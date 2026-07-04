@@ -14,7 +14,29 @@ import { getShippingConfig, computeShipping, getPaymentMethods, getStoreName } f
 const PENDING_TTL = 1800;
 const pendingKey = (id: string) => `checkout:pending:${id}`;
 
-interface PendingData { userId: string; addressId: string; couponCode?: string }
+interface Billing {
+  isCorporate: boolean;
+  billingName?: string;
+  taxNumber?: string; // VKN
+  identityNo?: string; // TCKN
+  taxOffice?: string;
+}
+
+/** İstek gövdesinden fatura bilgisini normalize eder (boş alanları eler). */
+function normalizeBilling(b: unknown): Billing | undefined {
+  if (!b || typeof b !== 'object') return undefined;
+  const o = b as Record<string, unknown>;
+  const str = (v: unknown) => (typeof v === 'string' && v.trim() ? v.trim() : undefined);
+  return {
+    isCorporate: !!o.isCorporate,
+    billingName: str(o.billingName),
+    taxNumber: str(o.taxNumber),
+    identityNo: str(o.identityNo),
+    taxOffice: str(o.taxOffice),
+  };
+}
+
+interface PendingData { userId: string; addressId: string; couponCode?: string; billing?: Billing }
 
 async function setPending(conversationId: string, data: PendingData) {
   await redis.setex(pendingKey(conversationId), PENDING_TTL, JSON.stringify(data));
@@ -40,6 +62,7 @@ export async function initialize(req: AuthRequest, res: Response, next: NextFunc
   try {
     const userId = req.user!.id;
     const { addressId, couponCode } = req.body as { addressId: string; couponCode?: string };
+    const billing = normalizeBilling((req.body as { billing?: unknown }).billing);
 
     const [user, cart] = await Promise.all([
       prisma.user.findUnique({ where: { id: userId }, include: { profile: true } }),
@@ -72,7 +95,7 @@ export async function initialize(req: AuthRequest, res: Response, next: NextFunc
     const total = subtotal - discount + shippingFee;
 
     const conversationId = `${userId.slice(-6)}-${Date.now()}`;
-    await setPending(conversationId, { userId, addressId, couponCode });
+    await setPending(conversationId, { userId, addressId, couponCode, billing });
 
     const contactName = `${address.firstName} ${address.lastName}`;
     const now = new Date().toISOString().slice(0, 19).replace('T', ' ');
@@ -175,7 +198,7 @@ export async function callback(req: Request, res: Response, next: NextFunction) 
       return res.redirect(`${env.FRONTEND_URL}/sepet?error=session_expired`);
     }
 
-    const order = await orderSvc.createOrder(pending.userId, pending.addressId, pending.couponCode);
+    const order = await orderSvc.createOrder(pending.userId, pending.addressId, pending.couponCode, pending.billing);
 
     await prisma.payment.create({
       data: {
@@ -218,7 +241,7 @@ export async function devCallback(req: Request, res: Response, next: NextFunctio
       return res.status(400).json({ success: false, error: 'Oturum bulunamadı veya süresi doldu' });
     }
 
-    const order = await orderSvc.createOrder(pending.userId, pending.addressId, pending.couponCode);
+    const order = await orderSvc.createOrder(pending.userId, pending.addressId, pending.couponCode, pending.billing);
 
     await prisma.payment.create({
       data: {
@@ -265,6 +288,7 @@ export async function placeOrder(req: AuthRequest, res: Response, next: NextFunc
   try {
     const userId = req.user!.id;
     const { addressId, method, couponCode } = req.body as { addressId: string; method: 'cod' | 'havale'; couponCode?: string };
+    const billing = normalizeBilling((req.body as { billing?: unknown }).billing);
 
     if (!addressId || !['cod', 'havale'].includes(method)) {
       return res.status(400).json({ success: false, error: 'Geçersiz istek' });
@@ -279,7 +303,7 @@ export async function placeOrder(req: AuthRequest, res: Response, next: NextFunc
       return res.status(400).json({ success: false, error: 'Havale/EFT ödemesi şu an aktif değil' });
     }
 
-    const order = await orderSvc.createOrder(userId, addressId, couponCode);
+    const order = await orderSvc.createOrder(userId, addressId, couponCode, billing);
 
     await prisma.payment.create({
       data: {

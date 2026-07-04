@@ -37,6 +37,26 @@ const envSchema = z.object({
 
   // Google Sign-In — OAuth Client ID (token audience doğrulaması için)
   GOOGLE_CLIENT_ID: z.string().optional(),
+
+  // ── QNB eSolutions e-Fatura/e-Arşiv (SOAP) ──
+  // Base host, ör: https://erpefaturatest1.qnbesolutions.com.tr (WSDL yolları bundan türetilir)
+  EFINANS_BASE_URL: z.string().optional(),
+  EFINANS_USER: z.string().optional(), // WS kullanıcı kodu
+  EFINANS_PASSWORD: z.string().optional(),
+  EFINANS_SENDER_VKN: z.string().optional(), // satıcı (gönderici) VKN
+  EFINANS_SENDER_NAME: z.string().optional(), // satıcı ünvanı
+  EFINANS_INVOICE_PREFIX: z.string().default('MAB'), // fatura no seri öneki (3 harf)
+
+  // ── e-Arşiv kanalı (portaltest) — bireysel müşteriler için. Tanımlı değilse
+  //    e-Arşiv gönderimi denenmez ("henüz aktif değil" hatası döner). ──
+  EFINANS_EARSIV_BASE_URL: z.string().optional(),
+  EFINANS_EARSIV_USER: z.string().optional(),
+  EFINANS_EARSIV_PASSWORD: z.string().optional(),
+  EFINANS_EARSIV_SENDER_VKN: z.string().optional(),
+  EFINANS_EARSIV_SENDER_NAME: z.string().optional(),
+  EFINANS_EARSIV_INVOICE_PREFIX: z.string().optional(),
+  EFINANS_EARSIV_BELGE_TURU: z.string().optional(), // gönderim belgeTuru (portaltest'te denenerek bulunacak)
+  EFINANS_EARSIV_BELGE_TURU_KISA: z.string().optional(), // durum/indirme kısa formu
 });
 
 const parsed = envSchema.safeParse(process.env);

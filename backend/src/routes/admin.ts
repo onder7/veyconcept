@@ -6,6 +6,7 @@ import * as chatbotCtrl from '../controllers/chatbotController';
 import * as popupCtrl from '../controllers/popupController';
 import * as campaignCtrl from '../controllers/discountCampaignController';
 import * as attrCtrl from '../controllers/attributeController';
+import * as invoiceCtrl from '../controllers/invoiceController';
 import { uploadImage } from '../middlewares/upload';
 import { uploadProductImage, uploadProductImageWatermarked } from '../controllers/uploadController';
 
@@ -40,6 +41,14 @@ router.put('/orders/:id/status', ctrl.updateOrderStatus);
 router.put('/orders/:id/shipping', ctrl.updateOrderShipping);
 router.put('/orders/:id/payment-status', ctrl.updatePaymentStatus);
 router.post('/orders/:id/send-invoice', ctrl.sendOrderInvoiceEmail);
+
+// e-Fatura / e-Arşiv (QNB eSolutions)
+router.get('/e-invoice/ping', invoiceCtrl.ping);
+router.post('/orders/:id/e-invoice', invoiceCtrl.issue);
+router.get('/orders/:id/e-invoice', invoiceCtrl.get);
+router.post('/orders/:id/e-invoice/refresh', invoiceCtrl.refresh);
+router.get('/orders/:id/e-invoice/pdf', invoiceCtrl.pdf);
+router.get('/orders/:id/e-invoice/preview-xml', invoiceCtrl.previewXml);
 
 // Reviews (moderasyon — onaylanmadan müşteri tarafında görünmez)
 router.get('/reviews', ctrl.listReviews);

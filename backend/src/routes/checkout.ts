@@ -8,15 +8,27 @@ import * as returnCtrl from '../controllers/returnController';
 
 const router = Router();
 
+const billingSchema = z
+  .object({
+    isCorporate: z.boolean().optional(),
+    billingName: z.string().max(300).optional(),
+    taxNumber: z.string().max(11).optional(),
+    identityNo: z.string().max(11).optional(),
+    taxOffice: z.string().max(200).optional(),
+  })
+  .optional();
+
 const initSchema = z.object({
   addressId: z.string().min(1),
   couponCode: z.string().optional(),
+  billing: billingSchema,
 });
 
 const placeOrderSchema = z.object({
   addressId: z.string().min(1),
   method: z.enum(['cod', 'havale']),
   couponCode: z.string().optional(),
+  billing: billingSchema,
 });
 
 // Public
