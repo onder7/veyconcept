@@ -13,9 +13,14 @@ interface CartState {
   sessionId: string;
   itemCount: number;
   appliedCoupon: AppliedCoupon | null;
+  /** Sağdan açılan sepet çekmecesi (persist edilmez) */
+  isDrawerOpen: boolean;
   setCart: (cart: Cart | null) => void;
   setAppliedCoupon: (coupon: AppliedCoupon | null) => void;
   clearSession: () => void;
+  openCart: () => void;
+  closeCart: () => void;
+  setDrawerOpen: (open: boolean) => void;
 }
 
 export const useCartStore = create<CartState>()(
@@ -25,6 +30,7 @@ export const useCartStore = create<CartState>()(
       sessionId: crypto.randomUUID(),
       itemCount: 0,
       appliedCoupon: null,
+      isDrawerOpen: false,
       setCart: (cart) =>
         set({
           cart,
@@ -32,7 +38,19 @@ export const useCartStore = create<CartState>()(
         }),
       setAppliedCoupon: (coupon) => set({ appliedCoupon: coupon }),
       clearSession: () => set({ sessionId: crypto.randomUUID(), cart: null, itemCount: 0, appliedCoupon: null }),
+      openCart: () => set({ isDrawerOpen: true }),
+      closeCart: () => set({ isDrawerOpen: false }),
+      setDrawerOpen: (open) => set({ isDrawerOpen: open }),
     }),
-    { name: 'cart' },
+    {
+      name: 'cart',
+      // Çekmece açık durumunu kalıcı yapma — yalnızca sepet verisi saklanır
+      partialize: (s) => ({
+        cart: s.cart,
+        sessionId: s.sessionId,
+        itemCount: s.itemCount,
+        appliedCoupon: s.appliedCoupon,
+      }),
+    },
   ),
 );

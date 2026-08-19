@@ -53,14 +53,14 @@ function StepBar({ current }: { current: number }) {
       {STEPS.map((label, i) => (
         <li key={label} className="flex items-center flex-1 last:flex-none">
           <div
-            className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold border-2 transition-colors
-              ${i < current ? 'bg-primary border-primary text-white' : ''}
-              ${i === current ? 'border-primary text-primary' : ''}
-              ${i > current ? 'border-muted-foreground text-muted-foreground' : ''}`}
+            className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold border transition-colors
+              ${i < current ? 'bg-foreground border-foreground text-background' : ''}
+              ${i === current ? 'border-amber-600 text-amber-700 dark:text-amber-500' : ''}
+              ${i > current ? 'border-border text-muted-foreground' : ''}`}
           >
             {i < current ? <Check className="h-4 w-4" /> : i + 1}
           </div>
-          <span className={`ml-2 text-sm font-medium ${i === current ? 'text-primary' : 'text-muted-foreground'}`}>
+          <span className={`ml-2 text-xs uppercase tracking-[0.12em] ${i === current ? 'text-foreground' : 'text-muted-foreground'}`}>
             {label}
           </span>
           {i < STEPS.length - 1 && <ChevronRight className="h-4 w-4 mx-2 text-muted-foreground flex-shrink-0" />}
@@ -130,14 +130,14 @@ function PayMethodCard({
     <button
       type="button"
       onClick={onSelect}
-      className={`w-full flex items-center gap-4 rounded-lg border-2 p-4 text-left transition-all ${
+      className={`w-full flex items-center gap-4 rounded-sm border p-4 text-left transition-all ${
         selected
-          ? 'border-primary bg-primary/5'
-          : 'border-border hover:border-muted-foreground'
+          ? 'border-foreground bg-secondary'
+          : 'border-border hover:border-foreground/40'
       }`}
     >
       <div className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full ${
-        selected ? 'bg-primary text-white' : 'bg-muted text-muted-foreground'
+        selected ? 'bg-foreground text-background' : 'bg-muted text-muted-foreground'
       }`}>
         {icon}
       </div>
@@ -145,17 +145,17 @@ function PayMethodCard({
         <div className="flex items-center gap-2">
           <p className="font-medium text-sm">{title}</p>
           {badge && (
-            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-amber-100 text-amber-700">
+            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-sm bg-amber-100 text-amber-800">
               {badge}
             </span>
           )}
         </div>
         <p className="text-xs text-muted-foreground mt-0.5">{subtitle}</p>
       </div>
-      <div className={`h-5 w-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors ${
-        selected ? 'border-primary bg-primary' : 'border-muted-foreground'
+      <div className={`h-5 w-5 rounded-full border flex items-center justify-center flex-shrink-0 transition-colors ${
+        selected ? 'border-foreground bg-foreground' : 'border-muted-foreground'
       }`}>
-        {selected && <div className="h-2 w-2 rounded-full bg-white" />}
+        {selected && <div className="h-2 w-2 rounded-full bg-background" />}
       </div>
     </button>
   );
@@ -419,8 +419,8 @@ export function Checkout() {
 
   const stepAddress = () => (
     <div className="space-y-4">
-      <h2 className="text-lg font-semibold flex items-center gap-2">
-        <MapPin className="h-5 w-5 text-primary" />
+      <h2 className="font-display text-2xl flex items-center gap-2.5">
+        <MapPin className="h-5 w-5 text-amber-700 dark:text-amber-500" />
         Teslimat Adresi
       </h2>
 
@@ -432,9 +432,9 @@ export function Checkout() {
             <button
               key={addr.id}
               onClick={() => { setSelectedAddress(addr); setShowNewForm(false); }}
-              className={`w-full text-left border rounded-lg p-4 transition-colors ${
+              className={`w-full text-left border border-border rounded-sm p-4 transition-colors ${
                 selectedAddress?.id === addr.id
-                  ? 'border-primary bg-primary/5'
+                  ? 'border-foreground bg-secondary'
                   : 'hover:border-muted-foreground'
               }`}
             >
@@ -461,7 +461,7 @@ export function Checkout() {
       )}
 
       {showNewForm && (
-        <div className="border rounded-lg p-4 space-y-4">
+        <div className="border border-border rounded-sm p-4 space-y-4">
           <h3 className="font-medium">Yeni Adres</h3>
           <AddressForm
             onSaved={(addr) => {
@@ -473,7 +473,7 @@ export function Checkout() {
         </div>
       )}
 
-      <Button className="w-full" disabled={!selectedAddress} onClick={() => setStep(1)}>
+      <Button className="w-full h-11 rounded-full" disabled={!selectedAddress} onClick={() => setStep(1)}>
         Devam Et
         <ChevronRight className="h-4 w-4 ml-2" />
       </Button>
@@ -486,22 +486,22 @@ export function Checkout() {
     <div className="space-y-5">
       {/* Order items */}
       <div>
-        <h2 className="text-lg font-semibold flex items-center gap-2 mb-3">
-          <ShoppingBag className="h-5 w-5 text-primary" />
+        <h2 className="font-display text-2xl flex items-center gap-2.5 mb-3">
+          <ShoppingBag className="h-5 w-5 text-amber-700 dark:text-amber-500" />
           Sipariş Özeti
         </h2>
 
-        <div className="border rounded-lg divide-y">
+        <div className="border border-border rounded-sm divide-y">
           {cart.items.map((item) => (
             <div key={item.id} className="flex items-center gap-3 p-3">
-              <div className="w-12 h-12 rounded bg-gray-50 flex-shrink-0 overflow-hidden">
+              <div className="w-12 h-12 rounded-sm bg-secondary flex-shrink-0 overflow-hidden">
                 {item.variant.product.images?.[0] ? (
                   <img
                     src={item.variant.product.images[0].url}
                     alt={item.variant.product.name}
                     className="w-full h-full object-cover"
                   />
-                ) : <div className="w-full h-full bg-gray-100" />}
+                ) : <div className="w-full h-full bg-muted" />}
               </div>
               <div className="flex-1 min-w-0">
                 <p className="font-medium text-sm line-clamp-1">{item.variant.product.name}</p>
@@ -513,7 +513,7 @@ export function Checkout() {
         </div>
 
         {selectedAddress && (
-          <div className="border rounded-lg p-4 mt-3">
+          <div className="border border-border rounded-sm p-4 mt-3">
             <p className="text-sm font-medium mb-1 flex items-center gap-1.5">
               <MapPin className="h-4 w-4 text-muted-foreground" />
               Teslimat Adresi
@@ -528,8 +528,8 @@ export function Checkout() {
 
       {/* Payment method selection */}
       <div>
-        <h2 className="text-lg font-semibold flex items-center gap-2 mb-3">
-          <CreditCard className="h-5 w-5 text-primary" />
+        <h2 className="font-display text-2xl flex items-center gap-2.5 mb-3">
+          <CreditCard className="h-5 w-5 text-amber-700 dark:text-amber-500" />
           Ödeme Yöntemi
         </h2>
 
@@ -577,8 +577,8 @@ export function Checkout() {
 
       {/* Fatura bilgileri (e-Fatura / e-Arşiv) */}
       <div>
-        <h2 className="text-lg font-semibold flex items-center gap-2 mb-3">
-          <FileText className="h-5 w-5 text-primary" />
+        <h2 className="font-display text-2xl flex items-center gap-2.5 mb-3">
+          <FileText className="h-5 w-5 text-amber-700 dark:text-amber-500" />
           Fatura Bilgileri
         </h2>
 
@@ -587,7 +587,7 @@ export function Checkout() {
             type="button"
             onClick={() => setBillingType('individual')}
             className={`flex-1 rounded-lg border px-3 py-2 text-sm font-medium transition ${
-              billingType === 'individual' ? 'border-primary bg-primary/5 text-primary' : 'text-muted-foreground'
+              billingType === 'individual' ? 'border-foreground bg-secondary text-primary' : 'text-muted-foreground'
             }`}
           >
             Bireysel
@@ -596,7 +596,7 @@ export function Checkout() {
             type="button"
             onClick={() => setBillingType('corporate')}
             className={`flex-1 rounded-lg border px-3 py-2 text-sm font-medium transition ${
-              billingType === 'corporate' ? 'border-primary bg-primary/5 text-primary' : 'text-muted-foreground'
+              billingType === 'corporate' ? 'border-foreground bg-secondary text-primary' : 'text-muted-foreground'
             }`}
           >
             Kurumsal
@@ -612,7 +612,7 @@ export function Checkout() {
               value={billing.identityNo}
               onChange={(e) => setBilling((b) => ({ ...b, identityNo: e.target.value.replace(/\D/g, '') }))}
               placeholder="TC Kimlik No (opsiyonel)"
-              className="w-full rounded-md border px-3 py-2 text-sm"
+              className="w-full rounded-sm border border-border px-3 py-2 text-sm focus:border-amber-500 outline-none"
             />
             <p className="text-xs text-muted-foreground mt-1">
               Bireysel müşteriler için e-Arşiv fatura kesilir. TCKN girilmesi zorunlu değildir.
@@ -625,7 +625,7 @@ export function Checkout() {
               value={billing.billingName}
               onChange={(e) => setBilling((b) => ({ ...b, billingName: e.target.value }))}
               placeholder="Firma Ünvanı *"
-              className="w-full rounded-md border px-3 py-2 text-sm"
+              className="w-full rounded-sm border border-border px-3 py-2 text-sm focus:border-amber-500 outline-none"
             />
             <div className="grid grid-cols-2 gap-2">
               <input
@@ -635,14 +635,14 @@ export function Checkout() {
                 value={billing.taxNumber}
                 onChange={(e) => setBilling((b) => ({ ...b, taxNumber: e.target.value.replace(/\D/g, '') }))}
                 placeholder="Vergi No (VKN) *"
-                className="w-full rounded-md border px-3 py-2 text-sm"
+                className="w-full rounded-sm border border-border px-3 py-2 text-sm focus:border-amber-500 outline-none"
               />
               <input
                 type="text"
                 value={billing.taxOffice}
                 onChange={(e) => setBilling((b) => ({ ...b, taxOffice: e.target.value }))}
                 placeholder="Vergi Dairesi *"
-                className="w-full rounded-md border px-3 py-2 text-sm"
+                className="w-full rounded-sm border border-border px-3 py-2 text-sm focus:border-amber-500 outline-none"
               />
             </div>
             <p className="text-xs text-muted-foreground">
@@ -653,7 +653,7 @@ export function Checkout() {
       </div>
 
       {/* Price breakdown */}
-      <div className="border rounded-lg p-4 space-y-2">
+      <div className="border border-border rounded-sm p-4 space-y-2">
         <div className="flex justify-between text-sm">
           <span>Ara Toplam</span>
           <span>{formatPrice(subtotal)}</span>
@@ -681,9 +681,9 @@ export function Checkout() {
       </div>
 
       <div className="flex gap-3">
-        <Button variant="outline" onClick={() => setStep(0)} className="flex-1">Geri</Button>
+        <Button variant="outline" onClick={() => setStep(0)} className="flex-1 h-11 rounded-full">Geri</Button>
         <Button
-          className="flex-1"
+          className="flex-1 h-11 rounded-full"
           disabled={isProcessing}
           onClick={handleProceed}
         >
@@ -705,13 +705,13 @@ export function Checkout() {
 
   const stepPayment = () => (
     <div className="space-y-4">
-      <h2 className="text-lg font-semibold flex items-center gap-2">
-        <CreditCard className="h-5 w-5 text-primary" />
+      <h2 className="font-display text-2xl flex items-center gap-2.5">
+        <CreditCard className="h-5 w-5 text-amber-700 dark:text-amber-500" />
         Kart Bilgileri
       </h2>
 
       {initData && (
-        <div className="border rounded-lg p-4 text-sm text-muted-foreground space-y-1">
+        <div className="border border-border rounded-sm p-4 text-sm text-muted-foreground space-y-1">
           <div className="flex justify-between">
             <span>Toplam Tutar</span>
             <span className="font-semibold text-foreground">{formatPrice(initData.total)}</span>
@@ -729,7 +729,7 @@ export function Checkout() {
 
   return (
     <main className="container mx-auto px-4 py-8 max-w-2xl">
-      <h1 className="text-2xl font-bold mb-6">Ödeme</h1>
+      <h1 className="font-display text-4xl mb-6">Ödeme</h1>
       <StepBar current={step} />
 
       {step === 0 && stepAddress()}

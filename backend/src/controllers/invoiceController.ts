@@ -1,9 +1,9 @@
 import { Response, NextFunction } from 'express';
 import { AuthRequest } from '../types';
 import * as invoiceService from '../services/invoiceService';
-import * as efinans from '../services/efinansService';
+import * as sysmond from '../services/sysmondService';
 
-// e-Fatura / e-Arşiv (QNB eSolutions) — admin uçları
+// e-Fatura / e-Arşiv (Sysmond E-Dönüşüm) — admin uçları
 
 /** Sipariş için e-Fatura/e-Arşiv keser. */
 export async function issue(req: AuthRequest, res: Response, next: NextFunction) {
@@ -25,7 +25,7 @@ export async function get(req: AuthRequest, res: Response, next: NextFunction) {
   }
 }
 
-/** GİB durumunu yeniden sorgular. */
+/** GİB durumunu yeniden sorgular (Sysmond GetOutboxInvoiceStatus). */
 export async function refresh(req: AuthRequest, res: Response, next: NextFunction) {
   try {
     const status = await invoiceService.refreshStatus(String(req.params.id));
@@ -47,22 +47,31 @@ export async function pdf(req: AuthRequest, res: Response, next: NextFunction) {
   }
 }
 
-/** UBL XML önizleme (göndermeden). */
+/** Sysmond'a gönderilecek JSON payload önizleme (debug). */
 export async function previewXml(req: AuthRequest, res: Response, next: NextFunction) {
   try {
-    const xml = await invoiceService.previewXml(String(req.params.id));
-    res.setHeader('Content-Type', 'application/xml; charset=utf-8');
-    res.send(xml);
+    const payload = await invoiceService.previewPayload(String(req.params.id));
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    res.send(JSON.stringify(payload, null, 2));
   } catch (err) {
     next(err);
   }
 }
 
-/** Entegratör bağlantı/oturum testi. */
+/** e-Arşiv faturasını iptal eder (yalnızca EARSIVFATURA). */
+export async function cancel(req: AuthRequest, res: Response, next: NextFunction) {
+  try {
+    const result = await invoiceService.cancelInvoice(String(req.params.id));
+    res.json({ success: result.status === 'CANCELLED', data: result });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/** Sysmond bağlantı testi. */
 export async function ping(req: AuthRequest, res: Response, next: NextFunction) {
   try {
-    const channel = req.query.channel === 'earsiv' ? 'earsiv' : 'efatura';
-    const result = await efinans.ping(channel);
+    const result = await sysmond.ping();
     res.json({ success: result.ok, data: result });
   } catch (err) {
     next(err);

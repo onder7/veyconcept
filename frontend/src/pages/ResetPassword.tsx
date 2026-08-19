@@ -50,13 +50,13 @@ export function ResetPassword() {
         <div className="w-full max-w-xs sm:max-w-sm md:max-w-md flex flex-col justify-between min-h-[85vh]">
           {/* Logo */}
           <div className="mb-8 sm:mb-12">
-            <Link to="/" className="text-xl sm:text-2xl font-bold tracking-tight text-primary">
+            <Link to="/" className="font-display text-3xl tracking-tight text-foreground">
               {storeName}
             </Link>
           </div>
 
           <div className="flex-1 flex flex-col justify-center">
-            <h1 className="text-xl sm:text-2xl font-bold mb-2">Yeni Şifre Belirle</h1>
+            <h1 className="font-display text-4xl mb-3">Yeni Şifre Belirle</h1>
             <p className="text-sm text-muted-foreground mb-6 sm:mb-8">
               En az 8 karakter, bir büyük harf ve bir rakam içermelidir.
             </p>
@@ -77,7 +77,7 @@ export function ResetPassword() {
                       id="password"
                       type={viewPassword ? 'text' : 'password'}
                       placeholder="Yeni şifre"
-                      className="h-12 pl-4 pr-12 rounded-md border border-input focus:border-primary w-full"
+                      className="h-12 pl-4 pr-12 rounded-sm border border-input focus:border-amber-500 w-full"
                       value={form.password}
                       onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
                       required
@@ -103,7 +103,7 @@ export function ResetPassword() {
                     id="confirmPassword"
                     type={viewPassword ? 'text' : 'password'}
                     placeholder="Yeni şifre tekrar"
-                    className="h-12 px-4 rounded-md border border-input focus:border-primary w-full"
+                    className="h-12 px-4 rounded-sm border border-input focus:border-amber-500 w-full"
                     value={form.confirmPassword}
                     onChange={(e) => setForm((f) => ({ ...f, confirmPassword: e.target.value }))}
                     required
@@ -114,7 +114,7 @@ export function ResetPassword() {
                 <Button
                   type="submit"
                   disabled={loading}
-                  className="h-12 w-full text-sm font-bold uppercase tracking-wider rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+                  className="h-12 w-full text-sm font-medium uppercase tracking-[0.14em] rounded-full bg-foreground text-background hover:bg-amber-900 transition-colors"
                 >
                   {loading ? 'Güncelleniyor...' : 'ŞİFREYİ GÜNCELLE'}
                 </Button>
@@ -122,7 +122,7 @@ export function ResetPassword() {
             )}
 
             <div className="mt-8 text-center">
-              <Link to="/giris" className="font-bold text-primary hover:underline text-sm">
+              <Link to="/giris" className="font-medium text-amber-800 dark:text-amber-500 hover:underline underline-offset-4 text-sm">
                 Giriş ekranına dön
               </Link>
             </div>
@@ -140,7 +140,17 @@ export function ResetPassword() {
         </div>
       </div>
 
-      <div className="hidden lg:block h-full w-full bg-gradient-to-br from-slate-100 to-slate-200" />
+      <div className="relative hidden lg:flex h-full w-full flex-col justify-end overflow-hidden bg-foreground p-16 text-background">
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-neutral-900 via-neutral-800 to-black" />
+        <div className="relative z-10 max-w-md">
+          <p className="mb-5 flex items-center gap-3 text-[10px] uppercase tracking-[0.3em] text-white/50">
+            <span className="h-px w-8 bg-amber-500" /> {storeName}
+          </p>
+          <p className="font-display text-4xl leading-tight text-white">
+            Yeni bir <span className="italic text-amber-300">başlangıç.</span>
+          </p>
+        </div>
+      </div>
     </main>
   );
 }

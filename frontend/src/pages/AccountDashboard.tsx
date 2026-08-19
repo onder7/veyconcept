@@ -529,7 +529,7 @@ export function AccountDashboard() {
           {activeSection === 'overview' && (
             <div className="space-y-6">
               <div>
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                <h1 className="font-display text-4xl text-foreground mb-2">
                   Hoş geldin, {user?.profile?.firstName || user?.email?.split('@')[0]}!
                 </h1>
                 <p className="text-gray-600 dark:text-gray-400">
@@ -543,7 +543,7 @@ export function AccountDashboard() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-gray-600 dark:text-gray-400">Toplam Sipariş</p>
-                      <p className="text-3xl font-bold text-gray-900 dark:text-white">
+                      <p className="font-display text-4xl text-foreground">
                         {ordersData.length}
                       </p>
                     </div>
@@ -555,7 +555,7 @@ export function AccountDashboard() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-gray-600 dark:text-gray-400">Beğendiler</p>
-                      <p className="text-3xl font-bold text-gray-900 dark:text-white">
+                      <p className="font-display text-4xl text-foreground">
                         {favoritesData.length}
                       </p>
                     </div>
@@ -567,7 +567,7 @@ export function AccountDashboard() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-gray-600 dark:text-gray-400">Kuponlarım</p>
-                      <p className="text-3xl font-bold text-gray-900 dark:text-white">0</p>
+                      <p className="font-display text-4xl text-foreground">0</p>
                     </div>
                     <Gift size={32} className="text-purple-500 opacity-20" />
                   </div>
@@ -577,7 +577,7 @@ export function AccountDashboard() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-gray-600 dark:text-gray-400">Değerlendirmelerim</p>
-                      <p className="text-3xl font-bold text-gray-900 dark:text-white">
+                      <p className="font-display text-4xl text-foreground">
                         {reviewsData.length}
                       </p>
                     </div>
@@ -590,7 +590,7 @@ export function AccountDashboard() {
               {ordersData.length > 0 && (
                 <div className="bg-white rounded-lg border border-gray-200 dark:bg-gray-900 dark:border-gray-700">
                   <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-                    <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+                    <h2 className="font-display text-xl text-foreground">
                       Son Siparişler
                     </h2>
                   </div>
@@ -631,7 +631,7 @@ export function AccountDashboard() {
           {activeSection === 'cart' && (
             <div className="bg-white rounded-lg border border-gray-200 dark:bg-gray-900 dark:border-gray-700">
               <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Sepetim</h2>
+                <h2 className="font-display text-3xl text-foreground">Sepetim</h2>
               </div>
 
               {cartLoading ? (
@@ -736,7 +736,7 @@ export function AccountDashboard() {
 
                     <Link
                       to="/sepet"
-                      className="block w-full text-center px-4 py-3 bg-primary text-white font-medium rounded-lg hover:bg-opacity-90 transition-all"
+                      className="block w-full text-center px-4 py-3 bg-foreground text-background font-medium rounded-full hover:bg-amber-900 transition-all"
                     >
                       Sepete Git →
                     </Link>
@@ -763,7 +763,7 @@ export function AccountDashboard() {
                     >
                       <ArrowLeft size={24} />
                     </button>
-                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                    <h2 className="font-display text-3xl text-foreground">
                       Sipariş #{selectedOrderId.slice(-8).toUpperCase()}
                     </h2>
                   </div>
@@ -1031,7 +1031,7 @@ export function AccountDashboard() {
                 // Orders List View
                 <>
                   <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Siparişlerim</h2>
+                    <h2 className="font-display text-3xl text-foreground">Siparişlerim</h2>
                   </div>
 
                   {ordersLoading ? (
@@ -1105,7 +1105,7 @@ export function AccountDashboard() {
           {activeSection === 'favorites' && (
             <div className="bg-white rounded-lg border border-gray-200 dark:bg-gray-900 dark:border-gray-700">
               <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Beğendiklerim</h2>
+                <h2 className="font-display text-3xl text-foreground">Beğendiklerim</h2>
               </div>
 
               {favoritesLoading ? (
@@ -1169,7 +1169,7 @@ export function AccountDashboard() {
           {activeSection === 'profile' && (
             <div className="bg-white rounded-lg border border-gray-200 dark:bg-gray-900 dark:border-gray-700">
               <div className="p-6 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Profil Bilgileri</h2>
+                <h2 className="font-display text-3xl text-foreground">Profil Bilgileri</h2>
                 <button
                   onClick={() => {
                     if (isEditingProfile) {
@@ -1320,7 +1320,7 @@ export function AccountDashboard() {
                     <button
                       onClick={handleSaveProfile}
                       disabled={isSavingProfile}
-                      className="flex-1 px-4 py-2 bg-primary text-white font-medium rounded-lg hover:bg-opacity-90 disabled:opacity-50 transition-all"
+                      className="flex-1 px-4 py-2 bg-foreground text-background font-medium rounded-full hover:bg-amber-900 disabled:opacity-50 transition-all"
                     >
                       {isSavingProfile ? 'Kaydediliyor...' : 'Değişiklikleri Kaydet'}
                     </button>
@@ -1371,7 +1371,7 @@ export function AccountDashboard() {
                     <button
                       onClick={handleChangePassword}
                       disabled={isSavingPassword}
-                      className="px-6 py-2 bg-primary text-white font-medium rounded-lg hover:bg-opacity-90 disabled:opacity-50 transition-all flex items-center gap-2"
+                      className="px-6 py-2 bg-foreground text-background font-medium rounded-full hover:bg-amber-900 disabled:opacity-50 transition-all flex items-center gap-2"
                     >
                       <Lock size={16} />
                       {isSavingPassword
@@ -1388,7 +1388,7 @@ export function AccountDashboard() {
           {activeSection === 'reviews' && (
             <div className="bg-white rounded-lg border border-gray-200 dark:bg-gray-900 dark:border-gray-700">
               <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Değerlendirmelerim</h2>
+                <h2 className="font-display text-3xl text-foreground">Değerlendirmelerim</h2>
               </div>
 
               {reviewsLoading ? (
@@ -1478,7 +1478,7 @@ export function AccountDashboard() {
           {activeSection === 'questions' && (
             <div className="bg-white rounded-lg border border-gray-200 dark:bg-gray-900 dark:border-gray-700">
               <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Soru & Cevaplarım</h2>
+                <h2 className="font-display text-3xl text-foreground">Soru & Cevaplarım</h2>
               </div>
 
               {questionsLoading ? (
@@ -1572,7 +1572,7 @@ export function AccountDashboard() {
           {/* Coupons — kullanılabilir kişiye özel kuponlar */}
           {activeSection === 'coupons' && (
             <div className="bg-white rounded-lg border border-gray-200 p-6 dark:bg-gray-900 dark:border-gray-700">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">İndirimlerim</h2>
+              <h2 className="font-display text-3xl text-foreground mb-1">İndirimlerim</h2>
               <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
                 Size özel indirim kuponlarınız. Kupon kodunu sepette "Kupon Kodu" alanına girerek alışverişinizde kullanabilirsiniz.
               </p>

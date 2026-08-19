@@ -3,50 +3,17 @@ import { Prisma } from '@prisma/client';
 import { prisma } from '../config/database';
 import { logger } from '../config/logger';
 import { getTaxConfig } from './settingsService';
-import * as efinans from './efinansService';
-import { buildInvoiceXml, InvoiceData, InvoiceLineData, InvoiceParty, InvoiceProfile } from './efinansUbl';
+import * as sysmond from './sysmondService';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Sipariş → UBL-TR fatura eşlemesi ve gönderim orkestrasyonu.
+// Sipariş → Sysmond e-Dönüşüm fatura entegrasyonu.
 //
-// Fiyat modeli: ürün fiyatları KDV DAHİL saklanır; ekran faturası tek global
-// KDV oranı (tax_rate) ile net'i brütten çıkarır (net = brüt / (1+oran)).
-// e-Fatura'yı ekran faturasıyla birebir tutmak için aynı modeli kullanıyoruz:
-// iskonto satırlara oransal dağıtılır, kargo ayrı bir kalem olur, KDV kalem
-// bazında brütten ayrıştırılır. Böylece Σ(net)+Σ(kdv) = sipariş toplamı.
+// Fiyat modeli: ürün fiyatları KDV DAHİL saklanır.
+// Sysmond'a NET (KDV hariç) birim fiyat + vatRate gönderilir;
+// isCalculateByApi=true ile tüm tutarlar Sysmond tarafından hesaplanır.
 // ─────────────────────────────────────────────────────────────────────────────
 
 const round2 = (n: number): number => Math.round((n + Number.EPSILON) * 100) / 100;
-
-async function getSupplierParty(senderVkn: string, senderName: string): Promise<InvoiceParty> {
-  const rows = await prisma.siteSettings.findMany({
-    where: {
-      key: {
-        in: [
-          'general_legal_name',
-          'general_tax_office',
-          'general_tax_number',
-          'general_address',
-          'general_city',
-          'general_email',
-          'general_phone',
-        ],
-      },
-    },
-  });
-  const s = Object.fromEntries(rows.map((r) => [r.key.replace('general_', ''), r.value]));
-  return {
-    vknTckn: s.tax_number || senderVkn,
-    name: s.legal_name || senderName || 'Satıcı',
-    isCorporate: true,
-    taxOffice: s.tax_office || '',
-    street: s.address || '',
-    city: s.city || '',
-    country: 'Türkiye',
-    email: s.email || '',
-    phone: s.phone || '',
-  };
-}
 
 type OrderWithRelations = Prisma.OrderGetPayload<{
   include: {
@@ -69,24 +36,18 @@ async function loadOrder(orderId: string): Promise<OrderWithRelations> {
   return order;
 }
 
-/** Sipariş verisini UBL InvoiceData yapısına çevirir (tek global KDV oranı). */
-export async function buildInvoiceData(order: OrderWithRelations, opts: {
-  ettn: string;
-  invoiceNo: string;
-  supplier: InvoiceParty;
-}): Promise<InvoiceData> {
+/** Sipariş verilerinden Sysmond fatura satırlarını üretir. */
+async function buildLineItems(order: OrderWithRelations): Promise<sysmond.FaturaLineItem[]> {
   const { taxRate } = await getTaxConfig();
-  const r = taxRate; // %; net = gross/(1+r/100)
-  const div = 1 + r / 100;
+  const div = 1 + taxRate / 100;
 
   const subtotalGross = Number(order.subtotal);
   const discount = Number(order.discount);
   const shippingFee = Number(order.shippingFee);
-  const totalGross = Number(order.total); // subtotal - discount + shipping
 
   const grossItems = order.items.map((it) => Number(it.unitPrice) * it.quantity);
 
-  // İskontoyu ürün satırlarına oransal dağıt (son satırda yuvarlama artığı)
+  // İskontoyu satırlara oransal dağıt
   const discountShares: number[] = [];
   let allocated = 0;
   grossItems.forEach((g, i) => {
@@ -99,84 +60,80 @@ export async function buildInvoiceData(order: OrderWithRelations, opts: {
     }
   });
 
-  const lines: InvoiceLineData[] = order.items.map((it, i) => {
-    const grossAfter = round2(grossItems[i] - discountShares[i]);
-    const net = round2(grossAfter / div);
-    const vat = round2(grossAfter - net);
+  const lines: sysmond.FaturaLineItem[] = order.items.map((it, i) => {
+    const grossAfterDiscount = round2(grossItems[i] - discountShares[i]);
+    const netTotal = round2(grossAfterDiscount / div);
+    const netUnit = round2(netTotal / it.quantity);
+    const taxAmount = round2(netTotal * taxRate / 100);
     return {
-      name: it.variant.product.name,
+      productName: it.variant.product.name,
       quantity: it.quantity,
       unitCode: 'C62',
-      unitPriceNet: round2(net / it.quantity),
-      lineNet: net,
-      vatRate: r,
-      vatAmount: vat,
+      unitPrice: netUnit,
+      vatRate: taxRate,
+      malHizmetKaydet: false,
+      tax: [{ taxName: 'KDV', taxCode: '0015', taxRate, taxAmount }],
     };
   });
 
-  // Kargo ayrı kalem (KDV dahil brütten ayrıştır)
   if (shippingFee > 0) {
-    const net = round2(shippingFee / div);
+    const KARGO_KDV = 20; // Taşımacılık hizmeti KDV oranı %20 (sabit, ürün oranından bağımsız)
+    const kargoDiv = 1 + KARGO_KDV / 100;
+    const netUnit = round2(shippingFee / kargoDiv);
+    const taxAmount = round2(netUnit * KARGO_KDV / 100);
     lines.push({
-      name: 'Kargo / Teslimat Bedeli',
+      productName: 'Kargo / Teslimat Bedeli',
       quantity: 1,
       unitCode: 'C62',
-      unitPriceNet: net,
-      lineNet: net,
-      vatRate: r,
-      vatAmount: round2(shippingFee - net),
+      unitPrice: netUnit,
+      vatRate: KARGO_KDV,
+      malHizmetKaydet: false,
+      tax: [{ taxName: 'KDV', taxCode: '0015', taxRate: KARGO_KDV, taxAmount }],
     });
   }
 
-  const lineExtensionTotal = round2(lines.reduce((s, l) => s + l.lineNet, 0));
-  const taxTotal = round2(lines.reduce((s, l) => s + l.vatAmount, 0));
-
-  const customer = buildCustomerParty(order);
-
-  return {
-    invoiceNo: opts.invoiceNo,
-    ettn: opts.ettn,
-    issueDate: new Date(),
-    profile: pickProfile(order),
-    invoiceTypeCode: 'SATIS',
-    currency: 'TRY',
-    supplier: opts.supplier,
-    customer,
-    lines,
-    lineExtensionTotal,
-    allowanceTotal: 0, // iskonto satır fiyatlarına gömüldü
-    taxExclusiveTotal: lineExtensionTotal,
-    taxTotal,
-    taxInclusiveTotal: totalGross,
-    payableTotal: totalGross,
-    notes: [`Sipariş No: TR-${order.id.slice(-8).toUpperCase()}`],
-  };
+  return lines;
 }
 
-function pickProfile(order: OrderWithRelations): InvoiceProfile {
-  // Kurumsal (VKN) → e-Fatura; bireysel → e-Arşiv.
-  // e-Fatura mükellefi mi kontrolü (kayıtlı kullanıcı sorgulama) ileride eklenecek.
-  return order.isCorporate ? 'TEMELFATURA' : 'EARSIVFATURA';
+type Profile = 'TEMELFATURA' | 'EARSIVFATURA';
+
+interface InvoiceTarget {
+  profile: Profile;
+  pkAlias?: string; // e-Fatura alıcı posta kutusu etiketi
 }
 
-function buildCustomerParty(order: OrderWithRelations): InvoiceParty {
-  const a = order.address;
-  const fullName = `${a.firstName} ${a.lastName}`.trim();
-  const vknTckn = order.isCorporate ? order.taxNumber ?? '' : order.identityNo ?? '11111111111';
-  return {
-    vknTckn,
-    name: order.isCorporate ? order.billingName || fullName : fullName,
-    isCorporate: order.isCorporate,
-    firstName: a.firstName,
-    lastName: a.lastName,
-    taxOffice: order.taxOffice ?? undefined,
-    street: a.address,
-    citySubdivision: a.district,
-    city: a.city,
-    postalZone: a.postalCode ?? undefined,
-    phone: a.phone,
-    country: 'Türkiye',
-  };
+/**
+ * Faturanın profilini (e-Fatura/e-Arşiv) ve varsa alıcı posta kutusunu belirler.
+ *
+ * - Bireysel (TCKN)               → her zaman e-Arşiv (mevcut davranış, dokunulmaz)
+ * - Kurumsal (VKN) + e-Fatura mükellefi → e-Fatura (TEMELFATURA) + alıcı etiketi
+ * - Kurumsal (VKN) ama mükellef değil   → VKN'li e-Arşiv (yasal, her alıcıya kesilebilir)
+ * - Mükellef sorgusu hata verirse        → güvenli tarafa: VKN'li e-Arşiv
+ */
+async function resolveInvoiceTarget(order: OrderWithRelations): Promise<InvoiceTarget> {
+  // Bireysel: hiç sorgu yapmadan e-Arşiv (bugünkü çalışan akış).
+  if (!order.isCorporate || !order.taxNumber) {
+    return { profile: 'EARSIVFATURA' };
+  }
+  // Kurumsal: VKN gerçekten e-Fatura mükellefi mi? (alias dönerse evet)
+  try {
+    const alias = await sysmond.getEFaturaAlias(order.taxNumber);
+    if (alias) {
+      return { profile: 'TEMELFATURA', pkAlias: alias };
+    }
+    logger.info(`VKN ${order.taxNumber} e-Fatura mükellefi değil, VKN'li e-Arşiv kesilecek (order ${order.id})`);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    logger.warn(`e-Fatura mükellef sorgusu başarısız (VKN ${order.taxNumber}), e-Arşiv'e düşülüyor: ${msg}`);
+  }
+  return { profile: 'EARSIVFATURA' };
+}
+
+/** Fatura tipine göre belge seri öneki. e-Fatura ve e-Arşiv GİB'de ayrı serilerdir. */
+function pickInvoicePrefix(profile: 'TEMELFATURA' | 'EARSIVFATURA'): string {
+  return profile === 'TEMELFATURA'
+    ? (process.env.SYSMOND_PREFIX_EFATURA ?? 'MAB')   // e-Fatura
+    : (process.env.SYSMOND_PREFIX_EARSIV ?? 'GLB');   // e-Arşiv
 }
 
 // ─── Orkestrasyon ────────────────────────────────────────────────────────────
@@ -185,145 +142,228 @@ export interface IssueResult {
   status: 'SENT' | 'ERROR' | 'QUEUED';
   ettn?: string;
   invoiceNo?: string;
+  profile?: string;
   errorMessage?: string;
 }
-
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 /** Sipariş için e-Fatura/e-Arşiv keser. Mükerrer gönderimi engeller. */
 export async function issueInvoice(orderId: string): Promise<IssueResult> {
   const order = await loadOrder(orderId);
 
-  // Mükerrer engelleme
   if (order.invoice && ['QUEUED', 'SENT'].includes(order.invoice.status)) {
     throw Object.assign(new Error('Bu sipariş için zaten fatura kesilmiş'), { status: 409 });
   }
 
-  // Kanal seçimi: kurumsal → e-Fatura, bireysel → e-Arşiv
-  const channel: efinans.Channel = order.isCorporate ? 'efatura' : 'earsiv';
-  const type = order.isCorporate ? 'EFATURA' : 'EARSIV';
-
-  if (!(await efinans.isConfigured(channel))) {
+  if (!sysmond.isConfigured()) {
     throw Object.assign(
-      new Error(
-        channel === 'earsiv'
-          ? 'e-Arşiv entegrasyonu henüz aktif değil. Bireysel müşteriler için e-Arşiv (portaltest) erişimi tanımlanmalı.'
-          : 'QNB e-Finans yapılandırılmamış',
-      ),
+      new Error('Sysmond e-Dönüşüm yapılandırılmamış (SYSMOND_USERNAME/PASSWORD env değişkeni eksik)'),
       { status: 400 },
     );
   }
 
   const ettn = crypto.randomUUID();
+  const refNo = crypto.randomUUID();
+  const { profile, pkAlias } = await resolveInvoiceTarget(order);
+  const type = profile === 'TEMELFATURA' ? 'EFATURA' : 'EARSIV';
+  const a = order.address;
+  const fullName = `${a.firstName} ${a.lastName}`.trim();
 
-  // Fatura no üret + UBL kur
-  const invoiceNo = await efinans.generateInvoiceNo(channel);
-  const supplier = await getSupplierParty(process.env.EFINANS_SENDER_VKN ?? '', process.env.EFINANS_SENDER_NAME ?? '');
-  const data = await buildInvoiceData(order, { ettn, invoiceNo, supplier });
-  const xml = buildInvoiceXml(data);
+  const invoiceDetail = await buildLineItems(order);
 
-  // DRAFT kaydı (idempotent upsert)
+  // docDate: Sysmond "2026-07-07T00:00:00" formatı bekliyor (Z yok, ms yok)
+  const now = new Date();
+  const docDate = now.toISOString().split('.')[0]; // "2026-07-07T11:23:45"
+
+  // docNo: PREFIX + YIL + 9 haneli timestamp sonu (Sysmond format: "MAB2026000001234")
+  // Seri öneki fatura tipine göre seçilir: e-Fatura=MAB, e-Arşiv=GLB.
+  const invoicePrefix = pickInvoicePrefix(profile);
+  const year = now.getFullYear();
+  const seq = String(now.getTime()).slice(-9);
+  const docNo = `${invoicePrefix}${year}${seq}`;
+
+  const faturaItem: sysmond.FaturaItem = {
+    profile,
+    invoiceType: 'SATIS',
+    ettn,
+    docDate,
+    docNo,
+    currencyCode: 'TRY',
+    isDraft: false,
+    ...(profile === 'EARSIVFATURA' ? { senderType: 'ELEKTRONIK' } : {}),
+    ...(pkAlias ? { pkAlias } : {}),
+    invoiceAccount: {
+      vknTckn: order.isCorporate ? (order.taxNumber ?? '') : (order.identityNo ?? '11111111111'),
+      accountName: order.isCorporate ? (order.billingName || fullName) : fullName,
+      taxOfficeName: order.taxOffice ?? undefined,
+      countryName: 'Türkiye',
+      cityName: a.city,
+      citySubdivision: a.district || a.city,
+      streetName: [a.neighborhood, a.address].filter(Boolean).join(' '),
+      postalCode: a.postalCode ?? undefined,
+      telephone: a.phone,
+    },
+    invoiceDetail,
+    notes: [`Sipariş No: TR-${order.id.slice(-8).toUpperCase()}`],
+    isCalculateByApi: true,
+    refNo,
+  };
+
+  // DRAFT kaydı
   await prisma.invoice.upsert({
     where: { orderId },
-    create: { orderId, type, status: 'DRAFT', ettn, invoiceNo, profile: data.profile },
-    update: { type, status: 'DRAFT', ettn, invoiceNo, profile: data.profile, errorMessage: null },
+    create: { orderId, type, status: 'DRAFT', ettn, profile },
+    update: { type, status: 'DRAFT', ettn, profile, invoiceNo: null, errorMessage: null },
   });
 
   try {
-    const res = await efinans.sendInvoice(channel, { xml, belgeNo: invoiceNo });
+    const res = await sysmond.createInvoice([faturaItem]);
 
-    // belgeOid = yalnızca "kuyruğa alındı" demek; belge async işlenir ve durum 2'de
-    // (hata) kalabilir. Bu yüzden gerçek durumu (durum) sorgulamadan SENT deme.
-    if (!res.belgeOid) {
-      const msg = res.errorMessage ?? 'Gönderim reddedildi (belgeOid alınamadı)';
-      await prisma.invoice.update({ where: { orderId }, data: { status: 'ERROR', errorMessage: msg, providerResponse: res.raw as any } });
-      logger.warn(`Fatura gönderim reddedildi (order ${orderId}): ${msg}`);
-      return { status: 'ERROR', errorMessage: msg, ettn, invoiceNo };
-    }
-
-    await prisma.invoice.update({ where: { orderId }, data: { status: 'QUEUED', belgeOid: res.belgeOid, providerResponse: res.raw as any } });
-
-    // Durum netleşene kadar poll et (durum: 1=işleniyor, 2=hata, 3+=başarı)
-    let st: any = null;
-    for (let i = 0; i < 6; i++) {
-      await sleep(2500);
-      st = await efinans.queryStatusByOid(channel, res.belgeOid).catch(() => null);
-      if (st && st.durum !== 1) break;
-    }
-
-    if (st && st.durum >= 3) {
-      const realEttn = st.ettn || ettn;
-      const realNo = st.belgeNo || invoiceNo;
+    if (!res.status) {
+      const msg = res.exceptionMessage ?? res.message ?? res.errorList?.join('; ') ?? 'Fatura oluşturulamadı';
       await prisma.invoice.update({
         where: { orderId },
-        data: { status: 'SENT', sentAt: new Date(), ettn: realEttn, invoiceNo: realNo, providerResponse: st as any, errorMessage: null },
+        data: { status: 'ERROR', errorMessage: msg.slice(0, 500), providerResponse: res as any },
       });
-      logger.info(`Fatura kesildi (order ${orderId}, ETTN ${realEttn}, No ${realNo})`);
-      return { status: 'SENT', ettn: realEttn, invoiceNo: realNo };
+      logger.warn(`Sysmond fatura reddedildi (order ${orderId}): ${msg}`);
+      return { status: 'ERROR', errorMessage: msg, ettn };
     }
 
-    if (st && st.durum === 2) {
-      const msg = String(st.aciklama || 'Belge işlenirken hata').slice(0, 500);
-      await prisma.invoice.update({ where: { orderId }, data: { status: 'REJECTED', errorMessage: msg, providerResponse: st as any } });
-      logger.warn(`Fatura reddedildi (order ${orderId}): ${msg}`);
-      return { status: 'ERROR', errorMessage: msg, ettn, invoiceNo };
+    const item = res.data?.[0];
+    if (!item?.status) {
+      const msg = item?.exceptionMessage ?? item?.message ?? 'Fatura kaydı başarısız';
+      await prisma.invoice.update({
+        where: { orderId },
+        data: { status: 'ERROR', errorMessage: msg.slice(0, 500), providerResponse: res as any },
+      });
+      logger.warn(`Sysmond fatura öğe hatası (order ${orderId}): ${msg}`);
+      return { status: 'ERROR', errorMessage: msg, ettn };
     }
 
-    // Hâlâ işleniyor → QUEUED bırak; admin "Durumu Yenile" ile kontrol edebilir
-    logger.info(`Fatura kuyrukta, işleniyor (order ${orderId}, belgeOid ${res.belgeOid})`);
-    return { status: 'QUEUED', errorMessage: 'Fatura işleniyor. Birkaç saniye sonra durumu yenileyin.', ettn, invoiceNo };
+    const realEttn = item.ettn ?? ettn;
+    const invoiceNo = item.documentNo ?? undefined;
+
+    await prisma.invoice.update({
+      where: { orderId },
+      data: {
+        status: 'SENT',
+        sentAt: new Date(),
+        ettn: realEttn,
+        invoiceNo: invoiceNo ?? null,
+        providerResponse: res as any,
+        errorMessage: null,
+      },
+    });
+    logger.info(`Sysmond fatura kesildi (order ${orderId}, ETTN ${realEttn}, No ${invoiceNo ?? '–'})`);
+    return { status: 'SENT', ettn: realEttn, invoiceNo, profile };
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     await prisma.invoice.update({ where: { orderId }, data: { status: 'ERROR', errorMessage: message } }).catch(() => {});
-    logger.error(`Fatura gönderim hatası (order ${orderId}): ${message}`);
-    return { status: 'ERROR', errorMessage: message, ettn, invoiceNo };
+    logger.error(`Sysmond fatura gönderim hatası (order ${orderId}): ${message}`);
+    return { status: 'ERROR', errorMessage: message, ettn };
   }
 }
 
-/** Fatura tipine göre entegratör kanalını verir. */
-function channelOf(type: string): efinans.Channel {
-  return type === 'EARSIV' ? 'earsiv' : 'efatura';
-}
-
-/** Güncel GİB durumunu belgeOid ile sorgular, statüyü ilerletir ve kaydı günceller. */
+/** GİB durumunu ETTN ile sorgular, kaydı günceller. */
 export async function refreshStatus(orderId: string) {
   const invoice = await prisma.invoice.findUnique({ where: { orderId } });
-  if (!invoice?.belgeOid) throw Object.assign(new Error('Fatura bulunamadı'), { status: 404 });
-  const status = await efinans.queryStatusByOid(channelOf(invoice.type), invoice.belgeOid);
-  const data: Record<string, unknown> = { providerResponse: status as any };
-  if (status?.durum >= 3) {
-    data.status = 'SENT';
-    if (!invoice.sentAt) data.sentAt = new Date();
-    if (status.ettn) data.ettn = status.ettn;
-    if (status.belgeNo) data.invoiceNo = status.belgeNo;
-    data.errorMessage = null;
-  } else if (status?.durum === 2) {
-    data.status = 'REJECTED';
-    data.errorMessage = String(status.aciklama || 'Belge işlenirken hata').slice(0, 500);
+  if (!invoice?.ettn) throw Object.assign(new Error('Fatura bulunamadı'), { status: 404 });
+
+  const [statusItem] = await sysmond.getStatus([invoice.ettn]);
+  if (!statusItem) throw Object.assign(new Error('Durum bilgisi alınamadı'), { status: 502 });
+
+  const update: Record<string, unknown> = { providerResponse: statusItem as any };
+  const s = statusItem.status?.toUpperCase() ?? '';
+
+  // Sysmond durum stringleri: BASARILI, GONDERILDI, HATALI, REDDEDILDI, ...
+  if (['BASARILI', 'GONDERILDI', 'ILETILDI', 'KABUL_EDILDI'].includes(s)) {
+    update.status = 'SENT';
+    if (!invoice.sentAt) update.sentAt = new Date();
+    if (statusItem.docNo) update.invoiceNo = statusItem.docNo;
+    update.errorMessage = null;
+  } else if (['HATALI', 'REDDEDILDI', 'IPTAL'].includes(s)) {
+    update.status = 'REJECTED';
+    update.errorMessage = (statusItem.gibStatusMessage ?? statusItem.description ?? s).slice(0, 500);
   }
-  await prisma.invoice.update({ where: { orderId }, data });
-  return status;
+
+  await prisma.invoice.update({ where: { orderId }, data: update });
+  return statusItem;
 }
 
-/** Fatura PDF'ini ETTN ile indirir (ham PDF Buffer). Belge işlenmemişse hata döner. */
+/** Fatura PDF'ini ETTN ile indirir. */
 export async function getInvoicePdf(orderId: string): Promise<Buffer> {
   const invoice = await prisma.invoice.findUnique({ where: { orderId } });
   if (!invoice?.ettn) throw Object.assign(new Error('Fatura bulunamadı'), { status: 404 });
-  return efinans.downloadByEttn(channelOf(invoice.type), invoice.ettn, 'PDF');
+  if (invoice.status === 'DRAFT' || invoice.status === 'ERROR') {
+    throw Object.assign(new Error('Fatura henüz gönderilmemiş'), { status: 400 });
+  }
+  return sysmond.downloadPdf(invoice.ettn);
 }
 
 export async function getInvoice(orderId: string) {
   return prisma.invoice.findUnique({ where: { orderId } });
 }
 
-/** Sadece XML üretir (test/önizleme; entegratöre göndermeden). */
-export async function previewXml(orderId: string): Promise<string> {
-  const order = await loadOrder(orderId);
-  const supplier = await getSupplierParty(process.env.EFINANS_SENDER_VKN ?? '', process.env.EFINANS_SENDER_NAME ?? '');
-  const data = await buildInvoiceData(order, {
-    ettn: crypto.randomUUID(),
-    invoiceNo: 'PREVIEW',
-    supplier,
+export interface CancelResult {
+  status: 'CANCELLED' | 'ERROR';
+  message?: string;
+}
+
+/** e-Arşiv faturasını Sysmond üzerinden iptal eder. Yalnızca EARSIVFATURA profili destekler. */
+export async function cancelInvoice(orderId: string): Promise<CancelResult> {
+  const invoice = await prisma.invoice.findUnique({ where: { orderId } });
+  if (!invoice) throw Object.assign(new Error('Fatura bulunamadı'), { status: 404 });
+  if (invoice.status === 'CANCELLED') throw Object.assign(new Error('Fatura zaten iptal edilmiş'), { status: 409 });
+  if (invoice.status !== 'SENT') throw Object.assign(new Error('Yalnızca SENT durumundaki faturalar iptal edilebilir'), { status: 400 });
+  if (invoice.profile !== 'EARSIVFATURA') throw Object.assign(new Error('Yalnızca e-Arşiv faturaları bu yolla iptal edilebilir'), { status: 400 });
+  if (!invoice.ettn) throw Object.assign(new Error('Fatura ETTN bilgisi eksik'), { status: 400 });
+
+  const res = await sysmond.cancelEArsiv([invoice.ettn]);
+
+  if (!res.status) {
+    const msg = res.exceptionMessage ?? res.message ?? 'İptal başarısız';
+    await prisma.invoice.update({ where: { orderId }, data: { errorMessage: msg.slice(0, 500) } });
+    logger.warn(`e-Arşiv iptal başarısız (order ${orderId}): ${msg}`);
+    return { status: 'ERROR', message: msg };
+  }
+
+  await prisma.invoice.update({
+    where: { orderId },
+    data: { status: 'CANCELLED', errorMessage: null, providerResponse: res as any },
   });
-  return buildInvoiceXml(data);
+  logger.info(`e-Arşiv iptal edildi (order ${orderId}, ETTN ${invoice.ettn})`);
+  return { status: 'CANCELLED' };
+}
+
+/** Sysmond'a gönderilecek JSON gövdesini önizler (test / debug). */
+export async function previewPayload(orderId: string): Promise<object> {
+  const order = await loadOrder(orderId);
+  const invoiceDetail = await buildLineItems(order);
+  const a = order.address;
+  const fullName = `${a.firstName} ${a.lastName}`.trim();
+  const previewDate = new Date();
+  const docDate = previewDate.toISOString().split('.')[0];
+  const { profile, pkAlias } = await resolveInvoiceTarget(order);
+  const invoicePrefix = pickInvoicePrefix(profile);
+  const docNo = `${invoicePrefix}${previewDate.getFullYear()}${String(previewDate.getTime()).slice(-9)}`;
+  return {
+    profile,
+    invoiceType: 'SATIS',
+    ettn: '(üretilecek)',
+    docDate,
+    docNo,
+    currencyCode: 'TRY',
+    isDraft: false,
+    ...(profile === 'EARSIVFATURA' ? { senderType: 'ELEKTRONIK' } : {}),
+    ...(pkAlias ? { pkAlias } : {}),
+    invoiceAccount: {
+      vknTckn: order.isCorporate ? (order.taxNumber ?? '') : (order.identityNo ?? '11111111111'),
+      accountName: order.isCorporate ? (order.billingName || fullName) : fullName,
+      taxOfficeName: order.taxOffice ?? undefined,
+      cityName: a.city,
+      citySubdivision: a.district || a.city,
+      streetName: [a.neighborhood, a.address].filter(Boolean).join(' '),
+    },
+    invoiceDetail,
+    isCalculateByApi: true,
+  };
 }

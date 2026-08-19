@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { UserCircle, Heart, ShoppingBag, Search, LogOut, ChevronDown, Loader2, AlertTriangle } from 'lucide-react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { UserCircle, ShoppingBag, Search, LogOut, ChevronDown, Loader2, AlertTriangle, Menu, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,7 +30,21 @@ export function Header() {
   const { hasWarning: profileHasWarning, message: profileWarningMessage } = useProfileCompleteness();
   const { taxRate } = useTaxConfig();
   const itemCount = useCartStore((s) => s.itemCount);
+  const openCart = useCartStore((s) => s.openCart);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Ana sayfada hero üstünde şeffaf header; scroll'da katı zemine geçer.
+  const isHome = location.pathname === '/';
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 40);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+  const overHero = isHome && !scrolled;
+
   const [searchQuery, setSearchQuery] = useState('');
   const { fetchWishlist } = useWishlistStore();
 
@@ -37,6 +52,10 @@ export function Header() {
   const [loadingPredictions, setLoadingPredictions] = useState(false);
   const [showPredictions, setShowPredictions] = useState(false);
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  // Referans header etkileşimleri: açılır arama, kategori dropdown, mobil çekmece
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [catOpen, setCatOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   // Fetch logo from settings
   useEffect(() => {
@@ -128,6 +147,8 @@ export function Header() {
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setSearchOpen(false);
+    setShowPredictions(false);
     if (searchQuery.trim()) {
       navigate(`/ara?search=${encodeURIComponent(searchQuery.trim())}`);
     } else {
@@ -135,181 +156,190 @@ export function Header() {
     }
   };
 
-  return (
-    <header className="border-b bg-white dark:bg-neutral-950 dark:border-neutral-800 sticky top-0 z-40">
-      {/* ─── Üst Şerit: Müşteri Hizmetleri sayfaları (masaüstü) ─────────── */}
-      {menuPages.length > 0 && (
-        <div className="hidden lg:block border-b border-neutral-100 bg-neutral-50/70 dark:bg-neutral-900 dark:border-neutral-800">
-          <div className="container mx-auto px-4">
-            <div className="flex items-center justify-end gap-x-5 gap-y-1 py-1.5 flex-wrap">
-              {menuPages.map((p) => (
-                <Link
-                  key={p.slug}
-                  to={p.isSystem ? `/${p.slug}` : `/sayfa/${p.slug}`}
-                  className="text-xs font-medium text-neutral-600 dark:text-neutral-300 hover:text-primary transition-colors whitespace-nowrap"
-                >
-                  {p.title}
-                </Link>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
+  // Rota değişince açık panelleri kapat
+  useEffect(() => {
+    setSearchOpen(false);
+    setMobileOpen(false);
+    setCatOpen(false);
+  }, [location.pathname]);
 
-      {/* ─── Üst Bar: Logo + Arama + İkonlar ─────────────────────────── */}
-      <div className="container mx-auto px-2 sm:px-4 h-20 flex items-center gap-3 sm:gap-6">
-        <Link to="/" className="flex items-center h-full flex-shrink-0">
+  // Logo düğümü: mağaza adının son kelimesi italik (referanstaki "Vey Concept" gibi)
+  const logoWords = storeName.trim().split(/\s+/);
+  const logoNode =
+    logoWords.length > 1 ? (
+      <>
+        {logoWords.slice(0, -1).join(' ')} <span className="italic">{logoWords[logoWords.length - 1]}</span>
+      </>
+    ) : (
+      storeName
+    );
+
+  // Nav link renk sınıfları (hero'da beyaz, aksi halde koyu)
+  const navLinkCls = overHero ? 'text-white/85 hover:text-white' : 'text-foreground/80 hover:text-foreground';
+  const navUnderlineCls = overHero ? 'bg-white' : 'bg-foreground';
+
+  const iconBtnCls = overHero ? 'text-white hover:bg-white/15' : 'text-foreground hover:bg-secondary';
+
+  return (
+    <header
+      className={`top-0 z-40 transition-all duration-500 ${
+        isHome
+          ? `fixed inset-x-0 ${
+              overHero && !searchOpen && !mobileOpen
+                ? 'bg-transparent text-white'
+                : 'border-b border-border bg-background/95 backdrop-blur-md dark:border-neutral-800'
+            }`
+          : 'sticky border-b border-border bg-background/95 backdrop-blur-md dark:border-neutral-800'
+      }`}
+    >
+      <div className="mx-auto flex h-16 max-w-[1600px] items-center justify-between px-4 sm:px-6 md:h-20 md:px-10">
+        {/* ─── Sol: masaüstü navigasyon ─────────────────────────────── */}
+        <nav className="hidden flex-1 items-center gap-7 md:flex">
+          <Link to="/ara" className={cn('group relative text-sm tracking-wide transition-colors', navLinkCls)}>
+            Mağaza
+            <span className={cn('absolute -bottom-1 left-0 h-px w-0 transition-all duration-300 group-hover:w-full', navUnderlineCls)} />
+          </Link>
+
+          {/* Kategoriler dropdown */}
+          <div className="relative" onMouseEnter={() => setCatOpen(true)} onMouseLeave={() => setCatOpen(false)}>
+            <button type="button" className={cn('group relative flex items-center gap-1 text-sm tracking-wide transition-colors', navLinkCls)}>
+              Kategoriler
+              <ChevronDown className={cn('h-3.5 w-3.5 transition-transform duration-200', catOpen && 'rotate-180')} />
+            </button>
+            {catOpen && categories.length > 0 && (
+              <div className="absolute left-0 top-full pt-3">
+                <div className="grid w-64 gap-0.5 rounded-sm border border-border/60 bg-background p-2 shadow-lg">
+                  {categories.slice(0, 12).map((cat: any) => (
+                    <Link
+                      key={cat.id}
+                      to={`/kategori/${cat.slug}`}
+                      className="rounded-sm px-3 py-2 text-sm text-foreground/80 transition-colors hover:bg-secondary hover:text-foreground"
+                    >
+                      {cat.name}
+                    </Link>
+                  ))}
+                  <Link to="/ara" className="mt-1 border-t border-border/60 px-3 pt-2.5 text-[11px] uppercase tracking-[0.16em] text-amber-800 dark:text-amber-500 hover:underline">
+                    Tüm Ürünler →
+                  </Link>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Admin özel nav linkleri */}
+          {navLinks.slice(0, 2).map((link) => (
+            <a
+              key={link.id}
+              href={link.url}
+              target={link.openInNewTab ? '_blank' : undefined}
+              rel={link.openInNewTab ? 'noopener noreferrer' : undefined}
+              className={cn('group relative text-sm tracking-wide transition-colors', navLinkCls)}
+            >
+              {link.label}
+              <span className={cn('absolute -bottom-1 left-0 h-px w-0 transition-all duration-300 group-hover:w-full', navUnderlineCls)} />
+            </a>
+          ))}
+        </nav>
+
+        {/* Mobil menü butonu */}
+        <button
+          type="button"
+          className="flex flex-1 md:hidden"
+          aria-label="Menü"
+          onClick={() => setMobileOpen((v) => !v)}
+        >
+          {mobileOpen
+            ? <X className={cn('h-6 w-6', overHero ? 'text-white' : 'text-foreground')} />
+            : <Menu className={cn('h-6 w-6', overHero ? 'text-white' : 'text-foreground')} />}
+        </button>
+
+        {/* ─── Orta: logo ────────────────────────────────────────────── */}
+        <Link to="/" className="flex flex-1 items-center justify-center md:flex-none">
           {logoUrl ? (
-            <img src={logoUrl} alt="Logo" className="h-10 sm:h-12 object-contain max-w-[120px] sm:max-w-[150px]" />
+            <img src={logoUrl} alt={storeName} className="h-9 sm:h-11 object-contain max-w-[150px]" />
           ) : (
-            <span className="text-lg sm:text-xl font-bold text-primary">{storeName}</span>
+            <span className={cn('font-display text-2xl tracking-tight transition-colors sm:text-3xl', overHero ? 'text-white' : 'text-foreground')}>
+              {logoNode}
+            </span>
           )}
         </Link>
 
-        {/* Ana Arama Çubuğu (ortada, büyük) */}
-        <form onSubmit={handleSearchSubmit} className="search-container relative flex-1 max-w-2xl mx-auto">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-neutral-400 pointer-events-none" />
-          <Input
-            type="text"
-            placeholder="Ürün, kategori veya marka ara"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            onFocus={() => setShowPredictions(true)}
-            className="h-11 pl-11 pr-4 bg-white dark:bg-neutral-900 border-2 border-neutral-300 dark:border-neutral-700 dark:text-neutral-100 focus-visible:ring-2 focus-visible:ring-neutral-200 focus-visible:border-neutral-400 text-sm rounded-lg placeholder-neutral-400 shadow-sm"
-          />
+        {/* ─── Sağ: kalan nav + aksiyonlar ───────────────────────────── */}
+        <div className="flex flex-1 items-center justify-end gap-2 md:gap-4">
+          {/* Menü sayfaları (md+) */}
+          <nav className="hidden items-center gap-6 lg:flex">
+            {menuPages.slice(0, 2).map((p) => (
+              <Link
+                key={p.slug}
+                to={p.isSystem ? `/${p.slug}` : `/sayfa/${p.slug}`}
+                className={cn('group relative text-sm tracking-wide transition-colors', navLinkCls)}
+              >
+                {p.title}
+                <span className={cn('absolute -bottom-1 left-0 h-px w-0 transition-all duration-300 group-hover:w-full', navUnderlineCls)} />
+              </Link>
+            ))}
+          </nav>
 
-          {showPredictions && searchQuery.trim().length >= 2 && (
-            <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg sm:rounded-xl border border-neutral-100 shadow-xl overflow-hidden z-[100] max-h-60 sm:max-h-80 overflow-y-auto">
-              {loadingPredictions ? (
-                <div className="p-4 text-center text-xs text-neutral-400 flex items-center justify-center gap-2">
-                  <Loader2 className="h-3 w-3 animate-spin text-primary" />
-                  <span>Aranıyor...</span>
-                </div>
-              ) : predictions.length === 0 ? (
-                <div className="p-4 text-center text-xs text-neutral-400">
-                  Uyumlu ürün bulunamadı.
-                </div>
-              ) : (
-                <div className="divide-y divide-neutral-50">
-                  {predictions.map((prod) => {
-                    const primaryImg = prod.images?.find(img => img.isPrimary)?.url || prod.images?.[0]?.url || 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=100';
-                    const rawPrice = prod.variants?.[0]?.price ? Number(prod.variants[0].price) : 0;
-                    const grossPrice = prod.vatIncluded ? rawPrice : rawPrice * (1 + taxRate / 100);
-                    const price = rawPrice ? grossPrice.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' }) : '';
-                    return (
-                      <Link
-                        key={prod.id}
-                        to={`/urun/${prod.slug}`}
-                        onClick={() => {
-                          setSearchQuery('');
-                          setShowPredictions(false);
-                        }}
-                        className="flex items-center gap-3 p-3 hover:bg-neutral-50 transition-colors"
-                      >
-                        <img
-                          src={primaryImg}
-                          alt={prod.name}
-                          className="h-10 w-10 object-cover rounded bg-neutral-100 shrink-0"
-                        />
-                        <div className="min-w-0 flex-1">
-                          <p className="text-[11px] font-semibold text-neutral-800 truncate">{prod.name}</p>
-                          <p className="text-[9px] text-neutral-400 truncate">{prod.category?.name}</p>
-                        </div>
-                        {price && (
-                          <div className="hidden sm:block text-[11px] font-bold text-neutral-900 shrink-0">
-                            {price}
-                          </div>
-                        )}
-                      </Link>
-                    );
-                  })}
-                  <Link
-                    to={`/ara?search=${encodeURIComponent(searchQuery)}`}
-                    onClick={() => setShowPredictions(false)}
-                    className="block text-center text-[10px] font-semibold text-primary hover:underline p-2.5 bg-neutral-50/50"
-                  >
-                    Tüm sonuçları gör
-                  </Link>
-                </div>
-              )}
-            </div>
-          )}
-        </form>
+          {/* Arama ikonu */}
+          <button
+            type="button"
+            aria-label="Ara"
+            onClick={() => setSearchOpen((v) => !v)}
+            className={cn('flex h-9 w-9 items-center justify-center rounded-full transition-colors', iconBtnCls)}
+          >
+            {searchOpen ? <X className="h-[18px] w-[18px]" /> : <Search className="h-[18px] w-[18px]" />}
+          </button>
 
-        <div className="flex items-center gap-4 sm:gap-6 flex-shrink-0">
-          <ThemeToggle className="text-neutral-700 hover:text-primary dark:text-neutral-300" />
+          {/* Tema */}
+          <ThemeToggle className={cn('hidden h-9 w-9 items-center justify-center rounded-full transition-colors sm:flex', iconBtnCls)} />
+
+          {/* Hesap */}
           {isAuthenticated ? (
             <DropdownMenu>
               <DropdownMenuTrigger
                 render={
-                  <div className="flex flex-col items-center gap-1 text-neutral-700 hover:text-primary transition-colors cursor-pointer outline-none bg-transparent border-none">
-                    <div className="relative">
-                      <UserCircle className="h-6 w-6 stroke-[1.5]" />
-                      {profileHasWarning && (
-                        <span
-                          title={profileWarningMessage}
-                          className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-white"
-                        />
-                      )}
-                    </div>
-                    <span className="hidden md:block text-[10px] sm:text-[11px] font-medium">Hesabım</span>
-                  </div>
+                  <button
+                    type="button"
+                    aria-label="Hesabım"
+                    className={cn('relative flex h-9 w-9 items-center justify-center rounded-full outline-none transition-colors', iconBtnCls)}
+                  >
+                    <UserCircle className="h-[19px] w-[19px] stroke-[1.5]" />
+                    {profileHasWarning && (
+                      <span title={profileWarningMessage} className="absolute right-0.5 top-0.5 h-2 w-2 rounded-full bg-red-500 ring-2 ring-background" />
+                    )}
+                  </button>
                 }
               />
               <DropdownMenuContent align="end" className="w-56">
-                {/* User Info */}
                 <div className="px-3 py-2">
-                  <p className="text-sm font-medium truncate text-black dark:text-white">
-                    {user?.profile?.firstName ?? user?.email}
-                  </p>
-                  <p className="text-xs text-neutral-500 truncate">
-                    {user?.email}
-                  </p>
+                  <p className="truncate text-sm font-medium text-foreground">{user?.profile?.firstName ?? user?.email}</p>
+                  <p className="truncate text-xs text-muted-foreground">{user?.email}</p>
                 </div>
                 <DropdownMenuSeparator />
-
-                {/* Eksik profil uyarısı (adres/telefon) */}
                 {!user?.isGuest && profileHasWarning && (
                   <>
                     <DropdownMenuItem
                       render={<Link to="/hesabim/profil" />}
-                      className="text-sm items-start gap-2 bg-red-50 text-red-700 focus:bg-red-100 dark:bg-red-900/20 dark:text-red-300"
+                      className="items-start gap-2 bg-red-50 text-sm text-red-700 focus:bg-red-100 dark:bg-red-900/20 dark:text-red-300"
                     >
-                      <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
+                      <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
                       <span className="leading-snug">{profileWarningMessage} Tamamlamak için tıklayın.</span>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                   </>
                 )}
-
-                {/* Account Links */}
                 {!user?.isGuest && (
                   <>
-                    <DropdownMenuItem render={<Link to="/hesabim" />} className="text-sm">
-                      Hesap Özeti
-                    </DropdownMenuItem>
-                    <DropdownMenuItem render={<Link to="/hesabim/siparisler" />} className="text-sm">
-                      Siparişlerim
-                    </DropdownMenuItem>
-                    <DropdownMenuItem render={<Link to="/iletisim" />} className="text-sm">
-                      Soru ve Taleplerim
-                    </DropdownMenuItem>
-                    <DropdownMenuItem render={<Link to="/hesabim/profil" />} className="text-sm">
-                      Kullanıcı Bilgilerim
-                    </DropdownMenuItem>
-                    <DropdownMenuItem render={<Link to="/hesabim" />} className="text-sm">
-                      Değerlendirmelerim
-                    </DropdownMenuItem>
-                    <DropdownMenuItem render={<Link to="/hesabim/favoriler" />} className="text-sm">
-                      Beğendiklerim
-                    </DropdownMenuItem>
+                    <DropdownMenuItem render={<Link to="/hesabim" />} className="text-sm">Hesap Özeti</DropdownMenuItem>
+                    <DropdownMenuItem render={<Link to="/hesabim/siparisler" />} className="text-sm">Siparişlerim</DropdownMenuItem>
+                    <DropdownMenuItem render={<Link to="/iletisim" />} className="text-sm">Soru ve Taleplerim</DropdownMenuItem>
+                    <DropdownMenuItem render={<Link to="/hesabim/profil" />} className="text-sm">Kullanıcı Bilgilerim</DropdownMenuItem>
+                    <DropdownMenuItem render={<Link to="/hesabim/favoriler" />} className="text-sm">Beğendiklerim</DropdownMenuItem>
                     <DropdownMenuSeparator />
                   </>
                 )}
-
-                {/* Logout */}
-                <DropdownMenuItem onClick={handleLogout} className="text-destructive text-sm">
-                  <LogOut className="h-4 w-4 mr-2" />
+                <DropdownMenuItem onClick={handleLogout} className="text-sm text-destructive">
+                  <LogOut className="mr-2 h-4 w-4" />
                   Çıkış Yap
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -317,148 +347,122 @@ export function Header() {
           ) : (
             <Link
               to="/giris"
-              className="flex flex-col items-center gap-1 text-neutral-700 hover:text-primary transition-colors"
+              aria-label="Giriş"
+              className={cn('flex h-9 w-9 items-center justify-center rounded-full transition-colors', iconBtnCls)}
             >
-              <UserCircle className="h-6 w-6 stroke-[1.5]" />
-              <span className="hidden md:block text-[10px] sm:text-[11px] font-medium">Hesabım</span>
+              <UserCircle className="h-[19px] w-[19px] stroke-[1.5]" />
             </Link>
           )}
 
-          <Link
-            to="/hesabim/favoriler"
-            className="hidden sm:flex flex-col items-center gap-1 text-neutral-700 hover:text-primary transition-colors"
+          {/* Sepet — sağdan çekmeceyi açar */}
+          <button
+            type="button"
+            onClick={openCart}
+            aria-label="Sepetim"
+            className={cn('relative flex h-9 w-9 items-center justify-center rounded-full transition-colors', iconBtnCls)}
           >
-            <Heart className="h-6 w-6 stroke-[1.5]" />
-            <span className="hidden md:block text-[11px] font-medium">Favorilerim</span>
-          </Link>
-
-          <Link
-            to="/sepet"
-            className="flex flex-col items-center gap-1 text-neutral-700 hover:text-primary transition-colors"
-          >
-            <div className="relative">
-              <ShoppingBag className="h-6 w-6 stroke-[1.5]" />
-              <span className="absolute -bottom-1 -right-1 bg-red-500 text-white text-[9px] font-bold rounded-full h-4 w-4 flex items-center justify-center">
+            <ShoppingBag className="h-[18px] w-[18px]" />
+            {itemCount > 0 && (
+              <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-amber-600 px-1 text-[10px] font-semibold text-white">
                 {itemCount}
               </span>
-            </div>
-            <span className="hidden md:block text-[11px] font-medium">Sepetim</span>
-          </Link>
+            )}
+          </button>
         </div>
-        {/* Mobil hamburger menü kaldırıldı — mobilde alt menü (BottomNav) zaten aynı menüyü sunuyor */}
       </div>
 
-      {/* ─── Renkli Gradient Şerit ───────────────────────────────────── */}
-      <div
-        className="h-1 w-full"
-        style={{
-          background:
-            'linear-gradient(90deg, rgb(0, 0, 0) 0%, rgba(251, 146, 60, 0.12) 12%, rgb(49, 51, 52) 28%, rgb(58, 66, 67) 42%, rgb(79, 74, 68) 58%, rgb(31, 30, 35) 72%, rgb(147, 139, 143) 88%, rgb(17, 16, 16) 100%)',
-        }}
-      />
-
-      {/* ─── Kategori Navigasyon Barı ────────────────────────────────── */}
-      <nav className="hidden lg:block bg-white dark:bg-neutral-950 border-t border-neutral-100 dark:border-neutral-800">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-center gap-0.5 py-2.5 flex-wrap">
-            {/* Tüm Ürünler */}
-            <div className="flex items-center">
-              <Link
-                to="/ara"
-                className="inline-flex items-center justify-center gap-1 text-center px-2 py-1.5 rounded-md text-[13px] leading-tight font-semibold text-neutral-700 dark:text-neutral-200 hover:text-primary dark:hover:bg-neutral-800 hover:bg-orange-50 hover:-translate-y-0.5 transition-all duration-200 whitespace-nowrap"
-              >
-                Tüm Ürünler
-              </Link>
-              <span className="text-neutral-200 select-none" aria-hidden="true">|</span>
-            </div>
-            {categories.slice(0, 9).map((cat, idx) => {
-              const children = (cat.children ?? []).filter((c: any) => c.showInMenu !== false);
-              const hasChildren = children.length > 0;
-              return (
-                <div key={cat.id} className="flex items-center">
-                  <div className="group relative">
-                    <Link
-                      to={`/kategori/${cat.slug}`}
-                      className="inline-flex items-center justify-center gap-1 text-center px-2 py-1.5 rounded-md text-[13px] leading-tight font-semibold text-neutral-700 dark:text-neutral-200 group-hover:text-primary dark:group-hover:bg-neutral-800 group-hover:bg-orange-50 group-hover:-translate-y-0.5 transition-all duration-200"
-                    >
-                      <span className="whitespace-pre-line">{cat.name}</span>
-                      {hasChildren && (
-                        <ChevronDown className="h-3 w-3 shrink-0 transition-transform duration-200 group-hover:rotate-180" />
-                      )}
-                    </Link>
-
-                    {/* Alt Kategori Dropdown */}
-                    {hasChildren && (
-                      <div className="invisible opacity-0 translate-y-1 group-hover:visible group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-150 absolute left-1/2 -translate-x-1/2 top-full pt-2 z-50">
-                        <div className="bg-white dark:bg-neutral-900 rounded-lg shadow-xl border border-neutral-100 dark:border-neutral-700 py-2 min-w-[200px]">
-                          {children.map((child: any) => {
-                            const grandChildren = (child.children ?? []).filter((g: any) => g.showInMenu !== false);
-                            return (
-                              <div key={child.id}>
-                                <Link
-                                  to={`/kategori/${child.slug}`}
-                                  className={`block px-4 py-2 text-sm text-neutral-700 dark:text-neutral-200 hover:bg-orange-50 dark:hover:bg-neutral-800 hover:text-primary transition-colors whitespace-nowrap ${grandChildren.length > 0 ? 'font-semibold' : ''}`}
-                                >
-                                  {child.name}
-                                </Link>
-                                {grandChildren.map((grand: any) => (
-                                  <Link
-                                    key={grand.id}
-                                    to={`/kategori/${grand.slug}`}
-                                    className="block pl-8 pr-4 py-1.5 text-xs text-neutral-500 dark:text-neutral-400 hover:bg-orange-50 dark:hover:bg-neutral-800 hover:text-primary transition-colors whitespace-nowrap"
-                                  >
-                                    ↳ {grand.name}
-                                  </Link>
-                                ))}
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    )}
+      {/* ─── Açılır arama barı ─────────────────────────────────────── */}
+      {searchOpen && (
+        <div className="border-t border-border/60 bg-background">
+          <form onSubmit={handleSearchSubmit} className="search-container relative mx-auto max-w-2xl px-4 py-4">
+            <Search className="pointer-events-none absolute left-7 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+            <Input
+              autoFocus
+              type="text"
+              placeholder="Ürün, kategori veya marka ara"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onFocus={() => setShowPredictions(true)}
+              className="h-11 rounded-sm border border-border bg-card pl-11 pr-4 text-sm placeholder:text-muted-foreground focus-visible:border-amber-500/60 focus-visible:ring-1 focus-visible:ring-amber-500/40"
+            />
+            {showPredictions && searchQuery.trim().length >= 2 && (
+              <div className="absolute inset-x-4 top-full z-[100] mt-2 max-h-80 overflow-y-auto rounded-sm border border-border bg-background shadow-xl">
+                {loadingPredictions ? (
+                  <div className="flex items-center justify-center gap-2 p-4 text-xs text-muted-foreground">
+                    <Loader2 className="h-3 w-3 animate-spin text-amber-600" /> Aranıyor...
                   </div>
-                  {idx < categories.slice(0, 9).length - 1 && (
-                    <span className="text-neutral-200 select-none" aria-hidden="true">|</span>
-                  )}
-                </div>
-              );
-            })}
-            {/* Özel navigasyon linkleri */}
-            {navLinks.map((link, idx) => (
-              <div key={link.id} className="flex items-center">
-                {(categories.slice(0, 9).length > 0 || idx > 0) && (
-                  <span className="text-neutral-200 select-none" aria-hidden="true">|</span>
-                )}
-                <a
-                  href={link.url}
-                  target={link.openInNewTab ? '_blank' : undefined}
-                  rel={link.openInNewTab ? 'noopener noreferrer' : undefined}
-                  className="inline-flex items-center justify-center px-2 py-1.5 rounded-md text-[13px] leading-tight font-semibold text-neutral-700 dark:text-neutral-200 hover:text-primary dark:hover:bg-neutral-800 hover:bg-orange-50 hover:-translate-y-0.5 transition-all duration-200 whitespace-nowrap"
-                >
-                  {link.label}
-                </a>
-              </div>
-            ))}
-            {categories.length > 9 && (
-              <DropdownMenu>
-                <DropdownMenuTrigger className="flex items-center gap-1 px-2 text-[13px] font-semibold text-neutral-700 hover:text-primary transition-colors cursor-pointer outline-none whitespace-nowrap">
-                  Diğer <ChevronDown className="h-4 w-4" />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  {categories.slice(9).map((cat) => (
-                    <DropdownMenuItem
-                      key={cat.id}
-                      render={<Link to={`/kategori/${cat.slug}`} className="w-full cursor-pointer" />}
+                ) : predictions.length === 0 ? (
+                  <div className="p-4 text-center text-xs text-muted-foreground">Uyumlu ürün bulunamadı.</div>
+                ) : (
+                  <div className="divide-y divide-border/60">
+                    {predictions.map((prod) => {
+                      const primaryImg = prod.images?.find((img) => img.isPrimary)?.url || prod.images?.[0]?.url || '';
+                      const rawPrice = prod.variants?.[0]?.price ? Number(prod.variants[0].price) : 0;
+                      const grossPrice = prod.vatIncluded ? rawPrice : rawPrice * (1 + taxRate / 100);
+                      const price = rawPrice ? grossPrice.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY', maximumFractionDigits: 0 }) : '';
+                      return (
+                        <Link
+                          key={prod.id}
+                          to={`/urun/${prod.slug}`}
+                          onClick={() => { setSearchQuery(''); setShowPredictions(false); setSearchOpen(false); }}
+                          className="flex items-center gap-3 p-3 transition-colors hover:bg-secondary"
+                        >
+                          <img src={primaryImg} alt={prod.name} className="h-10 w-10 shrink-0 rounded-sm bg-secondary object-cover" />
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-xs font-medium text-foreground">{prod.name}</p>
+                            <p className="truncate text-[10px] text-muted-foreground">{prod.category?.name}</p>
+                          </div>
+                          {price && <div className="shrink-0 font-display text-sm text-foreground">{price}</div>}
+                        </Link>
+                      );
+                    })}
+                    <Link
+                      to={`/ara?search=${encodeURIComponent(searchQuery)}`}
+                      onClick={() => { setShowPredictions(false); setSearchOpen(false); }}
+                      className="block bg-secondary/40 p-2.5 text-center text-[11px] font-semibold text-amber-800 hover:underline dark:text-amber-500"
                     >
-                      {cat.name}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
+                      Tüm sonuçları gör
+                    </Link>
+                  </div>
+                )}
+              </div>
             )}
-          </div>
+          </form>
         </div>
-      </nav>
+      )}
+
+      {/* ─── Mobil çekmece ─────────────────────────────────────────── */}
+      <div
+        className={cn(
+          'overflow-hidden border-t transition-all duration-500 md:hidden',
+          mobileOpen ? 'max-h-[560px] border-border bg-background' : 'max-h-0 border-transparent',
+        )}
+      >
+        <nav className="flex flex-col gap-1 px-6 py-4">
+          <Link to="/ara" className="py-2.5 font-display text-2xl text-foreground">Mağaza</Link>
+          {categories.slice(0, 6).map((cat: any) => (
+            <Link key={cat.id} to={`/kategori/${cat.slug}`} className="py-1.5 text-sm text-muted-foreground">
+              {cat.name}
+            </Link>
+          ))}
+          <div className="my-2 h-px bg-border/60" />
+          {menuPages.map((p) => (
+            <Link key={p.slug} to={p.isSystem ? `/${p.slug}` : `/sayfa/${p.slug}`} className="py-2 text-sm text-muted-foreground">
+              {p.title}
+            </Link>
+          ))}
+          <div className="my-2 h-px bg-border/60" />
+          {isAuthenticated ? (
+            <>
+              <Link to="/hesabim" className="py-2 text-sm text-muted-foreground">Hesabım</Link>
+              <button onClick={handleLogout} className="py-2 text-left text-sm text-destructive">Çıkış Yap</button>
+            </>
+          ) : (
+            <Link to="/giris" className="py-2 text-sm text-muted-foreground">Giriş Yap</Link>
+          )}
+          <Link to="/sepet" className="py-2 text-sm text-muted-foreground">Sepetim ({itemCount})</Link>
+        </nav>
+      </div>
     </header>
   );
 }

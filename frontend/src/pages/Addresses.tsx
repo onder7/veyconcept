@@ -81,7 +81,7 @@ function fromType(type: AddressType) {
 }
 
 const inputClass =
-  'w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 dark:bg-gray-700 dark:text-white focus:border-primary outline-none transition-colors';
+  'w-full px-3 py-2 rounded-sm border border-border dark:border-gray-700 dark:bg-gray-700 dark:text-white focus:border-amber-500 outline-none transition-colors';
 
 const selectClass = inputClass + ' disabled:opacity-50 disabled:cursor-not-allowed';
 
@@ -247,17 +247,17 @@ export function Addresses() {
         {/* Header */}
         <div className="mb-8 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <button onClick={() => navigate('/hesabim')} className="text-primary hover:text-primary/80 transition-colors">
+            <button onClick={() => navigate('/hesabim')} className="text-amber-800 dark:text-amber-500 hover:text-amber-600 transition-colors">
               <ArrowLeft size={24} />
             </button>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Adreslerim</h1>
+              <h1 className="font-display text-4xl text-foreground">Adreslerim</h1>
               <p className="text-gray-600 dark:text-gray-400">Gönderim ve fatura adreslerinizi yönetin</p>
             </div>
           </div>
           <button
             onClick={openNew}
-            className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-white font-medium hover:bg-opacity-90 transition-all"
+            className="flex items-center gap-2 rounded-full bg-foreground px-5 py-2.5 text-background font-medium hover:bg-amber-900 transition-all"
           >
             <Plus size={20} />
             Yeni Adres
@@ -273,7 +273,7 @@ export function Addresses() {
           <div className="rounded-lg border-2 border-dashed border-gray-300 bg-gray-100 p-12 text-center dark:border-gray-700 dark:bg-gray-800">
             <MapPin size={48} className="mx-auto text-gray-400 mb-4" />
             <p className="text-gray-600 dark:text-gray-400 mb-4">Henüz kayıtlı adres bulunmamaktadır</p>
-            <button onClick={openNew} className="inline-block text-primary hover:underline font-medium">
+            <button onClick={openNew} className="inline-block text-amber-800 dark:text-amber-500 hover:underline font-medium">
               İlk adresini ekle →
             </button>
           </div>
@@ -289,7 +289,7 @@ export function Addresses() {
                     <TypeBadges type={addr.type} />
                   </div>
                   <div className="flex gap-2 shrink-0">
-                    <button onClick={() => openEdit(addr)} className="text-gray-500 hover:text-primary transition-colors p-2">
+                    <button onClick={() => openEdit(addr)} className="text-muted-foreground hover:text-amber-700 transition-colors p-2">
                       <Edit2 size={18} />
                     </button>
                     <button
@@ -317,7 +317,7 @@ export function Addresses() {
         {/* Add/Edit Form */}
         {isAdding && (
           <div className="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">
+            <h2 className="font-display text-3xl text-foreground mb-6">
               {editingId ? 'Adresi Düzenle' : 'Yeni Adres Ekle'}
             </h2>
 
@@ -401,7 +401,7 @@ export function Addresses() {
                 <div className="flex flex-wrap gap-3">
                   <label className={`flex items-center gap-2.5 cursor-pointer px-4 py-2.5 rounded-lg border-2 transition-all select-none ${
                     formData.isShipping
-                      ? 'border-primary bg-primary/5 dark:bg-primary/10'
+                      ? 'border-foreground bg-secondary dark:bg-secondary'
                       : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
                   }`}>
                     <input
@@ -414,7 +414,7 @@ export function Addresses() {
                   </label>
                   <label className={`flex items-center gap-2.5 cursor-pointer px-4 py-2.5 rounded-lg border-2 transition-all select-none ${
                     formData.isBilling
-                      ? 'border-primary bg-primary/5 dark:bg-primary/10'
+                      ? 'border-foreground bg-secondary dark:bg-secondary'
                       : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
                   }`}>
                     <input
@@ -439,7 +439,7 @@ export function Addresses() {
                 <button
                   onClick={handleSaveAddress}
                   disabled={saving}
-                  className="flex-1 px-4 py-2 bg-primary text-white font-medium rounded-lg hover:bg-opacity-90 disabled:opacity-50 transition-all"
+                  className="flex-1 px-4 py-2.5 bg-foreground text-background font-medium rounded-full hover:bg-amber-900 disabled:opacity-50 transition-all"
                 >
                   {saving ? 'Kaydediliyor...' : editingId ? 'Güncelle' : 'Ekle'}
                 </button>

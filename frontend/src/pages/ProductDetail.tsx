@@ -184,7 +184,7 @@ export function ProductDetail() {
   const [activeImageIdx, setActiveImageIdx] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const lightboxRef = useRef<HTMLDivElement>(null);
-  const { setCart } = useCartStore();
+  const { setCart, openCart } = useCartStore();
   const qc = useQueryClient();
   const { isFavorite, toggleFavorite } = useWishlistStore();
   const addToRecentlyViewed = useRecentlyViewedStore((s) => s.add);
@@ -202,7 +202,7 @@ export function ProductDetail() {
     onSuccess: (res) => {
       setCart(res.data.data);
       qc.setQueryData(['cart'], res.data.data);
-      toast.success('Ürün sepete eklendi!');
+      openCart();
     },
     onError: (err: { response?: { data?: { message?: string } } }) => {
       toast.error(err.response?.data?.message ?? 'Sepete eklenemedi');
@@ -338,7 +338,7 @@ export function ProductDetail() {
         <div className="space-y-3">
           <div className="relative mx-auto w-[62%] max-w-[16rem] sm:w-full sm:max-w-none">
             <div
-              className="aspect-square rounded-xl overflow-hidden bg-gray-50 dark:bg-neutral-900 cursor-zoom-in group/img"
+              className="aspect-square rounded-sm overflow-hidden bg-secondary dark:bg-neutral-900 cursor-zoom-in group/img"
               onClick={() => activeImage && setLightboxOpen(true)}
             >
               {activeImage ? (
@@ -415,10 +415,10 @@ export function ProductDetail() {
                   key={i}
                   type="button"
                   onClick={() => setActiveImageIdx(i)}
-                  className={`shrink-0 h-16 w-16 rounded-lg overflow-hidden border-2 transition-colors ${
+                  className={`shrink-0 h-16 w-16 rounded-sm overflow-hidden border transition-colors ${
                     i === activeImageIdx
-                      ? 'border-primary'
-                      : 'border-transparent hover:border-muted-foreground/50'
+                      ? 'border-foreground'
+                      : 'border-border hover:border-muted-foreground/50'
                   }`}
                 >
                   <img
@@ -434,14 +434,16 @@ export function ProductDetail() {
 
         {/* Bilgi */}
         <div className="space-y-4">
-          {product.brand && <p className="text-sm text-muted-foreground">{product.brand.name}</p>}
-          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">{product.name}</h1>
+          <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">
+            {product.category.name}{product.brand ? ` · ${product.brand.name}` : ''}
+          </p>
+          <h1 className="font-display text-3xl sm:text-4xl md:text-5xl leading-tight text-foreground">{product.name}</h1>
 
           {avgRating !== null && (
             <div className="flex items-center gap-2 text-sm">
               <div className="flex">
                 {[1, 2, 3, 4, 5].map((s) => (
-                  <Star key={s} className={`h-4 w-4 ${s <= Math.round(avgRating) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`} />
+                  <Star key={s} className={`h-4 w-4 ${s <= Math.round(avgRating) ? 'fill-amber-400 text-amber-400' : 'text-border'}`} />
                 ))}
               </div>
               <span className="text-muted-foreground">({(product.reviews as { rating: number }[]).length} değerlendirme)</span>
@@ -452,7 +454,7 @@ export function ProductDetail() {
           {variant && (
             <div className="space-y-1">
               <div className="flex items-baseline gap-3">
-                <span className="text-3xl font-bold text-primary">
+                <span className={`font-display text-4xl ${hasDiscount ? 'text-amber-800 dark:text-amber-400' : 'text-foreground'}`}>
                   {product.vatIncluded
                     ? formatPrice(variant.price)
                     : formatPrice(Number(variant.price) * (1 + taxRate / 100))}
@@ -506,8 +508,8 @@ export function ProductDetail() {
                       <button
                         key={av.id}
                         onClick={() => matchVariant && setSelectedVariant(matchVariant)}
-                        className={`px-3 py-1.5 text-sm border rounded-lg transition-colors ${
-                          isSelected ? 'border-primary bg-primary/5 font-medium' : 'hover:border-muted-foreground'
+                        className={`px-3.5 py-1.5 text-sm border rounded-sm transition-colors ${
+                          isSelected ? 'border-foreground bg-foreground/5 font-medium' : 'border-border hover:border-foreground/50'
                         } ${matchVariant?.stockQty === 0 ? 'opacity-40 cursor-not-allowed line-through' : ''}`}
                         disabled={matchVariant?.stockQty === 0}
                       >
@@ -538,17 +540,27 @@ export function ProductDetail() {
 
           {/* Miktar + Sepet */}
           <div className="flex items-center gap-3 pt-2">
-            <div className="flex items-center border rounded-lg">
-              <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => setQty((q) => Math.max(1, q - 1))}>
+            <div className="flex items-center rounded-full border border-border">
+              <button
+                type="button"
+                aria-label="Azalt"
+                className="flex h-11 w-11 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
+                onClick={() => setQty((q) => Math.max(1, q - 1))}
+              >
                 <Minus className="h-4 w-4" />
-              </Button>
-              <span className="w-10 text-center text-sm font-medium">{qty}</span>
-              <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => setQty((q) => Math.min(variant?.stockQty ?? 1, q + 1))}>
+              </button>
+              <span className="w-8 text-center text-sm tabular-nums">{qty}</span>
+              <button
+                type="button"
+                aria-label="Artır"
+                className="flex h-11 w-11 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
+                onClick={() => setQty((q) => Math.min(variant?.stockQty ?? 1, q + 1))}
+              >
                 <Plus className="h-4 w-4" />
-              </Button>
+              </button>
             </div>
             <Button
-              className="flex-1"
+              className="flex-1 h-11 rounded-full bg-foreground text-background hover:bg-amber-900"
               disabled={!variant || variant.stockQty === 0 || addToCartMut.isPending}
               onClick={() => variant && addToCartMut.mutate({ variantId: variant.id, quantity: qty })}
             >
@@ -562,9 +574,9 @@ export function ProductDetail() {
             href={buildWhatsAppUrl(waNumber, product, variant, qty, taxRate)}
             target="_blank"
             rel="noopener noreferrer"
-            className={`flex items-center justify-center gap-2.5 w-full rounded-lg py-3 px-5 text-sm font-semibold text-white transition-all ${
+            className={`flex items-center justify-center gap-2.5 w-full rounded-full py-3 px-5 text-sm font-semibold text-white transition-all ${
               variant && variant.stockQty > 0
-                ? 'bg-[#25D366] hover:bg-[#1ebe5a] active:bg-[#18a84d] shadow-sm hover:shadow-md'
+                ? 'bg-[#25D366] hover:bg-[#1ebe5a] active:bg-[#18a84d]'
                 : 'bg-gray-300 pointer-events-none'
             }`}
           >
@@ -582,8 +594,8 @@ export function ProductDetail() {
           />
 
           {product.description && (
-            <div className="border-t pt-4">
-              <h3 className="font-medium mb-2">Ürün Açıklaması</h3>
+            <div className="border-t border-border pt-5">
+              <h3 className="font-display text-2xl mb-3">Ürün Açıklaması</h3>
               <div
                 className="text-sm text-muted-foreground leading-relaxed product-description"
                 dangerouslySetInnerHTML={{ __html: product.description }}
@@ -599,9 +611,9 @@ export function ProductDetail() {
         <div className="flex border-b">
           <button
             onClick={() => setActiveTab('reviews')}
-            className={`px-6 py-3 text-sm font-semibold transition-colors border-b-2 -mb-px ${
+            className={`px-6 py-3 text-xs uppercase tracking-[0.14em] font-medium transition-colors border-b-2 -mb-px ${
               activeTab === 'reviews'
-                ? 'border-primary text-primary'
+                ? 'border-amber-600 text-foreground'
                 : 'border-transparent text-muted-foreground hover:text-foreground'
             }`}
           >
@@ -614,9 +626,9 @@ export function ProductDetail() {
           </button>
           <button
             onClick={() => setActiveTab('qa')}
-            className={`px-6 py-3 text-sm font-semibold transition-colors border-b-2 -mb-px ${
+            className={`px-6 py-3 text-xs uppercase tracking-[0.14em] font-medium transition-colors border-b-2 -mb-px ${
               activeTab === 'qa'
-                ? 'border-primary text-primary'
+                ? 'border-amber-600 text-foreground'
                 : 'border-transparent text-muted-foreground hover:text-foreground'
             }`}
           >

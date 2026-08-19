@@ -11,6 +11,7 @@ import { LiveChat } from '@/components/common/LiveChat';
 import { PopupNotification } from '@/components/common/PopupNotification';
 import { CampaignDisplay } from '@/components/common/CampaignDisplay';
 import { CookieConsent } from '@/components/common/CookieConsent';
+import { CartDrawer } from '@/components/cart/CartDrawer';
 import { Home } from '@/pages/Home';
 import { Login } from '@/pages/Login';
 import { Register } from '@/pages/Register';
@@ -100,6 +101,7 @@ function AppContent() {
       <BottomNav />
       {!isAuthPage && <LiveChat />}
       {!isAuthPage && <PopupNotification />}
+      <CartDrawer />
       <CookieConsent />
     </div>
   );

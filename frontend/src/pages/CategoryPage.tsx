@@ -79,7 +79,12 @@ export function CategoryPage() {
       </nav>
 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-        <h1 className="text-2xl font-bold">{category?.name ?? slug}</h1>
+        <div>
+          <p className="mb-2 flex items-center gap-3 text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
+            <span className="h-px w-8 bg-amber-500" /> Koleksiyon
+          </p>
+          <h1 className="font-display text-4xl md:text-5xl leading-none text-foreground">{category?.name ?? slug}</h1>
+        </div>
         <div className="flex items-center gap-2">
           {pagination && (
             <span className="text-sm text-muted-foreground">{pagination.total} ürün</span>

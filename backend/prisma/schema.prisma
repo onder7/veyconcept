@@ -26,8 +26,13 @@ model User {
   isActive     Boolean  @default(true) @map("is_active")
   refreshTokens String[] @default([]) @map("refresh_tokens")
 
-  // Ticari elektronik ileti (kampanya/SMS/e-posta) onayı — ETK/KVKK
-  marketingConsent Boolean @default(false) @map("marketing_consent")
+  // Ticari elektronik ileti onayları (ETK/KVKK). marketingConsent = e-posta izni
+  marketingConsent Boolean   @default(false) @map("marketing_consent")
+  smsConsent       Boolean   @default(false) @map("sms_consent")
+  termsAcceptedAt  DateTime? @map("terms_accepted_at") // üyelik koşulları + KVKK kabul zamanı
+
+  // Sadece adminlerin gördüğü müşteri notu
+  adminNote        String?   @map("admin_note")
 
   // MFA Fields
   mfaEnabled   Boolean  @default(false) @map("mfa_enabled")
@@ -392,11 +397,12 @@ enum InvoiceType {
 }
 
 enum InvoiceStatus {
-  DRAFT    // henüz gönderilmedi
-  QUEUED   // entegratöre gönderildi, sonuç bekleniyor
-  SENT     // başarıyla kesildi/gönderildi
-  REJECTED // GİB/alıcı reddetti
-  ERROR    // gönderim/teknik hata
+  DRAFT     // henüz gönderilmedi
+  QUEUED    // entegratöre gönderildi, sonuç bekleniyor
+  SENT      // başarıyla kesildi/gönderildi
+  REJECTED  // GİB/alıcı reddetti
+  ERROR     // gönderim/teknik hata
+  CANCELLED // e-Arşiv iptal edildi
 }
 
 model Invoice {

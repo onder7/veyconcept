@@ -33,7 +33,6 @@
     "prisma": "^5.22.0",
     "qrcode": "^1.5.4",
     "sharp": "^0.33.5",
-    "soap": "^1.9.3",
     "speakeasy": "^2.0.0",
     "systeminformation": "^5.31.6",
     "winston": "^3.19.0",

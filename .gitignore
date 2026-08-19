@@ -77,3 +77,6 @@ ecommerce-frontend-master/
 !frontend/public/*.svg
 !frontend/src/**/*.png
 !frontend/src/**/*.svg
+
+# Yerel referans tema kopyası (deploya dahil değil)
+tema/

@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { productApi } from '@/services/productApi';
 import { api } from '@/services/api';
@@ -65,7 +65,7 @@ function SocialBtn({ href, children }: SocialLinkProps) {
       href={href}
       target="_blank"
       rel="noreferrer noopener"
-      className="p-2 bg-neutral-900 hover:bg-primary hover:text-white rounded-full transition-all text-neutral-400"
+      className="flex h-9 w-9 items-center justify-center rounded-full border border-border text-muted-foreground transition-all hover:border-amber-600 hover:bg-amber-600 hover:text-white"
     >
       {children}
     </a>
@@ -74,6 +74,9 @@ function SocialBtn({ href, children }: SocialLinkProps) {
 
 export function Footer() {
   const { name: storeName, slogan: storeSlogan } = useStoreInfo();
+  const location = useLocation();
+  // Ana sayfada bülten "Günce" bandında olduğu için footer'daki tekrar gizlenir
+  const isHome = location.pathname === '/';
   const [email, setEmail] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
@@ -117,13 +120,18 @@ export function Footer() {
     Object.values(socialLinks).some((v) => v && v.trim() !== '');
 
   return (
-    <footer className="bg-neutral-950 text-neutral-200 mt-auto border-t border-neutral-800 pb-20 lg:pb-0">
-      {/* Newsletter Section */}
-      <div className="border-b border-neutral-800 py-10">
-        <div className="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-6">
+    <footer className="bg-background text-foreground mt-auto border-t border-border pb-20 lg:pb-0">
+      {/* Newsletter Section — ana sayfada "Günce" bandı olduğu için orada gizli */}
+      {!isHome && (
+      <div className="border-b border-border py-12">
+        <div className="container mx-auto px-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
           <div className="max-w-xl">
-            <h3 className="text-xl font-bold text-white mb-2">Özel Fırsatlardan Haberdar Olun!</h3>
-            <p className="text-neutral-400 text-sm">
+            <p className="mb-3 flex items-center gap-3 text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
+              <span className="h-px w-8 bg-amber-500" />
+              Bülten
+            </p>
+            <h3 className="font-display text-3xl md:text-4xl text-foreground mb-2">Özel Fırsatlardan Haberdar Olun</h3>
+            <p className="text-muted-foreground text-sm leading-relaxed">
               Bültenimize abone olun, yeni ürünlerden, kampanyalardan ve size özel sürpriz indirimlerden ilk siz haberdar olun.
             </p>
           </div>
@@ -133,24 +141,25 @@ export function Footer() {
               placeholder="E-posta adresiniz"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="bg-neutral-900 border-neutral-800 text-white placeholder-neutral-500 focus-visible:ring-primary h-10 w-full md:w-80"
+              className="bg-card border-border text-foreground placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-amber-500/40 focus-visible:border-amber-500/60 h-11 w-full md:w-80 rounded-sm"
               required
               disabled={submitting}
             />
-            <Button type="submit" disabled={submitting} className="bg-primary hover:bg-primary/95 text-white font-medium px-4 h-10 gap-2 shrink-0 border-none">
+            <Button type="submit" disabled={submitting} className="rounded-full bg-foreground hover:bg-amber-800 text-background font-medium px-5 h-11 gap-2 shrink-0 border-none">
               <span>{submitting ? 'Abone Yapılıyor...' : 'Abone Ol'}</span>
               <Send className="h-4 w-4" />
             </Button>
           </form>
         </div>
       </div>
+      )}
 
       {/* Main Links Section */}
-      <div className="container mx-auto px-4 py-12 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 text-sm">
+      <div className="container mx-auto px-4 py-16 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-10 text-sm">
         <div>
-          <h3 className="text-lg font-bold text-white mb-4">{storeName}</h3>
+          <h3 className="font-display text-3xl text-foreground mb-4">{storeName}</h3>
           <div
-            className="text-neutral-400 mb-6 leading-relaxed [&_a]:underline [&_a]:text-neutral-200 hover:[&_a]:text-white [&_p]:mb-2 [&_strong]:text-white [&_h1]:text-base [&_h1]:font-bold [&_h2]:text-sm [&_h2]:font-semibold [&_ul]:list-disc [&_ul]:pl-5"
+            className="text-muted-foreground mb-6 leading-relaxed [&_a]:underline [&_a]:text-foreground hover:[&_a]:text-amber-800 [&_p]:mb-2 [&_strong]:text-foreground [&_h1]:text-base [&_h1]:font-bold [&_h2]:text-sm [&_h2]:font-semibold [&_ul]:list-disc [&_ul]:pl-5"
             dangerouslySetInnerHTML={{ __html: storeSlogan || 'Güvenli ödeme ve hızlı kargo seçenekleriyle binlerce ürünü keşfedin.' }}
           />
 
@@ -197,11 +206,11 @@ export function Footer() {
         </div>
 
         <div>
-          <h3 className="font-semibold text-white mb-4 tracking-wider">Kategoriler</h3>
-          <ul className="space-y-3 text-neutral-400">
+          <h3 className="mb-4 text-xs uppercase tracking-[0.3em] text-muted-foreground">Kategoriler</h3>
+          <ul className="space-y-2.5 text-muted-foreground">
             {categories.map((cat) => (
               <li key={cat.id}>
-                <Link to={`/kategori/${cat.slug}`} className="hover:text-white hover:underline transition-colors">
+                <Link to={`/kategori/${cat.slug}`} className="hover:text-amber-800 dark:hover:text-amber-500 transition-colors">
                   {cat.name}
                 </Link>
               </li>
@@ -210,24 +219,24 @@ export function Footer() {
         </div>
 
         <div>
-          <h3 className="font-semibold text-white mb-4 tracking-wider">Hesabım</h3>
-          <ul className="space-y-3 text-neutral-400">
-            <li><Link to="/hesabim/siparisler" className="hover:text-white hover:underline transition-colors">Siparişlerim</Link></li>
-            <li><Link to="/hesabim/profil" className="hover:text-white hover:underline transition-colors">Profil Bilgilerim</Link></li>
-            <li><Link to="/sepet" className="hover:text-white hover:underline transition-colors">Sepetim</Link></li>
-            <li><Link to="/hesabim/favoriler" className="hover:text-white hover:underline transition-colors">Favori Ürünlerim</Link></li>
+          <h3 className="mb-4 text-xs uppercase tracking-[0.3em] text-muted-foreground">Hesabım</h3>
+          <ul className="space-y-2.5 text-muted-foreground">
+            <li><Link to="/hesabim/siparisler" className="hover:text-amber-800 dark:hover:text-amber-500 transition-colors">Siparişlerim</Link></li>
+            <li><Link to="/hesabim/profil" className="hover:text-amber-800 dark:hover:text-amber-500 transition-colors">Profil Bilgilerim</Link></li>
+            <li><Link to="/sepet" className="hover:text-amber-800 dark:hover:text-amber-500 transition-colors">Sepetim</Link></li>
+            <li><Link to="/hesabim/favoriler" className="hover:text-amber-800 dark:hover:text-amber-500 transition-colors">Favori Ürünlerim</Link></li>
           </ul>
         </div>
 
         {menuPages.length > 0 && (
           <div>
-            <h3 className="font-semibold text-white mb-4 tracking-wider">Müşteri Hizmetleri</h3>
-            <ul className="space-y-3 text-neutral-400">
+            <h3 className="mb-4 text-xs uppercase tracking-[0.3em] text-muted-foreground">Müşteri Hizmetleri</h3>
+            <ul className="space-y-2.5 text-muted-foreground">
               {menuPages.map((p) => (
                 <li key={p.slug}>
                   <Link
                     to={p.isSystem ? `/${p.slug}` : `/sayfa/${p.slug}`}
-                    className="hover:text-white hover:underline transition-colors"
+                    className="hover:text-amber-800 dark:hover:text-amber-500 transition-colors"
                   >
                     {p.title}
                   </Link>
@@ -238,23 +247,23 @@ export function Footer() {
         )}
       </div>
 
-      <div className="border-t border-neutral-900 bg-neutral-950/50 py-6 text-center text-xs text-neutral-500">
+      <div className="border-t border-border bg-secondary/40 py-6 text-center text-xs text-muted-foreground">
         <div className="container mx-auto px-4 text-center space-y-1.5">
           <p>© {new Date().getFullYear()} {storeName}. Tüm hakları saklıdır.</p>
-          <p className="text-neutral-600">
+          <p className="text-muted-foreground/70">
             Yazılım &amp; Geliştirme:{' '}
             <a
               href="https://nefesol.net/"
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:text-white hover:underline transition-colors"
+              className="hover:text-amber-800 dark:hover:text-amber-500 transition-colors"
             >
               nefesol.net
             </a>
-            <span className="mx-1.5 text-neutral-700">·</span>
+            <span className="mx-1.5 text-border">·</span>
             <a
               href="mailto:onder7@gmail.com"
-              className="hover:text-white hover:underline transition-colors"
+              className="hover:text-amber-800 dark:hover:text-amber-500 transition-colors"
             >
               onder7@gmail.com
             </a>

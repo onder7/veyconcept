@@ -237,11 +237,12 @@ export default function OrderDetailPage() {
   const [invoiceErr, setInvoiceErr]         = useState('');
   const [taxRate, setTaxRate]               = useState(20);
 
-  // e-Fatura (QNB eSolutions)
+  // e-Fatura / e-Arşiv (Sysmond E-Dönüşüm)
   type EInvoice = {
-    status: 'DRAFT' | 'QUEUED' | 'SENT' | 'REJECTED' | 'ERROR';
+    status: 'DRAFT' | 'QUEUED' | 'SENT' | 'REJECTED' | 'ERROR' | 'CANCELLED';
     ettn?: string | null;
     invoiceNo?: string | null;
+    profile?: string | null;
     errorMessage?: string | null;
   } | null;
   const [eInvoice, setEInvoice] = useState<EInvoice>(null);
@@ -271,12 +272,36 @@ export default function OrderDetailPage() {
       const r = await api.post<{ success: boolean; data: NonNullable<EInvoice> }>(
         `/admin/orders/${orderId}/e-invoice`, {},
       );
-      setEInvoice(r.data);
       if (r.data.status !== 'SENT') {
         setEInvErr(r.data.errorMessage || 'Fatura kesilemedi');
+        setEInvoice(r.data);
+      } else {
+        // Tüm alanları (profile dahil) almak için güncel kaydı çek
+        const fresh = await api.get<{ success: boolean; data: EInvoice }>(`/admin/orders/${orderId}/e-invoice`);
+        setEInvoice(fresh.data);
       }
     } catch (err) {
       setEInvErr(err instanceof Error ? err.message : 'Fatura kesilemedi');
+    } finally {
+      setEInvBusy(false);
+    }
+  }
+
+  async function handleCancelEInvoice() {
+    if (!window.confirm('Bu e-Arşiv faturayı iptal etmek istediğinize emin misiniz? Bu işlem geri alınamaz.')) return;
+    setEInvBusy(true);
+    setEInvErr('');
+    try {
+      const r = await api.post<{ success: boolean; data: { status: string; message?: string } }>(
+        `/admin/orders/${orderId}/e-invoice/cancel`, {},
+      );
+      if (r.data.status === 'CANCELLED') {
+        setEInvoice((prev) => prev ? { ...prev, status: 'CANCELLED' } : prev);
+      } else {
+        setEInvErr(r.data.message || 'İptal başarısız');
+      }
+    } catch (err) {
+      setEInvErr(err instanceof Error ? err.message : 'İptal başarısız');
     } finally {
       setEInvBusy(false);
     }
@@ -669,11 +694,13 @@ export default function OrderDetailPage() {
             <span className="text-xs text-red-600 font-medium px-2">{invoiceErr}</span>
           )}
 
-          {/* e-Fatura (QNB) durum + aksiyonlar */}
+          {/* e-Fatura / e-Arşiv durum + aksiyonlar */}
           {eInvErr && (
             <span className="text-xs text-red-600 font-medium px-2 max-w-xs truncate" title={eInvErr}>{eInvErr}</span>
           )}
-          {eInvoice?.status === 'SENT' ? (
+          {eInvoice?.status === 'CANCELLED' ? (
+            <span className="text-xs text-gray-500 font-medium px-2">e-Arşiv İptal Edildi</span>
+          ) : eInvoice?.status === 'SENT' ? (
             <>
               <span className="text-xs text-green-600 font-medium px-2">
                 e-Fatura kesildi{eInvoice.invoiceNo ? ` (${eInvoice.invoiceNo})` : ''}
@@ -689,6 +716,20 @@ export default function OrderDetailPage() {
                 </svg>
                 e-Fatura PDF
               </button>
+              {eInvoice.profile === 'EARSIVFATURA' && (
+                <button
+                  onClick={handleCancelEInvoice}
+                  disabled={eInvBusy}
+                  title="e-Arşiv faturayı iptal et"
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-lg border border-red-200 bg-red-50 text-sm font-medium text-red-600 hover:bg-red-100 transition disabled:opacity-50"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.8"/>
+                    <path d="M15 9l-6 6M9 9l6 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+                  </svg>
+                  {eInvBusy ? 'İptal ediliyor…' : 'Fatura İptal'}
+                </button>
+              )}
             </>
           ) : (
             <button

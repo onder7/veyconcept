@@ -109,7 +109,7 @@ export function Search() {
               setTempMaxPrice('5000');
               setInStockOnly(false);
             }}
-            className="flex items-center gap-1 text-xs text-primary hover:underline font-semibold cursor-pointer border-none bg-transparent"
+            className="flex items-center gap-1 text-xs text-amber-800 dark:text-amber-500 hover:underline font-semibold cursor-pointer border-none bg-transparent"
           >
             <RotateCcw className="h-3.5 w-3.5" />
             Temizle
@@ -213,13 +213,13 @@ export function Search() {
       />
       <div className="flex flex-col lg:flex-row gap-8">
         {/* Desktop Sidebar Filters */}
-        <aside className="hidden lg:block w-64 shrink-0 bg-white border border-neutral-100 rounded-2xl p-6 h-fit shadow-xs">
+        <aside className="hidden lg:block w-64 shrink-0 bg-card border border-border rounded-sm p-6 h-fit">
           {renderFilters()}
         </aside>
 
         {/* Main Content Area */}
         <div className="flex-1">
-          <h1 className="text-2xl font-bold mb-6 text-neutral-800 tracking-tight">
+          <h1 className="font-display text-4xl md:text-5xl mb-6 text-foreground">
             {q ? `"${q}" için sonuçlar` : 'Tüm Ürünler'}
           </h1>
 
@@ -268,7 +268,7 @@ export function Search() {
               <div className="flex items-center gap-2">
                 <span className="text-xs text-neutral-500 font-medium whitespace-nowrap">Sırala:</span>
                 <Select value={sort} onValueChange={(v) => updateFilters({ sort: v })}>
-                  <SelectTrigger className="w-40 h-9 text-xs border border-neutral-200 bg-white">
+                  <SelectTrigger className="w-40 h-9 text-xs border border-border bg-card rounded-sm">
                     <SelectValue>{SORTS.find(s => s.value === sort)?.label}</SelectValue>
                   </SelectTrigger>
                   <SelectContent>

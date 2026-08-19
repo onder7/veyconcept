@@ -72,7 +72,7 @@ export function OrderSuccess() {
   return (
     <main className="container mx-auto px-4 py-16 max-w-lg text-center">
       <CheckCircle className="h-20 w-20 text-green-500 mx-auto mb-6" />
-      <h1 className="text-3xl font-bold mb-2">Siparişiniz Alındı!</h1>
+      <h1 className="font-display text-4xl md:text-5xl mb-3">Siparişiniz Alındı!</h1>
       <p className="text-muted-foreground mb-1">
         Sipariş No: <strong className="text-foreground">#{orderId.slice(-8).toUpperCase()}</strong>
       </p>
@@ -137,7 +137,7 @@ export function OrderSuccess() {
       ) : order ? (
         <div className="border rounded-lg p-4 mb-6 text-left space-y-3">
           <div className="flex items-center gap-2 text-sm font-medium">
-            <Package className="h-4 w-4 text-primary" />
+            <Package className="h-4 w-4 text-amber-700 dark:text-amber-500" />
             Sipariş Detayı
           </div>
           {order.items.map((item) => (

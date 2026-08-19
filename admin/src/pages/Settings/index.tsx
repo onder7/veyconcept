@@ -2063,7 +2063,7 @@ function PagesTab() {
             <QuillEditor
               value={draft.content}
               onChange={(html) => setDraft({ ...draft, content: html })}
-              placeholder="Sayfa içeriğini yazın... Resim eklemek için araç çubuğundaki 🖼 simgesine tıklayın."
+              placeholder="Sayfa içeriğini yazın... Zengin HTML (<style>, <div class=…>) otomatik HTML kaynak modunda açılır ve olduğu gibi korunur."
               minHeight={360}
             />
           </div>
@@ -2115,6 +2115,9 @@ function PagesTab() {
 interface SlideItem {
   img: string;
   link: string;
+  title?: string;
+  subtitle?: string;
+  buttonText?: string;
 }
 
 function SliderTab() {
@@ -2217,7 +2220,7 @@ function SliderTab() {
   };
 
   const addSlide = () => {
-    setSlides((prev) => [...prev, { img: '', link: '' }]);
+    setSlides((prev) => [...prev, { img: '', link: '', title: '', subtitle: '', buttonText: '' }]);
   };
 
   if (loading) return <Loader />;
@@ -2294,6 +2297,35 @@ function SliderTab() {
                     />
                   </Field>
                 </div>
+
+                {/* Hero üzerinde gösterilecek metin (opsiyonel). Boş bırakılırsa
+                    slaytın tamamı yukarıdaki linke tıklanabilir olur. */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <Field label={`Başlık #${index + 1} (opsiyonel)`} hint="Görselin üzerinde büyük serif başlık olarak görünür">
+                    <input
+                      className={inputCls}
+                      value={slide.title ?? ''}
+                      onChange={(e) => updateSlide(index, 'title', e.target.value)}
+                      placeholder="Örn: Yaz Koleksiyonu"
+                    />
+                  </Field>
+                  <Field label={`Buton Metni #${index + 1} (opsiyonel)`} hint="Boşsa buton görünmez; doluysa buton yukarıdaki linke gider">
+                    <input
+                      className={inputCls}
+                      value={slide.buttonText ?? ''}
+                      onChange={(e) => updateSlide(index, 'buttonText', e.target.value)}
+                      placeholder="Örn: Keşfet"
+                    />
+                  </Field>
+                </div>
+                <Field label={`Alt Başlık #${index + 1} (opsiyonel)`} hint="Başlığın altında görünen kısa açıklama satırı">
+                  <input
+                    className={inputCls}
+                    value={slide.subtitle ?? ''}
+                    onChange={(e) => updateSlide(index, 'subtitle', e.target.value)}
+                    placeholder="Kısa açıklama satırı"
+                  />
+                </Field>
               </div>
 
               {/* Delete Button */}

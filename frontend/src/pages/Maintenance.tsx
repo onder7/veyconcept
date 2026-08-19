@@ -19,31 +19,31 @@ export default function Maintenance({ message }: MaintenanceProps) {
   }, []);
 
   return (
-    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-slate-950 px-6 py-12 text-slate-100 selection:bg-primary selection:text-white">
+    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-slate-950 px-6 py-12 text-slate-100 selection:bg-amber-500 selection:text-white">
       {/* Background Decorative Gradients */}
       <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900/50 via-slate-950 to-slate-950" />
-      <div className="absolute top-1/4 left-1/2 -z-10 h-96 w-96 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/10 blur-[120px]" />
+      <div className="absolute top-1/4 left-1/2 -z-10 h-96 w-96 -translate-x-1/2 -translate-y-1/2 rounded-full bg-amber-500/10 blur-[120px]" />
       <div className="absolute bottom-1/4 left-1/3 -z-10 h-72 w-72 rounded-full bg-indigo-500/5 blur-[100px]" />
 
       {/* Main Content Card */}
       <div className="mx-auto flex w-full max-w-xl flex-col items-center text-center">
         {/* Animated Icon Container */}
         <div className="relative mb-8 flex h-24 w-24 items-center justify-center rounded-2xl bg-slate-900 border border-slate-800 shadow-2xl">
-          <div className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-primary/10 to-indigo-500/10 opacity-50" />
-          <Wrench className="h-10 w-10 text-primary animate-pulse" />
+          <div className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-amber-500/10 to-indigo-500/10 opacity-50" />
+          <Wrench className="h-10 w-10 text-amber-500 animate-pulse" />
           <span className="absolute -top-1 -right-1 flex h-3 w-3">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-3 w-3 bg-primary"></span>
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-500 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-3 w-3 bg-amber-500"></span>
           </span>
         </div>
 
         {/* Company Logo or Name */}
-        <span className="mb-2 text-xs font-semibold tracking-[0.2em] text-primary uppercase">
+        <span className="mb-2 text-xs font-semibold tracking-[0.2em] text-amber-500 uppercase">
           {store.name}
         </span>
 
         {/* Title */}
-        <h1 className="mb-4 text-4xl font-extrabold tracking-tight text-white sm:text-5xl">
+        <h1 className="mb-4 font-display text-5xl text-white sm:text-6xl">
           Şu Anda Bakımdayız
         </h1>
 
@@ -60,7 +60,7 @@ export default function Maintenance({ message }: MaintenanceProps) {
           {store.email && (
             <a
               href={`mailto:${store.email}`}
-              className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-900 border border-slate-800 hover:border-primary hover:text-primary transition-all duration-300"
+              className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-900 border border-slate-800 hover:border-amber-500 hover:text-amber-500 transition-all duration-300"
               title="E-posta Gönder"
             >
               <Mail className="h-4 w-4" />
@@ -68,7 +68,7 @@ export default function Maintenance({ message }: MaintenanceProps) {
           )}
           <a
             href="/"
-            className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-900 border border-slate-800 hover:border-primary hover:text-primary transition-all duration-300"
+            className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-900 border border-slate-800 hover:border-amber-500 hover:text-amber-500 transition-all duration-300"
             title="Web Sitesi"
           >
             <Globe className="h-4 w-4" />

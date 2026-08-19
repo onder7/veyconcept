@@ -76,7 +76,7 @@ export default function CampaignDetail() {
     return (
       <main className="min-h-screen bg-neutral-50/50 py-12">
         <div className="container mx-auto px-4">
-          <Link to="/" className="flex items-center gap-2 text-primary mb-6 hover:underline">
+          <Link to="/" className="flex items-center gap-2 text-amber-800 dark:text-amber-500 mb-6 hover:underline">
             <ArrowLeft size={18} /> Ana sayfaya dön
           </Link>
           <div className="rounded-lg border border-stroke bg-white p-6 text-center dark:border-strokedark dark:bg-boxdark">
@@ -99,7 +99,7 @@ export default function CampaignDetail() {
       />
 
       <div className="container mx-auto px-4 py-8">
-        <Link to="/" className="flex items-center gap-2 text-primary mb-6 hover:underline">
+        <Link to="/" className="flex items-center gap-2 text-amber-800 dark:text-amber-500 mb-6 hover:underline">
           <ArrowLeft size={18} /> Ana sayfaya dön
         </Link>
 
@@ -120,7 +120,7 @@ export default function CampaignDetail() {
               <Zap size={24} />
               <h1 className="text-4xl sm:text-5xl font-black uppercase">{campaign.name}</h1>
             </div>
-            <h2 className="text-3xl sm:text-4xl font-bold mb-4">{campaign.discountText}</h2>
+            <h2 className="font-display text-4xl sm:text-5xl mb-4">{campaign.discountText}</h2>
             {campaign.description && (
               <p className="text-lg opacity-90 mb-6">{campaign.description}</p>
             )}
@@ -145,7 +145,7 @@ export default function CampaignDetail() {
 
         {/* Products */}
         <div>
-          <h2 className="text-2xl font-bold text-neutral-800 mb-6">
+          <h2 className="font-display text-3xl text-foreground mb-6">
             Kampanya Ürünleri ({products.length})
           </h2>
 

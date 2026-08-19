@@ -109,7 +109,7 @@ export function Cart() {
   if (isLoading) {
     return (
       <main className="container mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold mb-6">Sepetim</h1>
+        <h1 className="font-display text-4xl mb-6">Sepetim</h1>
         <div className="space-y-4">
           {[1, 2, 3].map((i) => <Skeleton key={i} className="h-24 rounded-lg" />)}
         </div>
@@ -121,7 +121,7 @@ export function Cart() {
     return (
       <main className="container mx-auto px-4 py-24 text-center">
         <ShoppingBag className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-        <h1 className="text-2xl font-bold mb-2">Sepetiniz boş</h1>
+        <h1 className="font-display text-4xl mb-2">Sepetiniz boş</h1>
         <p className="text-muted-foreground mb-6">Alışverişe başlamak için ürünlere göz atın.</p>
         <Button render={<Link to="/ara" />}>Alışverişe Başla</Button>
       </main>
@@ -177,7 +177,7 @@ export function Cart() {
 
   return (
     <main className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-6">Sepetim</h1>
+      <h1 className="font-display text-4xl mb-6">Sepetim</h1>
 
       <div className="grid lg:grid-cols-3 gap-8">
         {/* Ürün listesi */}
@@ -186,8 +186,8 @@ export function Cart() {
             const img = item.variant.product.images?.[0];
             const attrValues = item.variant.attributeValues ?? [];
             return (
-              <div key={item.id} className="flex gap-4 border rounded-lg p-4">
-                <div className="w-20 h-20 rounded-md overflow-hidden bg-gray-50 flex-shrink-0">
+              <div key={item.id} className="flex gap-4 border border-border rounded-sm p-4">
+                <div className="w-20 h-20 rounded-sm overflow-hidden bg-secondary flex-shrink-0">
                   {img ? (
                     <img src={img.url} alt={item.variant.product.name} className="w-full h-full object-cover" />
                   ) : (
@@ -199,7 +199,7 @@ export function Cart() {
                   <div className="flex items-start justify-between gap-2 mb-1">
                     <Link
                       to={`/urun/${item.variant.product.slug}`}
-                      className="font-medium hover:text-primary line-clamp-2"
+                      className="font-display text-lg leading-snug hover:text-amber-700 line-clamp-2"
                     >
                       {item.variant.product.name}
                     </Link>
@@ -209,7 +209,7 @@ export function Cart() {
                       {attrValues.map((av) => `${av.attributeValue.attribute.name}: ${av.attributeValue.value}`).join(' / ')}
                     </p>
                   )}
-                  <p className="font-semibold text-primary mt-1">{formatPrice(item.priceAtAdd)}</p>
+                  <p className="font-display text-lg text-foreground mt-1">{formatPrice(item.priceAtAdd)}</p>
                 </div>
 
                 <div className="flex flex-col items-end gap-2">
@@ -222,11 +222,11 @@ export function Cart() {
                     <Trash2 className="h-4 w-4" />
                   </button>
 
-                  <div className="flex items-center border rounded-lg">
+                  <div className="flex items-center border border-border rounded-full">
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-8 w-8"
+                      className="h-8 w-8 rounded-full"
                       disabled={isPending}
                       onClick={() => {
                         if (item.quantity === 1) removeMut.mutate(item.id);
@@ -239,7 +239,7 @@ export function Cart() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-8 w-8"
+                      className="h-8 w-8 rounded-full"
                       disabled={isPending || item.quantity >= item.variant.stockQty}
                       onClick={() => updateMut.mutate({ itemId: item.id, quantity: item.quantity + 1 })}
                     >
@@ -256,12 +256,12 @@ export function Cart() {
 
         {/* Sipariş özeti */}
         <div className="lg:col-span-1">
-          <div className="border rounded-lg p-6 space-y-4 sticky top-20">
-            <h2 className="font-semibold text-lg">Sipariş Özeti</h2>
+          <div className="border border-border rounded-sm p-6 space-y-4 sticky top-24">
+            <h2 className="font-display text-2xl">Sipariş Özeti</h2>
 
             {/* Kupon input */}
-            <div className="border-b pb-4">
-              <label className="text-sm font-medium text-gray-700 block mb-2">Kupon Kodu</label>
+            <div className="border-b border-border pb-4">
+              <label className="text-xs uppercase tracking-[0.14em] text-muted-foreground block mb-2">Kupon Kodu</label>
               <div className="flex gap-2">
                 <input
                   type="text"
@@ -270,7 +270,7 @@ export function Cart() {
                   onKeyPress={(e) => e.key === 'Enter' && validateCoupon()}
                   disabled={appliedDiscount || validatingCoupon}
                   placeholder="Kupon kodunu girin"
-                  className="flex-1 min-w-0 px-3 py-2 border rounded-md text-sm outline-none focus:border-primary disabled:bg-gray-50"
+                  className="flex-1 min-w-0 px-3 py-2 border border-border rounded-sm text-sm outline-none focus:border-amber-500 disabled:bg-secondary"
                 />
                 {appliedDiscount ? (
                   <button
@@ -288,7 +288,7 @@ export function Cart() {
                   <button
                     onClick={validateCoupon}
                     disabled={validatingCoupon}
-                    className="shrink-0 whitespace-nowrap px-4 py-2 bg-primary text-white rounded-md text-sm font-medium hover:bg-opacity-90 disabled:opacity-50 transition-all"
+                    className="shrink-0 whitespace-nowrap px-4 py-2 bg-foreground text-background rounded-full text-sm font-medium hover:bg-amber-900 disabled:opacity-50 transition-all"
                   >
                     {validatingCoupon ? 'Kontrol ediliyor...' : 'Uygula'}
                   </button>
@@ -328,7 +328,7 @@ export function Cart() {
                   </div>
                   <div className="w-full bg-muted rounded-full h-1.5 overflow-hidden">
                     <div
-                      className="h-full bg-primary rounded-full transition-all"
+                      className="h-full bg-amber-500 rounded-full transition-all"
                       style={{ width: `${Math.min(100, (subtotal / FREE_THRESHOLD) * 100)}%` }}
                     />
                   </div>
@@ -342,15 +342,15 @@ export function Cart() {
               )}
             </div>
 
-            <div className="border-t pt-4 flex justify-between font-semibold text-base">
-              <span>Toplam</span>
-              <span>{formatPrice(total)}</span>
+            <div className="border-t border-border pt-4 flex justify-between items-baseline">
+              <span className="text-sm uppercase tracking-[0.14em] text-muted-foreground">Toplam</span>
+              <span className="font-display text-2xl">{formatPrice(total)}</span>
             </div>
 
-            <Button className="w-full" size="lg" render={<Link to="/odeme" />}>
+            <Button className="w-full h-11 rounded-full bg-foreground text-background hover:bg-amber-900" size="lg" render={<Link to="/odeme" />}>
               Siparişi Tamamla
             </Button>
-            <Button variant="outline" className="w-full" render={<Link to="/ara" />}>
+            <Button variant="outline" className="w-full h-11 rounded-full" render={<Link to="/ara" />}>
               Alışverişe Devam Et
             </Button>
           </div>

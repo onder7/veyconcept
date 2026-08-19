@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 import { Eye, EyeOff } from 'lucide-react';
 import { useStoreInfo } from '@/hooks/useStoreInfo';
 import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton';
+import { ConsentCheckboxes, type ConsentValue } from '@/components/auth/ConsentCheckboxes';
 
 export function Register() {
   const { name: storeName } = useStoreInfo();
@@ -26,7 +27,7 @@ export function Register() {
   const [loading, setLoading] = useState(false);
   const [viewPassword, setViewPassword] = useState(false);
   const [viewConfirmPassword, setViewConfirmPassword] = useState(false);
-  const [marketingConsent, setMarketingConsent] = useState(true);
+  const [consent, setConsent] = useState<ConsentValue>({ emailConsent: true, smsConsent: true, acceptTerms: false });
 
   function set(field: keyof typeof form) {
     return (e: React.ChangeEvent<HTMLInputElement>) =>
@@ -71,10 +72,19 @@ export function Register() {
       toast.error('Şifreler eşleşmiyor. Lütfen iki alana da aynı şifreyi girin.');
       return;
     }
+    if (!consent.acceptTerms) {
+      toast.error('Üyelik koşullarını ve kişisel verilerimin korunmasını kabul etmelisiniz.');
+      return;
+    }
     setLoading(true);
     try {
       const { confirmPassword: _, ...payload } = form;
-      const res = await authApi.register({ ...payload, marketingConsent });
+      const res = await authApi.register({
+        ...payload,
+        marketingConsent: consent.emailConsent,
+        smsConsent: consent.smsConsent,
+        acceptTerms: consent.acceptTerms,
+      });
       const { accessToken } = res.data.data;
       const meRes = await authApi.me();
       setUser(meRes.data.data as User, accessToken);
@@ -100,14 +110,14 @@ export function Register() {
         <div className="w-full max-w-xs sm:max-w-sm md:max-w-md flex flex-col justify-between min-h-[85vh]">
           {/* Logo */}
           <div className="mb-8 sm:mb-12">
-            <Link to="/" className="text-xl sm:text-2xl font-bold tracking-tight text-primary">
+            <Link to="/" className="font-display text-3xl tracking-tight text-foreground">
               {storeName}
             </Link>
           </div>
 
           {/* Form İçeriği */}
           <div className="flex-1 flex flex-col justify-center">
-            <h1 className="text-xl sm:text-2xl font-bold mb-6 sm:mb-8">Kayıt Ol</h1>
+            <h1 className="font-display text-4xl mb-6 sm:mb-8">Kayıt Ol</h1>
 
             <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4 w-full">
               {/* Ad & Soyad - Mobilde alt alta, desktop'te yan yana */}
@@ -119,7 +129,7 @@ export function Register() {
                   <Input
                     id="firstName"
                     placeholder="Ad"
-                    className="h-12 px-4 rounded-md border border-input focus:border-primary w-full"
+                    className="h-12 px-4 rounded-sm border border-input focus:border-amber-500 w-full"
                     value={form.firstName}
                     onChange={set('firstName')}
                     required
@@ -133,7 +143,7 @@ export function Register() {
                   <Input
                     id="lastName"
                     placeholder="Soyad"
-                    className="h-12 px-4 rounded-md border border-input focus:border-primary w-full"
+                    className="h-12 px-4 rounded-sm border border-input focus:border-amber-500 w-full"
                     value={form.lastName}
                     onChange={set('lastName')}
                     required
@@ -151,7 +161,7 @@ export function Register() {
                   id="email"
                   type="email"
                   placeholder="E-posta"
-                  className="h-12 px-4 rounded-md border border-input focus:border-primary w-full"
+                  className="h-12 px-4 rounded-sm border border-input focus:border-amber-500 w-full"
                   value={form.email}
                   onChange={set('email')}
                   required
@@ -169,7 +179,7 @@ export function Register() {
                     id="password"
                     type={viewPassword ? 'text' : 'password'}
                     placeholder="Şifre"
-                    className="h-12 pl-4 pr-12 rounded-md border border-input focus:border-primary w-full"
+                    className="h-12 pl-4 pr-12 rounded-sm border border-input focus:border-amber-500 w-full"
                     value={form.password}
                     onChange={set('password')}
                     required
@@ -204,7 +214,7 @@ export function Register() {
                     id="confirmPassword"
                     type={viewConfirmPassword ? 'text' : 'password'}
                     placeholder="Şifre Tekrar"
-                    className="h-12 pl-4 pr-12 rounded-md border border-input focus:border-primary w-full"
+                    className="h-12 pl-4 pr-12 rounded-sm border border-input focus:border-amber-500 w-full"
                     value={form.confirmPassword}
                     onChange={set('confirmPassword')}
                     required
@@ -225,29 +235,17 @@ export function Register() {
                 </div>
               </div>
 
-              {/* Ticari elektronik ileti onayı (kampanya/SMS/e-posta) */}
-              <label className="flex items-start gap-3 pt-3 cursor-pointer select-none">
-                <input
-                  type="checkbox"
-                  checked={marketingConsent}
-                  onChange={(e) => setMarketingConsent(e.target.checked)}
-                  className="mt-0.5 h-5 w-5 shrink-0 accent-primary cursor-pointer"
-                />
-                <span className="text-xs leading-relaxed text-muted-foreground">
-                  <span className="font-semibold text-foreground">{storeName}</span> ve iştiraklerinin önemli
-                  kampanyalarından haberdar olmak için anlık/kısa mesaj, e-posta ve telefon aracılığıyla{' '}
-                  <span className="font-semibold text-foreground">elektronik ileti</span> almak istiyorum.
-                </span>
-              </label>
+              {/* ETK/KVKK onayları — e-posta / SMS izinleri + üyelik koşulları */}
+              <ConsentCheckboxes value={consent} onChange={(p) => setConsent((c) => ({ ...c, ...p }))} />
 
               <div className="flex justify-between items-center pt-4">
-                <Link to="/giris" className="font-bold text-primary hover:underline text-sm">
+                <Link to="/giris" className="font-medium text-amber-800 dark:text-amber-500 hover:underline underline-offset-4 text-sm">
                   Zaten hesabınız var mı? Giriş yapın
                 </Link>
                 <Button
                   type="submit"
                   disabled={loading}
-                  className="h-12 px-10 text-sm font-bold uppercase tracking-wider rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+                  className="h-12 px-10 text-sm font-medium uppercase tracking-[0.14em] rounded-full bg-foreground text-background hover:bg-amber-900 transition-colors"
                 >
                   {loading ? 'Kayıt Yapılıyor...' : 'KAYIT OL'}
                 </Button>
@@ -287,23 +285,21 @@ export function Register() {
             </form>
           </div>
 
-          {/* Footer Linkleri */}
-          <footer className="mt-8 sm:mt-16 flex flex-wrap gap-2 sm:gap-4 justify-between text-xs font-bold text-muted-foreground">
-            <Link to="/sozlesmeler" className="hover:text-foreground transition-colors">
-              Kullanım Koşulları
-            </Link>
-            <Link to="/kvkk" className="hover:text-foreground transition-colors">
-              Gizlilik Politikası
-            </Link>
-            <Link to="/iletisim" className="hover:text-foreground transition-colors">
-              Yardım
-            </Link>
-          </footer>
         </div>
       </div>
 
-      {/* Arka Plan - Gri gradyan */}
-      <div className="hidden lg:block h-full w-full bg-gradient-to-br from-slate-100 to-slate-200" />
+      {/* Editorial marka paneli */}
+      <div className="relative hidden lg:flex h-full w-full flex-col justify-end overflow-hidden bg-foreground p-16 text-background">
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-neutral-900 via-neutral-800 to-black" />
+        <div className="relative z-10 max-w-md">
+          <p className="mb-5 flex items-center gap-3 text-[10px] uppercase tracking-[0.3em] text-white/50">
+            <span className="h-px w-8 bg-amber-500" /> {storeName}
+          </p>
+          <p className="font-display text-4xl leading-tight text-white">
+            Ayrıcalıklı dünyamıza <span className="italic text-amber-300">katılın.</span>
+          </p>
+        </div>
+      </div>
     </main>
   );
 }

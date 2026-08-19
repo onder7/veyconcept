@@ -66,7 +66,7 @@ export function ProductCard({ product }: Props) {
   const grossCompareAt = discount > 0 && cheapestVariant?.compareAt ? toGross(Number(cheapestVariant.compareAt)) : 0;
 
   const { isFavorite, toggleFavorite } = useWishlistStore();
-  const { setCart } = useCartStore();
+  const { setCart, openCart } = useCartStore();
   const fav = isFavorite(product.id);
   const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
@@ -89,7 +89,7 @@ export function ProductCard({ product }: Props) {
     try {
       const res = await cartApi.addItem(cheapestVariant.id, 1);
       setCart(res.data.data);
-      toast.success('Ürün sepete eklendi!');
+      openCart();
     } catch {
       toast.error('Sepete eklenemedi.');
     }
@@ -98,11 +98,11 @@ export function ProductCard({ product }: Props) {
   return (
     <Link
       to={`/urun/${product.slug}`}
-      className="group flex flex-col rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 overflow-hidden text-left hover:shadow-lg hover:border-neutral-300 dark:hover:border-neutral-700 transition-all duration-200"
+      className="group flex flex-col rounded-sm border border-border bg-card dark:bg-neutral-900 overflow-hidden text-left hover:border-foreground/30 dark:hover:border-neutral-600 transition-all duration-300"
     >
       {/* Görsel Kutusu */}
       <div
-        className="relative aspect-[4/5] bg-[#F4F4F4] dark:bg-neutral-800 flex items-center justify-center overflow-hidden"
+        className="relative aspect-[4/5] bg-secondary dark:bg-neutral-800 flex items-center justify-center overflow-hidden"
         onMouseEnter={startCycle}
         onMouseLeave={stopCycle}
       >
@@ -110,7 +110,7 @@ export function ProductCard({ product }: Props) {
           <img
             src={activeImage.url}
             alt={activeImage.altText ?? product.name}
-            className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
+            className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-700"
             loading="lazy"
           />
         ) : (
@@ -120,7 +120,7 @@ export function ProductCard({ product }: Props) {
         {/* Favori */}
         <button
           onClick={handleFavoriteClick}
-          className="absolute top-3 right-3 z-20 p-2 rounded-full bg-white/90 backdrop-blur-xs shadow-xs text-neutral-600 hover:text-red-500 hover:scale-105 active:scale-95 transition-all cursor-pointer border border-neutral-100"
+          className="absolute top-3 right-3 z-20 p-2 rounded-full bg-background/90 backdrop-blur-xs text-foreground/60 hover:text-red-500 hover:scale-105 active:scale-95 transition-all cursor-pointer border border-border"
           aria-label="Favorilere Ekle"
         >
           <Heart className={`h-4.5 w-4.5 transition-colors ${fav ? 'fill-red-500 text-red-500' : 'text-neutral-600'}`} />
@@ -128,7 +128,7 @@ export function ProductCard({ product }: Props) {
 
         {!inStock && (
           <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
-            <span className="text-white text-xs font-bold uppercase tracking-wider bg-black/60 px-2 py-0.5 rounded-xs">
+            <span className="text-white text-[10px] font-medium uppercase tracking-[0.2em] bg-black/70 px-3 py-1">
               Stok Yok
             </span>
           </div>
@@ -143,16 +143,16 @@ export function ProductCard({ product }: Props) {
         </div>
 
         {/* Ürün Adı (marka + ad, 2 satır) */}
-        <h3 className="text-sm text-neutral-800 dark:text-neutral-100 group-hover:text-primary transition-colors line-clamp-2 leading-snug min-h-[2.5rem]">
-          {product.brand?.name && <span className="font-bold">{product.brand.name} </span>}
+        <h3 className="font-display text-lg text-foreground group-hover:text-amber-800 dark:group-hover:text-amber-500 transition-colors line-clamp-2 leading-snug min-h-[3.25rem]">
+          {product.brand?.name && <span className="font-semibold">{product.brand.name} </span>}
           {product.name}
         </h3>
 
         {/* Puan */}
         {avgRating !== null && (
           <div className="flex items-center gap-1 text-xs">
-            <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
-            <span className="font-semibold text-neutral-700 dark:text-neutral-300">
+            <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+            <span className="font-semibold text-foreground/80">
               {avgRating.toLocaleString('tr-TR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}
             </span>
             <span className="text-neutral-400 dark:text-neutral-500">({reviewCount})</span>
@@ -160,22 +160,22 @@ export function ProductCard({ product }: Props) {
         )}
 
         {/* Fiyat bilgisi (gri alan) + Sepete Ekle */}
-        <div className="mt-auto rounded-md bg-neutral-100 dark:bg-neutral-800 px-3 py-2 flex items-end justify-between gap-2">
+        <div className="mt-auto rounded-sm bg-secondary dark:bg-neutral-800 px-3 py-2.5 flex items-end justify-between gap-2">
           <div className="min-w-0">
             {discount > 0 && (
               <div className="flex items-center gap-2 mb-0.5">
-                <span className="text-xs text-neutral-400 dark:text-neutral-500 line-through">{formatPrice(grossCompareAt)}</span>
-                <span className="text-[11px] font-bold text-neutral-600 dark:text-neutral-300 bg-neutral-200 dark:bg-neutral-700 rounded px-1.5 py-0.5">%{discount}</span>
+                <span className="text-xs text-muted-foreground line-through">{formatPrice(grossCompareAt)}</span>
+                <span className="text-[11px] font-semibold text-amber-800 dark:text-amber-300 bg-amber-100 dark:bg-amber-900/40 rounded-sm px-1.5 py-0.5">%{discount}</span>
               </div>
             )}
-            <span className={`text-lg font-extrabold ${discount > 0 ? 'text-red-600 dark:text-red-400' : 'text-neutral-900 dark:text-neutral-100'}`}>
+            <span className={`font-display text-xl ${discount > 0 ? 'text-amber-800 dark:text-amber-400' : 'text-foreground'}`}>
               {cheapestVariant ? formatPrice(grossPrice) : 'Fiyat yok'}
             </span>
           </div>
           {inStock && (
             <button
               onClick={handleAddToCart}
-              className="shrink-0 h-9 w-9 flex items-center justify-center rounded-full border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-900 text-neutral-700 dark:text-neutral-200 hover:bg-primary hover:text-white hover:border-primary active:scale-95 transition-all cursor-pointer"
+              className="shrink-0 h-9 w-9 flex items-center justify-center rounded-full border border-border bg-card dark:bg-neutral-900 text-foreground/70 dark:text-neutral-200 hover:bg-foreground hover:text-background hover:border-foreground active:scale-95 transition-all cursor-pointer"
               aria-label="Sepete Ekle"
             >
               <ShoppingCart className="h-4.5 w-4.5" />

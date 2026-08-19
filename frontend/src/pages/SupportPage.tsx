@@ -142,7 +142,7 @@ export function SupportPage() {
       <div className="container mx-auto px-4">
         {/* Breadcrumb / Back button */}
         <div className="mb-6 flex items-center gap-2 text-sm text-neutral-500">
-          <button onClick={() => navigate('/')} className="flex items-center gap-1 hover:text-primary transition-colors cursor-pointer">
+          <button onClick={() => navigate('/')} className="flex items-center gap-1 hover:text-amber-700 dark:text-amber-500 transition-colors cursor-pointer">
             <ArrowLeft className="h-4 w-4" />
             <span>Ana Sayfa</span>
           </button>
@@ -153,7 +153,7 @@ export function SupportPage() {
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Sidebar Nav */}
           <aside className="w-full lg:w-64 shrink-0">
-            <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-100 dark:border-neutral-800 p-4 shadow-xs sticky top-24">
+            <div className="bg-card dark:bg-neutral-900 rounded-sm border border-border dark:border-neutral-800 p-4 shadow-xs sticky top-24">
               <h2 className="text-xs font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-widest px-3 mb-4">
                 Müşteri Hizmetleri
               </h2>
@@ -166,13 +166,13 @@ export function SupportPage() {
                     <Link
                       key={item.slug}
                       to={to}
-                      className={`w-full flex items-center gap-3 px-4 py-3 text-sm rounded-xl transition ${
+                      className={`w-full flex items-center gap-3 px-4 py-3 text-sm rounded-sm transition ${
                         isActive
-                          ? 'bg-primary/10 text-primary font-semibold'
+                          ? 'bg-amber-500/10 text-amber-800 dark:text-amber-400 font-semibold'
                           : 'text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 hover:text-neutral-900 dark:hover:text-white'
                       }`}
                     >
-                      <Icon className={`h-4 w-4 ${isActive ? 'text-primary' : 'text-neutral-400 dark:text-neutral-500'}`} />
+                      <Icon className={`h-4 w-4 ${isActive ? 'text-amber-700 dark:text-amber-500' : 'text-neutral-400 dark:text-neutral-500'}`} />
                       <span>{item.title}</span>
                     </Link>
                   );
@@ -183,10 +183,10 @@ export function SupportPage() {
 
           {/* Page Content Card */}
           <section className="flex-1 min-w-0">
-            <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-100 dark:border-neutral-800 p-6 md:p-10 shadow-xs">
+            <div className="bg-card dark:bg-neutral-900 rounded-sm border border-border dark:border-neutral-800 p-6 md:p-10 shadow-xs">
               {loading ? (
                 <div className="py-20 flex flex-col items-center justify-center text-neutral-400 gap-3">
-                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                  <Loader2 className="h-8 w-8 animate-spin text-amber-700 dark:text-amber-500" />
                   <p className="text-sm font-medium">Yükleniyor...</p>
                 </div>
               ) : error ? (
@@ -194,7 +194,7 @@ export function SupportPage() {
                   <p className="text-red-500 font-medium">{error}</p>
                   <button
                     onClick={() => setContent('')} // triggers reload via effect dependency if changed
-                    className="mt-4 px-4 py-2 bg-primary text-white rounded-xl text-sm font-medium hover:bg-opacity-90 transition"
+                    className="mt-4 px-4 py-2 bg-foreground text-background rounded-sm text-sm font-medium hover:bg-opacity-90 transition"
                   >
                     Tekrar Dene
                   </button>
@@ -213,15 +213,15 @@ export function SupportPage() {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         {/* Form */}
                         <div>
-                          <h3 className="text-lg font-bold text-neutral-800 dark:text-neutral-100 mb-4">Bizimle İletişime Geçin</h3>
+                          <h3 className="font-display text-2xl text-foreground mb-4">Bizimle İletişime Geçin</h3>
                           <form onSubmit={handleSubmit} className="space-y-4">
                             {submitSuccess && (
-                              <div className="p-4 rounded-xl bg-green-50 border border-green-200 text-green-700 text-sm font-medium">
+                              <div className="p-4 rounded-sm bg-green-50 border border-green-200 text-green-700 text-sm font-medium">
                                 Mesajınız başarıyla gönderildi. En kısa sürede size dönüş yapacağız.
                               </div>
                             )}
                             {submitError && (
-                              <div className="p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm font-medium">
+                              <div className="p-4 rounded-sm bg-red-50 border border-red-200 text-red-700 text-sm font-medium">
                                 {submitError}
                               </div>
                             )}
@@ -234,7 +234,7 @@ export function SupportPage() {
                                 required
                                 value={formData.name}
                                 onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                                className="w-full rounded-xl border border-neutral-200 dark:border-neutral-700 dark:text-neutral-100 bg-transparent px-4 py-2.5 text-sm outline-none transition focus:border-primary focus:ring-1 focus:ring-primary"
+                                className="w-full rounded-sm border border-neutral-200 dark:border-neutral-700 dark:text-neutral-100 bg-transparent px-4 py-2.5 text-sm outline-none transition focus:border-amber-500 focus:ring-1 focus:ring-amber-500/40"
                                 placeholder="Adınız Soyadınız"
                               />
                             </div>
@@ -247,7 +247,7 @@ export function SupportPage() {
                                 required
                                 value={formData.email}
                                 onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                                className="w-full rounded-xl border border-neutral-200 dark:border-neutral-700 dark:text-neutral-100 bg-transparent px-4 py-2.5 text-sm outline-none transition focus:border-primary focus:ring-1 focus:ring-primary"
+                                className="w-full rounded-sm border border-neutral-200 dark:border-neutral-700 dark:text-neutral-100 bg-transparent px-4 py-2.5 text-sm outline-none transition focus:border-amber-500 focus:ring-1 focus:ring-amber-500/40"
                                 placeholder="ornek@mail.com"
                               />
                             </div>
@@ -259,7 +259,7 @@ export function SupportPage() {
                                 type="text"
                                 value={formData.subject}
                                 onChange={(e) => setFormData(prev => ({ ...prev, subject: e.target.value }))}
-                                className="w-full rounded-xl border border-neutral-200 dark:border-neutral-700 dark:text-neutral-100 bg-transparent px-4 py-2.5 text-sm outline-none transition focus:border-primary focus:ring-1 focus:ring-primary"
+                                className="w-full rounded-sm border border-neutral-200 dark:border-neutral-700 dark:text-neutral-100 bg-transparent px-4 py-2.5 text-sm outline-none transition focus:border-amber-500 focus:ring-1 focus:ring-amber-500/40"
                                 placeholder="Mesaj konusu"
                               />
                             </div>
@@ -272,14 +272,14 @@ export function SupportPage() {
                                 rows={4}
                                 value={formData.body}
                                 onChange={(e) => setFormData(prev => ({ ...prev, body: e.target.value }))}
-                                className="w-full rounded-xl border border-neutral-200 dark:border-neutral-700 dark:text-neutral-100 bg-transparent px-4 py-2.5 text-sm outline-none transition focus:border-primary focus:ring-1 focus:ring-primary resize-none"
+                                className="w-full rounded-sm border border-neutral-200 dark:border-neutral-700 dark:text-neutral-100 bg-transparent px-4 py-2.5 text-sm outline-none transition focus:border-amber-500 focus:ring-1 focus:ring-amber-500/40 resize-none"
                                 placeholder="Sorunuzu veya mesajınızı buraya yazın..."
                               />
                             </div>
                             <button
                               type="submit"
                               disabled={submitting}
-                              className="w-full bg-primary text-white py-3 rounded-xl font-semibold hover:bg-opacity-95 disabled:opacity-50 transition cursor-pointer text-sm shadow-xs flex items-center justify-center gap-2"
+                              className="w-full bg-foreground text-background py-3 rounded-sm font-semibold hover:bg-opacity-95 disabled:opacity-50 transition cursor-pointer text-sm shadow-xs flex items-center justify-center gap-2"
                             >
                               {submitting ? (
                                 <>
@@ -295,7 +295,7 @@ export function SupportPage() {
 
                         {/* Company Info Card */}
                         <div>
-                          <h3 className="text-lg font-bold text-neutral-800 dark:text-neutral-100 mb-4">Merkez Ofisimiz</h3>
+                          <h3 className="font-display text-2xl text-foreground mb-4">Merkez Ofisimiz</h3>
                           <div className="space-y-4">
                             <p className="text-sm text-neutral-600 dark:text-neutral-400 font-sans leading-relaxed">
                               {companyInfo ? `Ziyaret etmek veya soru sormak isterseniz, merkez ofisimiz ${companyInfo.city} şehir merkezinde yer almaktadır.` : 'Ziyaret etmek veya soru sormak isterseniz, merkez ofisimiz Ankara şehir merkezinde yer almaktadır.'}
@@ -303,26 +303,26 @@ export function SupportPage() {
                             {companyInfo && (
                               <div className="space-y-3 pt-4 border-t border-neutral-200 dark:border-neutral-800">
                                 <div className="flex items-start gap-3">
-                                  <MapPin className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                                  <MapPin className="h-5 w-5 text-amber-700 dark:text-amber-500 mt-0.5 flex-shrink-0" />
                                   <div>
                                     <p className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase">Adres</p>
                                     <p className="text-sm text-neutral-800 dark:text-neutral-200 font-medium">{companyInfo.address}</p>
                                   </div>
                                 </div>
                                 <div className="flex items-start gap-3">
-                                  <Mail className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                                  <Mail className="h-5 w-5 text-amber-700 dark:text-amber-500 mt-0.5 flex-shrink-0" />
                                   <div>
                                     <p className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase">E-posta</p>
-                                    <a href={`mailto:${companyInfo.email}`} className="text-sm text-primary hover:underline font-medium">
+                                    <a href={`mailto:${companyInfo.email}`} className="text-sm text-amber-700 dark:text-amber-500 hover:underline font-medium">
                                       {companyInfo.email}
                                     </a>
                                   </div>
                                 </div>
                                 <div className="flex items-start gap-3">
-                                  <Phone className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                                  <Phone className="h-5 w-5 text-amber-700 dark:text-amber-500 mt-0.5 flex-shrink-0" />
                                   <div>
                                     <p className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase">Telefon</p>
-                                    <a href={`tel:${companyInfo.phone}`} className="text-sm text-primary hover:underline font-medium">
+                                    <a href={`tel:${companyInfo.phone}`} className="text-sm text-amber-700 dark:text-amber-500 hover:underline font-medium">
                                       {companyInfo.phone}
                                     </a>
                                   </div>
@@ -336,7 +336,7 @@ export function SupportPage() {
                       {/* Map Section */}
                       {companyInfo && (
                         <div className="mt-8 pt-8 border-t border-neutral-100 dark:border-neutral-800">
-                          <h3 className="text-lg font-bold text-neutral-800 dark:text-neutral-100 mb-4">Konumumuz</h3>
+                          <h3 className="font-display text-2xl text-foreground mb-4">Konumumuz</h3>
                           <div className="h-[400px] rounded-2xl overflow-hidden border border-neutral-100 dark:border-neutral-800 shadow-xs">
                             <iframe
                               src={companyInfo.mapEmbed}

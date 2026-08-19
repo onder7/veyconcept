@@ -53,7 +53,7 @@ function OrderCard({ order }: { order: Order }) {
   return (
     <Link
       to={`/hesabim/siparisler/${order.id}`}
-      className="block border rounded-lg p-4 hover:border-primary transition-colors group"
+      className="block border border-border rounded-sm p-4 hover:border-foreground transition-colors group"
     >
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1 min-w-0">
@@ -96,7 +96,7 @@ function OrderCard({ order }: { order: Order }) {
             )}
             <p className="font-semibold">{formatPrice(order.total)}</p>
           </div>
-          <ChevronRight className="h-4 w-4 text-muted-foreground mt-2 ml-auto group-hover:text-primary transition-colors" />
+          <ChevronRight className="h-4 w-4 text-muted-foreground mt-2 ml-auto group-hover:text-amber-700 transition-colors" />
         </div>
       </div>
     </Link>
@@ -113,7 +113,7 @@ export function Orders() {
 
   return (
     <main className="container mx-auto px-4 py-8 max-w-2xl">
-      <h1 className="text-2xl font-bold mb-6 flex items-center gap-2">
+      <h1 className="font-display text-4xl mb-6 flex items-center gap-2.5">
         <Package className="h-6 w-6" />
         Siparişlerim
       </h1>
@@ -355,11 +355,17 @@ thead th:nth-child(3),thead th:nth-child(4){text-align:right}
 
   const addr = order.address as { firstName: string; lastName: string; address: string; district: string; city: string } | undefined;
 
-  // İskonto düşülmüş toplam KDV dahil; Ara Toplam = netin (total/1+oran), KDV = fark
-  const orderDiscount = Number(order.discount);    // iskonto (düz tutar)
-  const orderTotal = Number(order.total);          // indirimli toplam (KDV dahil)
-  const orderNet = orderTotal / (1 + taxRate / 100);          // Ara Toplam (KDV hariç)
-  const orderKdv = Math.max(0, orderTotal - orderNet);        // KDV tutarı
+  const orderDiscount  = Number(order.discount);
+  const orderTotal     = Number(order.total);
+  const orderShipping  = Number(order.shippingFee ?? 0);
+
+  // Ürün toplamı (KDV dahil, iskonto + kargo düşülmüş)
+  const productTotal   = orderTotal - orderShipping;
+  // Net (KDV hariç) ayrı oranlarda hesapla: ürün %taxRate, kargo %20
+  const productNet     = productTotal / (1 + taxRate / 100);
+  const shippingNet    = orderShipping / 1.2;
+  const orderNet       = productNet + shippingNet;
+  const orderKdv       = Math.max(0, orderTotal - orderNet);
 
   return (
     <main className="container mx-auto px-4 py-8 max-w-7xl">
@@ -371,7 +377,7 @@ thead th:nth-child(3),thead th:nth-child(4){text-align:right}
       </nav>
 
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-2xl font-bold">Sipariş #{order.id.slice(-8).toUpperCase()}</h1>
+        <h1 className="font-display text-3xl">Sipariş #{order.id.slice(-8).toUpperCase()}</h1>
         <StatusBadge status={order.status} />
       </div>
 
@@ -388,7 +394,7 @@ thead th:nth-child(3),thead th:nth-child(4){text-align:right}
                 ) : <div className="w-full h-full bg-gray-100" />}
               </div>
               <div className="flex-1 min-w-0">
-                <Link to={`/urun/${product.slug}`} className="font-medium hover:text-primary line-clamp-1">
+                <Link to={`/urun/${product.slug}`} className="font-medium hover:text-amber-700 line-clamp-1">
                   {product.name}
                 </Link>
                 <p className="text-sm text-muted-foreground">Adet: {item.quantity}</p>
@@ -411,12 +417,18 @@ thead th:nth-child(3),thead th:nth-child(4){text-align:right}
                 <span className="font-medium">−{formatPrice(orderDiscount)}</span>
               </div>
             )}
+            {orderShipping > 0 && (
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Kargo</span>
+                <span className="font-medium">{formatPrice(orderShipping)}</span>
+              </div>
+            )}
             <div className="flex justify-between">
               <span className="text-muted-foreground">Ara Toplam (KDV Hariç)</span>
               <span className="font-medium">{formatPrice(orderNet)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-muted-foreground">KDV (%{taxRate})</span>
+              <span className="text-muted-foreground">KDV</span>
               <span className="font-medium">{formatPrice(orderKdv)}</span>
             </div>
             <div className="flex justify-between border-t pt-3 font-semibold">
