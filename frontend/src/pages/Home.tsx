@@ -9,11 +9,12 @@ import { useState, useEffect } from 'react';
 import { SeoHead } from '@/components/seo/SeoHead';
 import { organizationSchema, websiteSchema } from '@/lib/schemas';
 import { CampaignBanner } from '@/components/common/CampaignDisplay';
-import { useStoreInfo } from '@/hooks/useStoreInfo';
+import { useStoreInfo, useFooterSlogan } from '@/hooks/useStoreInfo';
 
 export function Home() {
   const { t } = useTranslation();
-  const { name: storeName, slogan: storeSlogan } = useStoreInfo();
+  const { name: storeName } = useStoreInfo();
+  const heroSlogan = useFooterSlogan();
   const [bannerCampaign, setBannerCampaign] = useState<any | null>(null);
 
   // Fetch banner campaign
@@ -59,7 +60,7 @@ export function Home() {
       
       <HeroVideo
         storeName={storeName}
-        slogan={storeSlogan}
+        slogan={heroSlogan}
       />
 
       {/* Campaign Banner */}
