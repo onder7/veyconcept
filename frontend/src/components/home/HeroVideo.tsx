@@ -64,15 +64,17 @@ export function HeroVideo({ storeName, slogan }: Props) {
 
       {/* Metin hemen gösterilir - videoLoaded'e bağlı değil */}
       <div
-        className="relative z-20 mx-auto flex h-full max-w-[1600px] flex-col justify-start px-4 pt-20 text-left sm:px-6 sm:pt-28 md:px-12 md:pt-40"
+        className="pointer-events-none relative z-10 mx-auto flex h-full max-w-[1600px] -translate-y-10 flex-col justify-center px-4 text-center animate-fade-up sm:-translate-y-14 sm:px-6 md:-translate-y-20 md:px-12"
       >
-        <div className="max-w-[min(32rem,90vw)] text-white">
-          <span className="mb-4 block h-px w-12 bg-amber-400 sm:mb-6" />
-          <p className="mb-4 text-xs uppercase tracking-[0.3em] text-white/70">{storeName}</p>
+        <div className="mx-auto max-w-3xl">
+          <span className="mx-auto mb-6 block h-px w-12 bg-amber-400" />
+          <h1 className="font-display text-4xl leading-[1.02] text-white sm:text-7xl md:text-8xl">
+            {storeName}
+          </h1>
           {cleanSlogan && (
-            <h1 className="font-display text-2xl leading-tight sm:text-3xl md:text-4xl">
+            <p className="mx-auto mt-5 max-w-xl text-base leading-relaxed text-white/80 md:text-lg">
               {cleanSlogan}
-            </h1>
+            </p>
           )}
         </div>
       </div>
@@ -81,7 +83,7 @@ export function HeroVideo({ storeName, slogan }: Props) {
       <button
         type="button"
         onClick={() => window.scrollTo({ top: window.innerHeight - 80, behavior: 'smooth' })}
-        className={`absolute bottom-6 right-6 z-20 hidden flex-col items-center gap-2 text-white/60 transition-all duration-700 hover:text-white md:flex ${videoLoaded ? 'opacity-100' : 'opacity-0'}`}
+        className={`absolute bottom-6 right-6 z-30 hidden flex-col items-center gap-2 text-white/60 transition-all duration-700 hover:text-white md:flex ${videoLoaded ? 'opacity-100' : 'opacity-0'}`}
       >
         <span className="text-[10px] uppercase tracking-[0.3em]">{t('hero.scroll')}</span>
         <span className="h-12 w-px bg-white/40" />
