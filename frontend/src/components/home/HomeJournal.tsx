@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { ArrowRight } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { api } from '@/services/api';
 import { toast } from 'sonner';
 
@@ -8,6 +9,7 @@ import { toast } from 'sonner';
  * bölümünün mağaza uyarlaması. Mevcut /newsletter/subscribe API'sine bağlı.
  */
 export function HomeJournal() {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [sent, setSent] = useState(false);
@@ -21,13 +23,13 @@ export function HomeJournal() {
       if (res.data.success) {
         setSent(true);
         setEmail('');
-        toast.success(res.data.message || 'Bültenimize başarıyla abone oldunuz!');
+        toast.success(res.data.message || t('journal.subscribeSuccess'));
         window.setTimeout(() => setSent(false), 4000);
       } else {
-        toast.error(res.data.message || 'Abonelik sırasında bir hata oluştu.');
+        toast.error(res.data.message || t('journal.subscribeError'));
       }
     } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Bir hata oluştu, lütfen tekrar deneyin.');
+      toast.error(err.response?.data?.message || t('journal.subscribeError'));
     } finally {
       setSubmitting(false);
     }
@@ -38,16 +40,15 @@ export function HomeJournal() {
       <div className="mx-auto grid max-w-[1600px] grid-cols-1 gap-12 px-4 sm:px-6 py-20 md:grid-cols-2 md:px-12 md:py-28">
         <div>
           <p className="mb-3 flex items-center gap-3 text-[10px] uppercase tracking-[0.3em] text-background/60">
-            <span className="h-px w-8 bg-amber-500" /> Günce
+            <span className="h-px w-8 bg-amber-500" /> {t('journal.title')}
           </p>
           <h2 className="font-display text-4xl leading-tight md:text-5xl">
-            Yeni ürünler, kampanyalar,
+            {t('journal.heading')}
             <br />
-            <span className="italic text-amber-300">ve size özel fırsatlar.</span>
+            <span className="italic text-amber-300">.</span>
           </h2>
           <p className="mt-6 max-w-md text-background/70 leading-relaxed">
-            Bültenimize abone olun; yeni koleksiyonlardan, indirimlerden ve size özel sürpriz
-            fırsatlardan ilk siz haberdar olun.
+            {t('journal.description')}
           </p>
         </div>
 
@@ -61,22 +62,22 @@ export function HomeJournal() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="E-posta adresiniz"
+              placeholder={t('journal.emailPlaceholder')}
               disabled={submitting}
               className="w-full bg-transparent text-lg text-background placeholder:text-background/40 focus:outline-none"
-              aria-label="E-posta adresi"
+              aria-label={t('journal.emailPlaceholder')}
             />
             <button
               type="submit"
               disabled={submitting}
               className="flex shrink-0 items-center gap-2 text-xs uppercase tracking-[0.2em] text-background transition-colors hover:text-amber-300 disabled:opacity-60"
             >
-              {submitting ? 'Gönderiliyor' : 'Abone Ol'} <ArrowRight className="h-4 w-4" />
+              {submitting ? t('journal.subscribing') : t('journal.subscribe')} <ArrowRight className="h-4 w-4" />
             </button>
           </form>
           {sent && (
             <p className="mt-4 text-sm text-amber-300">
-              Teşekkürler — aboneliğiniz alındı.
+              {t('journal.subscribeSuccess')}
             </p>
           )}
         </div>

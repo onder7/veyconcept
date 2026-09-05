@@ -437,6 +437,16 @@
     "unitPrice": "Unit Price",
     "subtotal": "Subtotal"
   },
+  "journal": {
+    "title": "Journal",
+    "heading": "New products, campaigns, and exclusive offers for you.",
+    "description": "Subscribe to our newsletter to be the first to hear about new collections, discounts, and exclusive offers just for you.",
+    "emailPlaceholder": "Your email address",
+    "subscribe": "Subscribe",
+    "subscribing": "Subscribing...",
+    "subscribeSuccess": "Thank you — subscription received.",
+    "subscribeError": "Subscription failed, please try again."
+  },
   "support": {
     "contactUs": "Contact Us",
     "centerOffice": "Our Center Office",

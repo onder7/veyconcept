@@ -13,7 +13,7 @@ import { useStoreInfo } from '@/hooks/useStoreInfo';
 
 export function Home() {
   const { t } = useTranslation();
-  const { name: storeName } = useStoreInfo();
+  const { name: storeName, slogan: storeSlogan } = useStoreInfo();
   const [bannerCampaign, setBannerCampaign] = useState<any | null>(null);
 
   // Fetch banner campaign
@@ -59,6 +59,7 @@ export function Home() {
       
       <HeroVideo
         storeName={storeName}
+        slogan={storeSlogan}
       />
 
       {/* Campaign Banner */}

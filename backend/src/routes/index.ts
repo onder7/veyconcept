@@ -119,6 +119,7 @@ router.get('/company-info', async (_req, res, next) => {
       name: data.store_name || 'Mağaza',
       legalName: data.legal_name || data.store_name || 'Mağaza',
       slogan: data.footer_slogan || '',
+      sloganEn: data.footer_slogan_en || '',
       email: data.email || '',
       phone: data.phone || '',
       address: data.address || '',

@@ -436,6 +436,16 @@
     "unitPrice": "Birim Fiyat",
     "subtotal": "Ara Toplam"
   },
+  "journal": {
+    "title": "Günce",
+    "heading": "Yeni ürünler, kampanyalar, ve size özel fırsatlar.",
+    "description": "Bültenimize abone olun; yeni koleksiyonlardan, indirimlerden ve size özel sürpriz fırsatlardan ilk siz haberdar olun.",
+    "emailPlaceholder": "E-posta adresiniz",
+    "subscribe": "Abone Ol",
+    "subscribing": "Gönderiliyor...",
+    "subscribeSuccess": "Teşekkürler — aboneliğiniz alındı.",
+    "subscribeError": "Abonelik sırasında bir hata oluştu."
+  },
   "support": {
     "contactUs": "Bizimle İletişime Geçin",
     "centerOffice": "Merkez Ofisimiz",

@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { useState } from 'react';
 import { useSocialLinks } from '@/hooks/useSocialLinks';
-import { useStoreInfo } from '@/hooks/useStoreInfo';
+import { useStoreInfo, useFooterSlogan } from '@/hooks/useStoreInfo';
 
 const FacebookIcon = () => (
   <svg className="h-4 w-4 fill-current" viewBox="0 0 24 24">
@@ -75,7 +75,8 @@ function SocialBtn({ href, children }: SocialLinkProps) {
 
 export function Footer() {
   const { t } = useTranslation();
-  const { name: storeName, slogan: storeSlogan } = useStoreInfo();
+  const { name: storeName } = useStoreInfo();
+  const storeSlogan = useFooterSlogan();
   const location = useLocation();
   // Ana sayfada bülten "Günce" bandında olduğu için footer'daki tekrar gizlenir
   const isHome = location.pathname === '/' || location.pathname === '/en';

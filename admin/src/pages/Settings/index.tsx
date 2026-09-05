@@ -296,6 +296,14 @@ function GeneralTab() {
             placeholder="Güvenli ödeme ve hızlı kargo seçenekleriyle binlerce ürünü keşfedin."
           />
         </Field>
+        <Field label="Footer Sloganı (İngilizce)" hint="Footer'da İngilizce seçiliyken gösterilecek mağaza sloganı.">
+          <QuillEditor
+            value={g.footer_slogan_en ?? ''}
+            onChange={(html) => s.set('footer_slogan_en', html)}
+            minHeight={120}
+            placeholder="Discover thousands of products with secure payment and fast shipping options."
+          />
+        </Field>
       </SectionCard>
 
       <SectionCard title="İletişim Bilgileri">

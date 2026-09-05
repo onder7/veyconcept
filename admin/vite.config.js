@@ -3,8 +3,11 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   // Admin is mounted by the main Nginx at /admin/; keep all Vite assets on that base.
-  base: '/admin/',
+  base: process.env.VITE_BASE_URL || '/admin/',
   plugins: [react()],
+  define: {
+    'import.meta.env.VITE_API_URL': JSON.stringify(process.env.VITE_API_URL || '/api'),
+  },
   server: {
     port: 3001,
     proxy: {
