@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { authApi } from '@/services/authApi';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,6 +9,7 @@ import { MailCheck } from 'lucide-react';
 import { useStoreInfo } from '@/hooks/useStoreInfo';
 
 export function ForgotPassword() {
+  const { t } = useTranslation();
   const { name: storeName } = useStoreInfo();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
@@ -33,28 +35,29 @@ export function ForgotPassword() {
         <div className="w-full max-w-xs sm:max-w-sm md:max-w-md flex flex-col justify-between min-h-[85vh]">
           {/* Logo */}
           <div className="mb-8 sm:mb-12">
-            <Link to="/" className="font-display text-3xl tracking-tight text-foreground">
-              {storeName}
+            <Link to="/" className="inline-flex flex-col items-center leading-none">
+              <span className="font-display text-3xl sm:text-4xl font-semibold uppercase tracking-[0.14em] text-[#6b1017]">VEY</span>
+              <span className="mt-1 text-[0.35rem] sm:text-[0.4rem] font-semibold uppercase tracking-[0.48em] text-[#6b1017]">CONCEPT</span>
             </Link>
           </div>
 
           <div className="flex-1 flex flex-col justify-center">
             {!sent ? (
               <>
-                <h1 className="font-display text-4xl mb-3">Şifremi Unuttum</h1>
+                <h1 className="font-display text-4xl mb-3">{t('auth.forgotPassword')}</h1>
                 <p className="text-sm text-muted-foreground mb-6 sm:mb-8">
-                  Hesabınızın e-posta adresini girin; şifre sıfırlama bağlantısını size gönderelim.
+                  {t('auth.forgotPasswordDescription')}
                 </p>
 
                 <form onSubmit={handleSubmit} className="space-y-6 w-full">
                   <div className="space-y-2">
                     <Label htmlFor="email" className="font-bold text-sm text-foreground">
-                      E-posta
+                      {t('auth.email')}
                     </Label>
                     <Input
                       id="email"
                       type="email"
-                      placeholder="E-posta"
+                      placeholder={t('auth.email')}
                       className="h-12 px-4 rounded-sm border border-input focus:border-amber-500 w-full"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
@@ -68,7 +71,7 @@ export function ForgotPassword() {
                     disabled={loading}
                     className="h-12 w-full text-sm font-medium uppercase tracking-[0.14em] rounded-full bg-foreground text-background hover:bg-amber-900 transition-colors"
                   >
-                    {loading ? 'Gönderiliyor...' : 'SIFIRLAMA BAĞLANTISI GÖNDER'}
+                    {loading ? t('common.sending') : t('auth.sendResetLink')}
                   </Button>
                 </form>
               </>
@@ -77,17 +80,16 @@ export function ForgotPassword() {
                 <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-amber-500/10">
                   <MailCheck className="h-7 w-7 text-amber-700 dark:text-amber-500" />
                 </div>
-                <h1 className="font-display text-4xl mb-3">E-postanızı kontrol edin</h1>
+                <h1 className="font-display text-4xl mb-3">{t('auth.checkEmail')}</h1>
                 <p className="text-sm text-muted-foreground">
-                  Eğer <span className="font-semibold text-foreground">{email}</span> adresine kayıtlı bir hesap
-                  varsa, şifre sıfırlama bağlantısı gönderildi. Bağlantı 1 saat geçerlidir.
+                  {t('auth.resetLinkSent')} <span className="font-semibold text-foreground">{email}</span>
                 </p>
               </div>
             )}
 
             <div className="mt-8 text-center">
               <Link to="/giris" className="font-medium text-amber-800 dark:text-amber-500 hover:underline underline-offset-4 text-sm">
-                Giriş ekranına dön
+                {t('auth.backToSignIn')}
               </Link>
             </div>
           </div>

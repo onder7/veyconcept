@@ -2,9 +2,32 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: 'Monument Extended';
+  src: url('../assets/monumentextended-regular.otf') format('opentype');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
 @layer base {
   body {
-    @apply font-satoshi font-normal text-base text-body bg-whiten relative z-1;
+    @apply font-normal text-base text-body bg-whiten relative z-1;
+    font-family: Verdana, Geneva, sans-serif;
+  }
+
+  body,
+  button,
+  input,
+  textarea,
+  select,
+  option {
+    font-family: Verdana, Geneva, sans-serif;
+  }
+
+  .font-sans,
+  .font-display {
+    font-family: Verdana, Geneva, sans-serif !important;
   }
 }
 

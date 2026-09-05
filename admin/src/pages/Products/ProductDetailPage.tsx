@@ -38,8 +38,10 @@ const VAT_RATES = [1, 10, 20];
 
 interface FormState {
   name: string;
+  nameEn?: string;
   slug: string;
   description: string;
+  descriptionEn?: string;
   categoryId: string;
   brandId: string;
   isActive: boolean;
@@ -79,7 +81,7 @@ function cartesianProduct<T>(arrays: T[][]): T[][] {
 }
 
 const defaultForm = (): FormState => ({
-  name: '', slug: '', description: '',
+  name: '', nameEn: '', slug: '', description: '', descriptionEn: '',
   categoryId: '', brandId: '',
   isActive: true, isFeatured: false,
   vatRate: 20, vatIncluded: true,
@@ -200,8 +202,10 @@ export default function ProductDetailPage() {
 
         setForm({
           name: p.name,
+          nameEn: p.nameEn || '',
           slug: p.slug,
           description: p.description ?? '',
+          descriptionEn: p.descriptionEn || '',
           categoryId: p.categoryId,
           brandId: p.brandId ?? '',
           isActive: p.isActive,
@@ -438,8 +442,10 @@ export default function ProductDetailPage() {
     }
     const payload = {
       name: form.name,
+      nameEn: form.nameEn || undefined,
       slug: form.slug,
       description: form.description || undefined,
+      descriptionEn: form.descriptionEn || undefined,
       categoryId: form.categoryId,
       brandId: form.brandId || undefined,
       isActive: form.isActive,
@@ -646,13 +652,23 @@ export default function ProductDetailPage() {
           <Card title="Temel Bilgiler">
             <div className="space-y-4">
               <div>
-                <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Ürün Adı *</label>
+                <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Ürün Adı (Türkçe) *</label>
                 <input
                   required
                   value={form.name}
                   onChange={(e) => handleNameChange(e.target.value)}
                   className={inputCls}
                   placeholder="Örn: Beyaz Gold Çeyiz Seti"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Ürün Adı (İngilizce)</label>
+                <input
+                  value={form.nameEn || ''}
+                  onChange={(e) => set('nameEn', e.target.value)}
+                  className={inputCls}
+                  placeholder="Örn: White Gold Wedding Set"
                 />
               </div>
 
@@ -715,10 +731,18 @@ export default function ProductDetailPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Açıklama</label>
+                <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Açıklama (Türkçe)</label>
                 <QuillEditor
                   value={form.description}
                   onChange={(html) => set('description', html)}
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Açıklama (İngilizce)</label>
+                <QuillEditor
+                  value={form.descriptionEn || ''}
+                  onChange={(html) => set('descriptionEn', html)}
                 />
               </div>
 

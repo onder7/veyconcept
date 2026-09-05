@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '@/store/authStore';
 import { authApi } from '@/services/authApi';
 import { cartApi } from '@/services/cartApi';
@@ -15,6 +16,7 @@ import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton';
 import { ConsentCheckboxes, type ConsentValue } from '@/components/auth/ConsentCheckboxes';
 
 export function Login() {
+  const { t } = useTranslation();
   const { name: storeName } = useStoreInfo();
   const navigate = useNavigate();
   const location = useLocation();
@@ -32,7 +34,7 @@ export function Login() {
   async function handleGuestSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!guestConsent.acceptTerms) {
-      toast.error('Üyelik koşullarını ve kişisel verilerimin korunmasını kabul etmelisiniz.');
+      toast.error(t('auth.acceptTermsError'));
       return;
     }
     setLoading(true);
@@ -55,11 +57,11 @@ export function Login() {
         // merge başarısız olsa da devam et
       }
 
-      toast.success('Misafir girişi başarılı, ödemeye yönlendiriliyorsunuz...');
+      toast.success(t('auth.guestLoginSuccess'));
       navigate(from, { replace: true });
     } catch (err: unknown) {
       const data = (err as { response?: { data?: { message?: string; error?: string } } }).response?.data;
-      const msg = data?.message ?? data?.error ?? 'İşlem gerçekleştirilemedi';
+      const msg = data?.message ?? data?.error ?? t('common.operationFailed');
       toast.error(msg);
     } finally {
       setLoading(false);
@@ -83,13 +85,13 @@ export function Login() {
         } catch {
           // merge başarısız olsa da girişe devam et
         }
-        toast.success('Google ile giriş başarılı!');
+        toast.success(t('auth.googleSignInSuccess'));
         navigate(from, { replace: true });
       } else {
-        toast.error(data.error || 'Giriş başarısız');
+        toast.error(data.error || t('auth.signInFailed'));
       }
     } catch {
-      toast.error('Google ile giriş başarısız');
+      toast.error(t('auth.googleSignInFailed'));
     }
   };
 
@@ -110,11 +112,11 @@ export function Login() {
         // merge başarısız olsa da girişe devam et
       }
 
-      toast.success('Giriş başarılı!');
+      toast.success(t('auth.signInSuccess'));
       navigate(from, { replace: true });
     } catch (err: unknown) {
       const data = (err as { response?: { data?: { message?: string; error?: string } } }).response?.data;
-      const msg = data?.message ?? data?.error ?? 'Giriş yapılamadı';
+      const msg = data?.message ?? data?.error ?? t('auth.signInFailed');
       toast.error(msg);
     } finally {
       setLoading(false);
@@ -128,8 +130,9 @@ export function Login() {
         <div className="w-full max-w-xs sm:max-w-sm md:max-w-md flex flex-col justify-between min-h-screen sm:min-h-[85vh]">
           {/* Logo */}
           <div className="mb-8 sm:mb-12">
-            <Link to="/" className="font-display text-3xl tracking-tight text-foreground">
-              {storeName}
+            <Link to="/" className="inline-flex flex-col items-center leading-none">
+              <span className="font-display text-3xl sm:text-4xl font-semibold uppercase tracking-[0.14em] text-[#6b1017]">VEY</span>
+              <span className="mt-1 text-[0.35rem] sm:text-[0.4rem] font-semibold uppercase tracking-[0.48em] text-[#6b1017]">CONCEPT</span>
             </Link>
           </div>
 
@@ -145,7 +148,7 @@ export function Login() {
                   }`}
                   onClick={() => setActiveTab('login')}
                 >
-                  Üye Girişi
+                  {t('auth.memberSignIn')}
                 </button>
                 <button
                   className={`flex-1 py-3 text-sm font-bold text-center border-b-2 transition-colors ${
@@ -155,23 +158,23 @@ export function Login() {
                   }`}
                   onClick={() => setActiveTab('guest')}
                 >
-                  Üye Olmadan Devam Et
+                  {t('auth.guestCheckout')}
                 </button>
               </div>
             ) : (
-              <h1 className="font-display text-4xl mb-6 sm:mb-8">Giriş Yap</h1>
+              <h1 className="font-display text-4xl mb-6 sm:mb-8">{t('auth.signIn')}</h1>
             )}
 
             {activeTab === 'login' ? (
               <form onSubmit={handleSubmit} className="space-y-6 w-full">
                 <div className="space-y-2">
                   <Label htmlFor="email" className="font-bold text-sm text-foreground">
-                    E-posta
+                    {t('auth.email')}
                   </Label>
                   <Input
                     id="email"
                     type="email"
-                    placeholder="E-posta"
+                    placeholder={t('auth.email')}
                     className="h-12 px-4 rounded-sm border border-input focus:border-amber-500 w-full"
                     value={form.email}
                     onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
@@ -182,13 +185,13 @@ export function Login() {
 
                 <div className="space-y-2">
                   <Label htmlFor="password" className="font-bold text-sm text-foreground">
-                    Şifre
+                    {t('auth.password')}
                   </Label>
                   <div className="relative">
                     <Input
                       id="password"
                       type={viewPassword ? 'text' : 'password'}
-                      placeholder="Şifre"
+                      placeholder={t('auth.password')}
                       className="h-12 pl-4 pr-12 rounded-sm border border-input focus:border-amber-500 w-full"
                       value={form.password}
                       onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
@@ -199,7 +202,7 @@ export function Login() {
                       type="button"
                       onClick={() => setViewPassword(!viewPassword)}
                       className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-none"
-                      aria-label={viewPassword ? 'Şifreyi gizle' : 'Şifreyi göster'}
+                      aria-label={viewPassword ? t('auth.hidePassword') : t('auth.showPassword')}
                     >
                       {viewPassword ? (
                         <EyeOff className="h-5 w-5 stroke-[1.5]" />
@@ -213,10 +216,10 @@ export function Login() {
                 <div className="flex flex-col sm:flex-row justify-between items-center gap-3 pt-4">
                   <div className="flex gap-4 text-sm">
                     <Link to="/kayit" className="font-medium text-amber-800 dark:text-amber-500 hover:underline underline-offset-4">
-                      Yeni hesap oluştur
+                      {t('auth.doNotHaveAccount')}
                     </Link>
                     <Link to="/sifremi-unuttum" className="font-medium text-amber-800 dark:text-amber-500 hover:underline underline-offset-4">
-                      Şifremi Unuttum
+                      {t('auth.forgotPassword')}
                     </Link>
                   </div>
                   <Button
@@ -224,7 +227,7 @@ export function Login() {
                     disabled={loading}
                     className="h-12 px-10 text-sm font-medium uppercase tracking-[0.14em] rounded-full bg-foreground text-background hover:bg-amber-900 transition-colors w-full sm:w-auto"
                   >
-                    {loading ? 'Giriş Yapılıyor...' : 'GİRİŞ YAP'}
+                    {loading ? t('auth.signingIn') : t('auth.signInButton')}
                   </Button>
                 </div>
 
@@ -234,7 +237,7 @@ export function Login() {
                     <span className="w-full border-t border-input" />
                   </div>
                   <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-background px-2 text-muted-foreground">Veya</span>
+                    <span className="bg-background px-2 text-muted-foreground">{t('auth.or')}</span>
                   </div>
                 </div>
 
@@ -248,11 +251,11 @@ export function Login() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="guest-firstName" className="font-bold text-sm text-foreground">
-                      Ad
+                      {t('auth.firstName')}
                     </Label>
                     <Input
                       id="guest-firstName"
-                      placeholder="Adınız"
+                      placeholder={t('auth.firstName')}
                       className="h-12 px-4 rounded-sm border border-input focus:border-amber-500 w-full"
                       value={guestForm.firstName}
                       onChange={(e) => setGuestForm((f) => ({ ...f, firstName: e.target.value }))}
@@ -261,11 +264,11 @@ export function Login() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="guest-lastName" className="font-bold text-sm text-foreground">
-                      Soyad
+                      {t('auth.lastName')}
                     </Label>
                     <Input
                       id="guest-lastName"
-                      placeholder="Soyadınız"
+                      placeholder={t('auth.lastName')}
                       className="h-12 px-4 rounded-sm border border-input focus:border-amber-500 w-full"
                       value={guestForm.lastName}
                       onChange={(e) => setGuestForm((f) => ({ ...f, lastName: e.target.value }))}
@@ -276,23 +279,23 @@ export function Login() {
 
                 <div className="space-y-2">
                   <Label htmlFor="guest-email" className="font-bold text-sm text-foreground">
-                    E-posta
+                    {t('auth.email')}
                   </Label>
                   <Input
                     id="guest-email"
                     type="email"
-                    placeholder="E-posta"
+                    placeholder={t('auth.email')}
                     className="h-12 px-4 rounded-sm border border-input focus:border-amber-500 w-full"
                     value={guestForm.email}
                     onChange={(e) => setGuestForm((f) => ({ ...f, email: e.target.value }))}
                     required
                   />
-                  <p className="text-[10px] text-muted-foreground">Sipariş bilgilendirmeleri bu adrese yapılacaktır.</p>
+                  <p className="text-[10px] text-muted-foreground">{t('auth.orderNotificationsInfo')}</p>
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="guest-phone" className="font-bold text-sm text-foreground">
-                    Telefon (Opsiyonel)
+                    {t('checkout.phone')} ({t('common.optional')})
                   </Label>
                   <Input
                     id="guest-phone"
@@ -313,7 +316,7 @@ export function Login() {
                     disabled={loading}
                     className="h-12 px-10 text-sm font-medium uppercase tracking-[0.14em] rounded-full bg-foreground text-background hover:bg-amber-900 transition-colors w-full"
                   >
-                    {loading ? 'İşleniyor...' : 'ÖDEMEYE DEVAM ET'}
+                    {loading ? t('common.processing') : t('auth.continueToPayment')}
                   </Button>
                 </div>
               </form>

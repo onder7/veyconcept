@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Minus, Plus, Trash2, ShoppingBag, Truck, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cartApi } from '@/services/cartApi';
@@ -15,6 +16,7 @@ function formatPrice(price: number) {
 }
 
 export function Cart() {
+  const { t } = useTranslation();
   const { setCart, setAppliedCoupon } = useCartStore();
   const qc = useQueryClient();
 
@@ -52,7 +54,7 @@ export function Cart() {
       setCart(res.data.data);
       qc.setQueryData(['cart'], res.data.data);
     },
-    onError: () => toast.error('Güncelleme başarısız'),
+    onError: () => toast.error(t('common.error')),
   });
 
   const removeMut = useMutation({
@@ -61,12 +63,12 @@ export function Cart() {
       setCart(res.data.data);
       qc.setQueryData(['cart'], res.data.data);
     },
-    onError: () => toast.error('Kaldırma başarısız'),
+    onError: () => toast.error(t('common.error')),
   });
 
   async function validateCoupon() {
     if (!couponCode.trim()) {
-      toast.error('Kupon kodu girin');
+      toast.error(t('cart.enterCouponCode'));
       return;
     }
 
@@ -87,7 +89,7 @@ export function Cart() {
       const data = await res.json();
 
       if (!res.ok || data.success === false) {
-        toast.error(data.error || 'Kupon geçersiz');
+        toast.error(data.error || t('cart.invalidCoupon'));
         setAppliedDiscount(null);
         setAppliedCoupon(null);
         return;
@@ -96,9 +98,9 @@ export function Cart() {
       setAppliedDiscount(data.data);
       setAppliedCoupon({ code: data.data.code, value: Number(data.data.value), type: data.data.type });
       setCouponCode('');
-      toast.success('Kupon başarıyla uygulandı!');
+      toast.success(t('cart.appliedCouponSuccess'));
     } catch (err: any) {
-      toast.error('Bir hata oluştu');
+      toast.error(t('common.error'));
       setAppliedDiscount(null);
       setAppliedCoupon(null);
     } finally {
@@ -109,7 +111,7 @@ export function Cart() {
   if (isLoading) {
     return (
       <main className="container mx-auto px-4 py-8">
-        <h1 className="font-display text-4xl mb-6">Sepetim</h1>
+        <h1 className="font-display text-4xl mb-6">{t('cart.myCart')}</h1>
         <div className="space-y-4">
           {[1, 2, 3].map((i) => <Skeleton key={i} className="h-24 rounded-lg" />)}
         </div>
@@ -121,9 +123,9 @@ export function Cart() {
     return (
       <main className="container mx-auto px-4 py-24 text-center">
         <ShoppingBag className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-        <h1 className="font-display text-4xl mb-2">Sepetiniz boş</h1>
-        <p className="text-muted-foreground mb-6">Alışverişe başlamak için ürünlere göz atın.</p>
-        <Button render={<Link to="/ara" />}>Alışverişe Başla</Button>
+        <h1 className="font-display text-4xl mb-2">{t('cart.empty')}</h1>
+        <p className="text-muted-foreground mb-6">{t('cart.emptyMessage')}</p>
+        <Button render={<Link to="/ara" />}>{t('cart.continueShopping')}</Button>
       </main>
     );
   }
@@ -177,7 +179,7 @@ export function Cart() {
 
   return (
     <main className="container mx-auto px-4 py-8">
-      <h1 className="font-display text-4xl mb-6">Sepetim</h1>
+      <h1 className="font-display text-4xl mb-6">{t('cart.myCart')}</h1>
 
       <div className="grid lg:grid-cols-3 gap-8">
         {/* Ürün listesi */}
@@ -217,7 +219,7 @@ export function Cart() {
                     onClick={() => removeMut.mutate(item.id)}
                     className="text-muted-foreground hover:text-destructive transition-colors"
                     disabled={isPending}
-                    aria-label="Kaldır"
+                    aria-label={t('common.close')}
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>
@@ -257,11 +259,11 @@ export function Cart() {
         {/* Sipariş özeti */}
         <div className="lg:col-span-1">
           <div className="border border-border rounded-sm p-6 space-y-4 sticky top-24">
-            <h2 className="font-display text-2xl">Sipariş Özeti</h2>
+            <h2 className="font-display text-2xl">{t('checkout.orderSummary')}</h2>
 
             {/* Kupon input */}
             <div className="border-b border-border pb-4">
-              <label className="text-xs uppercase tracking-[0.14em] text-muted-foreground block mb-2">Kupon Kodu</label>
+              <label className="text-xs uppercase tracking-[0.14em] text-muted-foreground block mb-2">{t('cart.couponCode')}</label>
               <div className="flex gap-2">
                 <input
                   type="text"
@@ -269,7 +271,7 @@ export function Cart() {
                   onChange={(e) => setCouponCode(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && validateCoupon()}
                   disabled={appliedDiscount || validatingCoupon}
-                  placeholder="Kupon kodunu girin"
+                  placeholder={t('cart.enterCouponCode')}
                   className="flex-1 min-w-0 px-3 py-2 border border-border rounded-sm text-sm outline-none focus:border-amber-500 disabled:bg-secondary"
                 />
                 {appliedDiscount ? (
@@ -280,7 +282,7 @@ export function Cart() {
                       setCouponCode('');
                     }}
                     className="shrink-0 px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
-                    title="Kuponu kaldır"
+                    title={t('cart.removeCoupon')}
                   >
                     <X className="h-4 w-4" />
                   </button>
@@ -290,7 +292,7 @@ export function Cart() {
                     disabled={validatingCoupon}
                     className="shrink-0 whitespace-nowrap px-4 py-2 bg-foreground text-background rounded-full text-sm font-medium hover:bg-amber-900 disabled:opacity-50 transition-all"
                   >
-                    {validatingCoupon ? 'Kontrol ediliyor...' : 'Uygula'}
+                    {validatingCoupon ? t('cart.validatingCoupon') : t('cart.applyCoupon')}
                   </button>
                 )}
               </div>
@@ -298,33 +300,33 @@ export function Cart() {
 
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <span>Ara Toplam (KDV Dahil)</span>
+                <span>{t('cart.subtotalWithTax')}</span>
                 <span>{formatPrice(subtotal)}</span>
               </div>
 
               {appliedDiscount && isDiscountValid && discountAmount > 0 && (
                 <div className="flex justify-between text-green-600">
-                  <span>İndirim {appliedDiscount.type === 'PERCENT' ? `(${appliedDiscount.value}%)` : ''}</span>
+                  <span>{t('cart.discount')} {appliedDiscount.type === 'PERCENT' ? `(${appliedDiscount.value}%)` : ''}</span>
                   <span>-{formatPrice(discountAmount)}</span>
                 </div>
               )}
 
               {appliedDiscount && !isDiscountValid && (
                 <div className="text-xs text-orange-600 bg-orange-50 p-2 rounded">
-                  Min. {formatPrice(typeof appliedDiscount.minOrder === 'string' ? parseFloat(appliedDiscount.minOrder) : appliedDiscount.minOrder)} alışveriş gerekli ({formatPrice((typeof appliedDiscount.minOrder === 'string' ? parseFloat(appliedDiscount.minOrder) : appliedDiscount.minOrder) - subtotal)} daha)
+                  {t('cart.minOrderRequired', { amount: formatPrice(typeof appliedDiscount.minOrder === 'string' ? parseFloat(appliedDiscount.minOrder) : appliedDiscount.minOrder) })} ({formatPrice((typeof appliedDiscount.minOrder === 'string' ? parseFloat(appliedDiscount.minOrder) : appliedDiscount.minOrder) - subtotal)} {t('cart.addMore', { amount: '' })})
                 </div>
               )}
 
               <div className="flex justify-between">
-                <span>Kargo</span>
-                <span>{shipping === 0 ? 'Ücretsiz' : formatPrice(shipping)}</span>
+                <span>{t('cart.shippingCost')}</span>
+                <span>{shipping === 0 ? t('cart.freeShipping') : formatPrice(shipping)}</span>
               </div>
 
               {shipping > 0 && remaining > 0 && (
                 <div className="space-y-1.5">
                   <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                     <Truck className="h-3.5 w-3.5 shrink-0" />
-                    <span>{formatPrice(remaining)} daha ekleyin, kargo ücretsiz!</span>
+                    <span>{t('cart.addMore', { amount: formatPrice(remaining) })}</span>
                   </div>
                   <div className="w-full bg-muted rounded-full h-1.5 overflow-hidden">
                     <div
@@ -337,21 +339,21 @@ export function Cart() {
               {shipping === 0 && (
                 <div className="flex items-center gap-1.5 text-xs text-green-600">
                   <Truck className="h-3.5 w-3.5 shrink-0" />
-                  <span>Ücretsiz kargo hakkı kazandınız!</span>
+                  <span>{t('cart.freeShippingEarned')}</span>
                 </div>
               )}
             </div>
 
             <div className="border-t border-border pt-4 flex justify-between items-baseline">
-              <span className="text-sm uppercase tracking-[0.14em] text-muted-foreground">Toplam</span>
+              <span className="text-sm uppercase tracking-[0.14em] text-muted-foreground">{t('checkout.total')}</span>
               <span className="font-display text-2xl">{formatPrice(total)}</span>
             </div>
 
             <Button className="w-full h-11 rounded-full bg-foreground text-background hover:bg-amber-900" size="lg" render={<Link to="/odeme" />}>
-              Siparişi Tamamla
+              {t('checkout.placeOrder')}
             </Button>
             <Button variant="outline" className="w-full h-11 rounded-full" render={<Link to="/ara" />}>
-              Alışverişe Devam Et
+              {t('cart.continueShopping')}
             </Button>
           </div>
         </div>

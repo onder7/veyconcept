@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { MessageCircle, X, Send, Bot, User, ChevronDown } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useStoreInfo } from '@/hooks/useStoreInfo';
 import { useSocialLinks } from '@/hooks/useSocialLinks';
 
@@ -163,6 +164,7 @@ const GREETING: Message = {
 };
 
 export function LiveChat() {
+  const { t } = useTranslation();
   const { name: storeName } = useStoreInfo();
   // WhatsApp numarası sistem ayarlarından (Sosyal Medya); yoksa env fallback
   const { data: socialLinks } = useSocialLinks();
@@ -324,7 +326,7 @@ export function LiveChat() {
               <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-green-400 border-2 border-primary" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="font-semibold text-sm leading-none">{storeName} Asistan</p>
+              <p className="font-semibold text-sm leading-none">{storeName} {t('common.language')}</p>
               <p className="text-xs text-primary-foreground/70 mt-0.5 flex items-center gap-1">
                 <span className="h-1.5 w-1.5 rounded-full bg-green-400 inline-block" />
                 Çevrimiçi · Genellikle anında yanıt verir
@@ -443,16 +445,15 @@ export function LiveChat() {
       {/* FAB tetikleyici buton */}
       <button
         onClick={open ? () => setOpen(false) : handleOpen}
-        className="fixed bottom-20 lg:bottom-6 right-4 sm:right-6 z-[70] h-14 w-14 rounded-full shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 group"
-        style={{ background: 'oklch(0.55 0.2 250)' }}
+        className="fixed bottom-20 lg:bottom-6 right-4 sm:right-6 z-[70] h-14 w-14 rounded-full shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 group bg-primary text-primary-foreground"
         title="Canlı Destek"
         aria-label="Canlı Destek Chatbotunu Aç"
       >
         {open ? (
-          <X className="h-6 w-6 text-white" />
+          <X className="h-6 w-6" />
         ) : (
           <>
-            <MessageCircle className="h-6 w-6 text-white" />
+            <MessageCircle className="h-6 w-6" />
             {/* Okunmamış rozet */}
             {unread > 0 && (
               <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">
@@ -460,7 +461,7 @@ export function LiveChat() {
               </span>
             )}
             {/* Pulse animasyonu */}
-            <span className="absolute inset-0 rounded-full animate-ping opacity-30" style={{ background: 'oklch(0.55 0.2 250)' }} />
+            <span className="absolute inset-0 rounded-full animate-ping opacity-30 bg-primary" />
           </>
         )}
       </button>

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '@/store/authStore';
 import { authApi } from '@/services/authApi';
 import type { User } from '@/types';
@@ -13,6 +14,7 @@ import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton';
 import { ConsentCheckboxes, type ConsentValue } from '@/components/auth/ConsentCheckboxes';
 
 export function Register() {
+  const { t } = useTranslation();
   const { name: storeName } = useStoreInfo();
   const navigate = useNavigate();
   const { setUser } = useAuthStore();
@@ -44,10 +46,10 @@ export function Register() {
       const data = await res.json();
       if (data.success) {
         setUser(data.data.user as User, data.data.accessToken);
-        toast.success('Google ile kayıt başarılı!');
+        toast.success(t('auth.googleSignUpSuccess'));
         navigate('/', { replace: true });
       } else {
-        toast.error(data.error || 'Kayıt başarısız');
+        toast.error(data.error || t('auth.signUpFailed'));
       }
     } catch {
       toast.error('Google ile kayıt başarısız');
@@ -73,7 +75,7 @@ export function Register() {
       return;
     }
     if (!consent.acceptTerms) {
-      toast.error('Üyelik koşullarını ve kişisel verilerimin korunmasını kabul etmelisiniz.');
+      toast.error(t('auth.acceptTermsError'));
       return;
     }
     setLoading(true);
@@ -88,7 +90,7 @@ export function Register() {
       const { accessToken } = res.data.data;
       const meRes = await authApi.me();
       setUser(meRes.data.data as User, accessToken);
-      toast.success('Kayıt başarılı! Hoş geldiniz.');
+      toast.success(t('auth.signUpSuccess'));
       navigate('/', { replace: true });
     } catch (err: unknown) {
       const resp = (err as {
@@ -110,25 +112,26 @@ export function Register() {
         <div className="w-full max-w-xs sm:max-w-sm md:max-w-md flex flex-col justify-between min-h-[85vh]">
           {/* Logo */}
           <div className="mb-8 sm:mb-12">
-            <Link to="/" className="font-display text-3xl tracking-tight text-foreground">
-              {storeName}
+            <Link to="/" className="inline-flex flex-col items-center leading-none">
+              <span className="font-display text-3xl sm:text-4xl font-semibold uppercase tracking-[0.14em] text-[#6b1017]">VEY</span>
+              <span className="mt-1 text-[0.35rem] sm:text-[0.4rem] font-semibold uppercase tracking-[0.48em] text-[#6b1017]">CONCEPT</span>
             </Link>
           </div>
 
           {/* Form İçeriği */}
           <div className="flex-1 flex flex-col justify-center">
-            <h1 className="font-display text-4xl mb-6 sm:mb-8">Kayıt Ol</h1>
+            <h1 className="font-display text-4xl mb-6 sm:mb-8">{t('auth.signUp')}</h1>
 
             <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4 w-full">
               {/* Ad & Soyad - Mobilde alt alta, desktop'te yan yana */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="firstName" className="font-bold text-sm text-foreground">
-                    Ad
+                    {t('auth.firstName')}
                   </Label>
                   <Input
                     id="firstName"
-                    placeholder="Ad"
+                    placeholder={t('auth.firstName')}
                     className="h-12 px-4 rounded-sm border border-input focus:border-amber-500 w-full"
                     value={form.firstName}
                     onChange={set('firstName')}
@@ -138,11 +141,11 @@ export function Register() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="lastName" className="font-bold text-sm text-foreground">
-                    Soyad
+                    {t('auth.lastName')}
                   </Label>
                   <Input
                     id="lastName"
-                    placeholder="Soyad"
+                    placeholder={t('auth.lastName')}
                     className="h-12 px-4 rounded-sm border border-input focus:border-amber-500 w-full"
                     value={form.lastName}
                     onChange={set('lastName')}
@@ -155,12 +158,12 @@ export function Register() {
               {/* E-posta */}
               <div className="space-y-2">
                 <Label htmlFor="email" className="font-bold text-sm text-foreground">
-                  E-posta
+                  {t('auth.email')}
                 </Label>
                 <Input
                   id="email"
                   type="email"
-                  placeholder="E-posta"
+                  placeholder={t('auth.email')}
                   className="h-12 px-4 rounded-sm border border-input focus:border-amber-500 w-full"
                   value={form.email}
                   onChange={set('email')}
@@ -172,13 +175,13 @@ export function Register() {
               {/* Şifre */}
               <div className="space-y-2">
                 <Label htmlFor="password" className="font-bold text-sm text-foreground">
-                  Şifre
+                  {t('auth.password')}
                 </Label>
                 <div className="relative">
                   <Input
                     id="password"
                     type={viewPassword ? 'text' : 'password'}
-                    placeholder="Şifre"
+                    placeholder={t('auth.password')}
                     className="h-12 pl-4 pr-12 rounded-sm border border-input focus:border-amber-500 w-full"
                     value={form.password}
                     onChange={set('password')}
@@ -190,7 +193,7 @@ export function Register() {
                     type="button"
                     onClick={() => setViewPassword(!viewPassword)}
                     className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-none"
-                    aria-label={viewPassword ? 'Şifreyi gizle' : 'Şifreyi göster'}
+                    aria-label={viewPassword ? t('auth.hidePassword') : t('auth.showPassword')}
                   >
                     {viewPassword ? (
                       <EyeOff className="h-5 w-5 stroke-[1.5]" />
@@ -200,20 +203,20 @@ export function Register() {
                   </button>
                 </div>
                 <p className="text-[11px] text-muted-foreground">
-                  En az 8 karakter, 1 büyük harf ve 1 rakam içermelidir.
+                  {t('auth.passwordRequirements')}
                 </p>
               </div>
 
               {/* Şifre Tekrar */}
               <div className="space-y-2">
                 <Label htmlFor="confirmPassword" className="font-bold text-sm text-foreground">
-                  Şifre Tekrar
+                  {t('auth.confirmPassword')}
                 </Label>
                 <div className="relative">
                   <Input
                     id="confirmPassword"
                     type={viewConfirmPassword ? 'text' : 'password'}
-                    placeholder="Şifre Tekrar"
+                    placeholder={t('auth.confirmPassword')}
                     className="h-12 pl-4 pr-12 rounded-sm border border-input focus:border-amber-500 w-full"
                     value={form.confirmPassword}
                     onChange={set('confirmPassword')}
@@ -224,7 +227,7 @@ export function Register() {
                     type="button"
                     onClick={() => setViewConfirmPassword(!viewConfirmPassword)}
                     className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-none"
-                    aria-label={viewConfirmPassword ? 'Şifreyi gizle' : 'Şifreyi göster'}
+                    aria-label={viewConfirmPassword ? t('auth.hidePassword') : t('auth.showPassword')}
                   >
                     {viewConfirmPassword ? (
                       <EyeOff className="h-5 w-5 stroke-[1.5]" />
@@ -240,14 +243,14 @@ export function Register() {
 
               <div className="flex justify-between items-center pt-4">
                 <Link to="/giris" className="font-medium text-amber-800 dark:text-amber-500 hover:underline underline-offset-4 text-sm">
-                  Zaten hesabınız var mı? Giriş yapın
+                  {t('auth.haveAccount')}
                 </Link>
                 <Button
                   type="submit"
                   disabled={loading}
                   className="h-12 px-10 text-sm font-medium uppercase tracking-[0.14em] rounded-full bg-foreground text-background hover:bg-amber-900 transition-colors"
                 >
-                  {loading ? 'Kayıt Yapılıyor...' : 'KAYIT OL'}
+                  {loading ? t('auth.signingUp') : t('auth.signUpButton')}
                 </Button>
               </div>
 
@@ -257,7 +260,7 @@ export function Register() {
                   <span className="w-full border-t border-input" />
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-background px-2 text-muted-foreground">Veya</span>
+                  <span className="bg-background px-2 text-muted-foreground">{t('auth.or')}</span>
                 </div>
               </div>
 

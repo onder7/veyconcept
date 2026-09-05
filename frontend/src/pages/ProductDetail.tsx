@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ChevronRight, ShoppingCart, Star, Minus, Plus, Heart, X, ZoomIn, ChevronLeft } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { productApi } from '@/services/productApi';
 import { cartApi } from '@/services/cartApi';
 import { useCartStore } from '@/store/cartStore';
@@ -19,14 +20,12 @@ import { useRecentlyViewedStore } from '@/store/recentlyViewedStore';
 import { SeoHead, SITE_URL } from '@/components/seo/SeoHead';
 import { productSchema, breadcrumbSchema } from '@/lib/schemas';
 import { useTaxConfig } from '@/hooks/useTaxConfig';
-import { useSocialLinks } from '@/hooks/useSocialLinks';
 import { useStoreInfo } from '@/hooks/useStoreInfo';
-
-const WA_NUMBER_FALLBACK = import.meta.env.VITE_WHATSAPP_NUMBER ?? '905551234567';
 
 function ProductShareBar({ name, url }: { name: string; url: string }) {
   const [copied, setCopied] = useState(false);
   const { name: storeName } = useStoreInfo();
+  const { t } = useTranslation();
 
   const encodedUrl  = encodeURIComponent(url);
   const encodedText = encodeURIComponent(`${name} — ${storeName}`);
@@ -91,7 +90,7 @@ function ProductShareBar({ name, url }: { name: string; url: string }) {
 
   return (
     <div className="flex flex-wrap items-center gap-2 pt-1">
-      <span className="text-xs text-muted-foreground shrink-0">Paylaş:</span>
+      <span className="text-xs text-muted-foreground shrink-0">{t('product.shareProduct')}:</span>
       <div className="flex flex-wrap items-center gap-1.5">
         {shares.map((s) => (
           <a
@@ -109,7 +108,7 @@ function ProductShareBar({ name, url }: { name: string; url: string }) {
         {/* Link kopyala */}
         <button
           type="button"
-          title="Linki kopyala"
+          title={t('product.copyLink')}
           onClick={copy}
           className={`flex items-center justify-center h-8 w-8 rounded-full border transition-all ${
             copied
@@ -131,43 +130,11 @@ function ProductShareBar({ name, url }: { name: string; url: string }) {
       </div>
       {copied && (
         <span className="text-xs text-green-600 animate-in fade-in slide-in-from-left-1 duration-150">
-          Kopyalandı!
+          {t('product.copied')}
         </span>
       )}
     </div>
   );
-}
-
-function buildWhatsAppUrl(
-  phone: string,
-  product: { name: string; vatIncluded?: boolean },
-  variant: { price: number | string; attributeValues?: { attributeValue: { value: string; attribute: { name: string } } }[] } | null,
-  qty: number,
-  taxRate: number,
-) {
-  const attrs = variant?.attributeValues
-    ?.map((av) => `${av.attributeValue.attribute.name}: ${av.attributeValue.value}`)
-    .join(', ') ?? '';
-  const grossPrice = variant
-    ? product.vatIncluded
-      ? Number(variant.price)
-      : Number(variant.price) * (1 + taxRate / 100)
-    : 0;
-  const price = variant ? grossPrice.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY', maximumFractionDigits: 0 }) : '';
-  const url = typeof window !== 'undefined' ? window.location.href : '';
-  // NOT: WhatsApp wa.me ön-dolgusu 4 baytlık (astral) emoji'leri bozuyor (� görünür);
-  // 3 bayta kadar olan BMP karakterler (Türkçe harfler, ₺, •) sorunsuz iletiliyor.
-  const msg = [
-    `Merhaba, aşağıdaki ürünü sipariş vermek istiyorum:`,
-    `• Ürün: ${product.name}`,
-    attrs ? `• Seçenek: ${attrs}` : '',
-    `• Fiyat: ${price}`,
-    `• Adet: ${qty}`,
-    url ? `• Ürün Linki: ${url}` : '',
-  ]
-    .filter(Boolean)
-    .join('\n');
-  return `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
 }
 
 function formatPrice(price: number | string): string {
@@ -175,6 +142,7 @@ function formatPrice(price: number | string): string {
 }
 
 export function ProductDetail() {
+  const { t, i18n } = useTranslation();
   const { slug } = useParams<{ slug: string }>();
   const { name: storeName } = useStoreInfo();
   const { taxRate } = useTaxConfig();
@@ -191,11 +159,6 @@ export function ProductDetail() {
   const navigate = useNavigate();
   const authUser = useAuthStore((s) => s.user);
 
-  const { data: socialLinks } = useSocialLinks();
-  const waNumber = socialLinks?.whatsapp
-    ? socialLinks.whatsapp.replace(/\D/g, '')
-    : WA_NUMBER_FALLBACK;
-
   const addToCartMut = useMutation({
     mutationFn: ({ variantId, quantity }: { variantId: string; quantity: number }) =>
       cartApi.addItem(variantId, quantity),
@@ -210,7 +173,7 @@ export function ProductDetail() {
   });
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['product', slug],
+    queryKey: ['product', slug, i18n.language],
     queryFn: () => productApi.get(slug!),
     enabled: !!slug,
     staleTime: 1000 * 30, // 30 saniye
@@ -271,8 +234,8 @@ export function ProductDetail() {
 
   if (isError || !product) return (
     <main className="container mx-auto px-4 py-24 text-center">
-      <p className="text-xl text-muted-foreground">Ürün bulunamadı.</p>
-      <Button render={<Link to="/" />} className="mt-4">Ana Sayfaya Dön</Button>
+      <p className="text-xl text-muted-foreground">{t('product.notFound')}</p>
+      <Button render={<Link to="/" />} className="mt-4">{t('breadcrumb.home')}</Button>
     </main>
   );
 
@@ -324,7 +287,7 @@ export function ProductDetail() {
       />
       {/* Breadcrumb */}
       <nav className="flex flex-wrap items-center gap-1 text-sm text-muted-foreground mb-6">
-        <Link to="/" className="hover:text-foreground">Ana Sayfa</Link>
+        <Link to="/" className="hover:text-foreground">{t('breadcrumb.home')}</Link>
         <ChevronRight className="h-4 w-4" />
         <Link to={`/kategori/${product.category.slug}`} className="hover:text-foreground">
           {product.category.name}
@@ -335,10 +298,10 @@ export function ProductDetail() {
 
       <div className="grid md:grid-cols-2 gap-4 sm:gap-8 lg:gap-12">
         {/* Görsel Galerisi */}
-        <div className="space-y-3">
-          <div className="relative mx-auto w-[62%] max-w-[16rem] sm:w-full sm:max-w-none">
+        <div className="space-y-4">
+          <div className="relative mx-auto w-full max-w-none">
             <div
-              className="aspect-square rounded-sm overflow-hidden bg-secondary dark:bg-neutral-900 cursor-zoom-in group/img"
+              className="aspect-[4/5] sm:aspect-square rounded-sm overflow-hidden bg-transparent cursor-zoom-in group/img"
               onClick={() => activeImage && setLightboxOpen(true)}
             >
               {activeImage ? (
@@ -362,10 +325,10 @@ export function ProductDetail() {
             {/* Favori butonu — resmin sağ üst köşesi */}
             <button
               type="button"
-              title={fav ? 'Favorilerden çıkar' : 'Favorilere ekle'}
+              title={fav ? t('product.removeFromWishlist') : t('product.addToWishlist')}
               onClick={() => {
                 if (authUser?.isGuest || !authUser) {
-                  toast.info('Favorilere eklemek için üye olmanız gerekiyor.');
+                  toast.info(t('product.favoriteLoginRequired'));
                   navigate('/kayit');
                   return;
                 }
@@ -385,7 +348,7 @@ export function ProductDetail() {
               <>
                 <button
                   type="button"
-                  aria-label="Önceki görsel"
+                  aria-label={t('product.previousImage')}
                   onClick={(e) => {
                     e.stopPropagation();
                     setActiveImageIdx((i) => (i - 1 + product.images.length) % product.images.length);
@@ -396,7 +359,7 @@ export function ProductDetail() {
                 </button>
                 <button
                   type="button"
-                  aria-label="Sonraki görsel"
+                  aria-label={t('product.nextImage')}
                   onClick={(e) => {
                     e.stopPropagation();
                     setActiveImageIdx((i) => (i + 1) % product.images.length);
@@ -409,13 +372,13 @@ export function ProductDetail() {
             )}
           </div>
           {product.images.length > 1 && (
-            <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-thin justify-center sm:justify-start">
+            <div className="flex gap-2 overflow-x-auto px-1 pb-1 scrollbar-thin justify-start">
               {product.images.map((img, i) => (
                 <button
                   key={i}
                   type="button"
                   onClick={() => setActiveImageIdx(i)}
-                  className={`shrink-0 h-16 w-16 rounded-sm overflow-hidden border transition-colors ${
+                  className={`shrink-0 h-20 w-20 sm:h-16 sm:w-16 rounded-sm overflow-hidden border transition-colors ${
                     i === activeImageIdx
                       ? 'border-foreground'
                       : 'border-border hover:border-muted-foreground/50'
@@ -423,7 +386,7 @@ export function ProductDetail() {
                 >
                   <img
                     src={img.url}
-                    alt={img.altText ?? `Görsel ${i + 1}`}
+                    alt={img.altText ?? `${t('product.image')} ${i + 1}`}
                     className="w-full h-full object-contain"
                   />
                 </button>
@@ -534,16 +497,16 @@ export function ProductDetail() {
           {/* Stok */}
           {variant && (
             <Badge variant={variant.stockQty > 0 ? 'default' : 'destructive'}>
-              {variant.stockQty > 0 ? `Stokta ${variant.stockQty} adet` : 'Stok Yok'}
+              {variant.stockQty > 0 ? `${t('product.stock')}: ${variant.stockQty} adet` : t('product.outOfStock')}
             </Badge>
           )}
 
           {/* Miktar + Sepet */}
-          <div className="flex items-center gap-3 pt-2">
-            <div className="flex items-center rounded-full border border-border">
+          <div className="flex flex-col items-stretch gap-3 pt-2 sm:flex-row sm:items-center">
+            <div className="mx-auto flex items-center rounded-full border border-border sm:mx-0">
               <button
                 type="button"
-                aria-label="Azalt"
+                aria-label={t('product.decrease')}
                 className="flex h-11 w-11 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
                 onClick={() => setQty((q) => Math.max(1, q - 1))}
               >
@@ -552,7 +515,7 @@ export function ProductDetail() {
               <span className="w-8 text-center text-sm tabular-nums">{qty}</span>
               <button
                 type="button"
-                aria-label="Artır"
+                aria-label={t('product.increase')}
                 className="flex h-11 w-11 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
                 onClick={() => setQty((q) => Math.min(variant?.stockQty ?? 1, q + 1))}
               >
@@ -560,32 +523,14 @@ export function ProductDetail() {
               </button>
             </div>
             <Button
-              className="flex-1 h-11 rounded-full bg-foreground text-background hover:bg-amber-900"
+              className="flex-1 h-11 rounded-full bg-primary text-primary-foreground hover:bg-primary/90"
               disabled={!variant || variant.stockQty === 0 || addToCartMut.isPending}
               onClick={() => variant && addToCartMut.mutate({ variantId: variant.id, quantity: qty })}
             >
               <ShoppingCart className="h-4 w-4 mr-2" />
-              {addToCartMut.isPending ? 'Ekleniyor...' : 'Sepete Ekle'}
+              {addToCartMut.isPending ? t('product.addingToCart') : t('product.addToCart')}
             </Button>
           </div>
-
-          {/* WhatsApp Sipariş */}
-          <a
-            href={buildWhatsAppUrl(waNumber, product, variant, qty, taxRate)}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={`flex items-center justify-center gap-2.5 w-full rounded-full py-3 px-5 text-sm font-semibold text-white transition-all ${
-              variant && variant.stockQty > 0
-                ? 'bg-[#25D366] hover:bg-[#1ebe5a] active:bg-[#18a84d]'
-                : 'bg-gray-300 pointer-events-none'
-            }`}
-          >
-            {/* WhatsApp SVG icon */}
-            <svg viewBox="0 0 32 32" className="h-5 w-5 fill-white shrink-0" xmlns="http://www.w3.org/2000/svg">
-              <path d="M16.003 3C9.375 3 4 8.373 4 15.001c0 2.118.553 4.107 1.518 5.837L4 29l8.38-1.495A12.94 12.94 0 0016.003 28c6.628 0 12.003-5.373 12.003-12.001S22.631 3 16.003 3zm0 21.999a10.92 10.92 0 01-5.582-1.531l-.4-.237-4.147.74.763-4.02-.26-.416A10.955 10.955 0 015.002 15c0-6.075 4.926-11 10.999-11C22.074 4 27 8.925 27 15s-4.926 11-10.997 11zm5.97-8.225c-.327-.163-1.935-.955-2.234-1.065-.3-.109-.517-.163-.735.163-.218.328-.844 1.065-.935 1.065-.163 0-.327-.054-.49-.163-.327-.163-1.38-.508-2.625-1.62-.97-.866-1.625-1.937-1.815-2.265-.19-.327-.02-.503.144-.666.147-.147.327-.382.49-.572.164-.19.219-.327.328-.545.109-.218.054-.41-.027-.572-.082-.163-.735-1.774-1.008-2.427-.264-.635-.537-.545-.735-.556h-.626c-.218 0-.572.082-.872.41-.3.327-1.143 1.118-1.143 2.727s1.17 3.162 1.333 3.38c.163.218 2.302 3.514 5.58 4.93.78.336 1.388.536 1.863.687.783.25 1.496.214 2.059.13.628-.094 1.935-.79 2.208-1.554.273-.763.273-1.417.19-1.554-.08-.136-.3-.218-.626-.382z"/>
-            </svg>
-            WhatsApp ile Sipariş Ver
-          </a>
 
           {/* Sosyal Medya Paylaşım */}
           <ProductShareBar
@@ -595,7 +540,7 @@ export function ProductDetail() {
 
           {product.description && (
             <div className="border-t border-border pt-5">
-              <h3 className="font-display text-2xl mb-3">Ürün Açıklaması</h3>
+              <h3 className="font-display text-2xl mb-3">{t('product.productDescription')}</h3>
               <div
                 className="text-sm text-muted-foreground leading-relaxed product-description"
                 dangerouslySetInnerHTML={{ __html: product.description }}
@@ -617,7 +562,7 @@ export function ProductDetail() {
                 : 'border-transparent text-muted-foreground hover:text-foreground'
             }`}
           >
-            Değerlendirmeler
+            {t('product.reviews')}
             {product._count?.reviews ? (
               <span className="ml-2 text-xs bg-muted px-1.5 py-0.5 rounded-full">
                 {product._count.reviews}
@@ -632,7 +577,7 @@ export function ProductDetail() {
                 : 'border-transparent text-muted-foreground hover:text-foreground'
             }`}
           >
-            Soru &amp; Cevap
+            {t('product.questionsAnswers')}
           </button>
         </div>
 

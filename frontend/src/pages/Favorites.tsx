@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useWishlistStore } from '@/store/wishlistStore';
 import { ProductGrid } from '@/components/product/ProductGrid';
 import { buttonVariants } from '@/components/ui/button';
@@ -7,6 +8,7 @@ import { cn } from '@/lib/utils';
 import { Heart } from 'lucide-react';
 
 export function Favorites() {
+  const { t } = useTranslation();
   const { items, isLoading, fetchWishlist } = useWishlistStore();
 
   useEffect(() => {
@@ -21,9 +23,9 @@ export function Favorites() {
     <main className="container mx-auto px-4 py-12 flex-grow">
       <div className="flex flex-col gap-8">
         <div>
-          <h1 className="font-display text-4xl text-foreground">Favorilerim</h1>
+          <h1 className="font-display text-4xl text-foreground">{t('favorites.myFavorites')}</h1>
           <p className="text-neutral-500 text-sm mt-1">
-            Beğendiğiniz ve daha sonra satın almak için kaydettiğiniz tüm ürünler.
+            {t('favorites.description')}
           </p>
         </div>
 
@@ -34,12 +36,12 @@ export function Favorites() {
             <div className="p-4 bg-red-50 text-red-500 rounded-full mb-4">
               <Heart className="h-10 w-10 fill-red-50" />
             </div>
-            <h2 className="font-display text-2xl text-foreground">Favori listeniz boş</h2>
+            <h2 className="font-display text-2xl text-foreground">{t('favorites.emptyFavorites')}</h2>
             <p className="text-neutral-500 text-sm max-w-sm mt-2 mb-8">
-              Henüz hiçbir ürünü favorilerinize eklemediniz. Ürünleri inceleyerek beğendiklerinizi favorilerinize ekleyebilirsiniz.
+              {t('favorites.noFavoritesMessage')}
             </p>
             <Link to="/ara" className={cn(buttonVariants({ size: 'lg' }))}>
-              Ürünleri Keşfet
+              {t('favorites.discoverProducts')}
             </Link>
           </div>
         ) : (

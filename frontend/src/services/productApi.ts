@@ -1,4 +1,5 @@
 import { api } from './api';
+import i18n from '@/lib/i18n';
 import type { Product, Category, Brand } from '@/types';
 
 export interface ProductFilters {
@@ -10,6 +11,7 @@ export interface ProductFilters {
   minPrice?: number;
   maxPrice?: number;
   sort?: 'price_asc' | 'price_desc' | 'newest' | 'popular';
+  language?: 'tr' | 'en';
 }
 
 export interface ProductListResponse {
@@ -21,26 +23,37 @@ export interface ProductListResponse {
 export const productApi = {
   list: (filters: ProductFilters = {}) => {
     const params = new URLSearchParams();
-    Object.entries(filters).forEach(([k, v]) => {
+    const lang = filters.language || (i18n.language as 'tr' | 'en') || 'tr';
+    Object.entries({ ...filters, language: lang }).forEach(([k, v]) => {
       if (v !== undefined && v !== '') params.set(k, String(v));
     });
     return api.get<ProductListResponse>(`/products?${params}`);
   },
 
-  featured: (limit = 8) =>
-    api.get<{ success: boolean; data: Product[] }>(`/products/featured?limit=${limit}`),
+  featured: (limit = 8, language?: 'tr' | 'en') => {
+    const lang = language || (i18n.language as 'tr' | 'en') || 'tr';
+    return api.get<{ success: boolean; data: Product[] }>(`/products/featured?limit=${limit}&language=${lang}`);
+  },
 
-  get: (slug: string) =>
-    api.get<{ success: boolean; data: Product }>(`/products/${slug}`),
+  get: (slug: string, language?: 'tr' | 'en') => {
+    const lang = language || (i18n.language as 'tr' | 'en') || 'tr';
+    return api.get<{ success: boolean; data: Product }>(`/products/${slug}?language=${lang}`);
+  },
 
-  categories: () =>
-    api.get<{ success: boolean; data: Category[] }>('/categories'),
+  categories: (language?: 'tr' | 'en') => {
+    const lang = language || (i18n.language as 'tr' | 'en') || 'tr';
+    return api.get<{ success: boolean; data: Category[] }>(`/categories?language=${lang}`);
+  },
 
-  category: (slug: string) =>
-    api.get<{ success: boolean; data: Category }>(`/categories/${slug}`),
+  category: (slug: string, language?: 'tr' | 'en') => {
+    const lang = language || (i18n.language as 'tr' | 'en') || 'tr';
+    return api.get<{ success: boolean; data: Category }>(`/categories/${slug}?language=${lang}`);
+  },
 
-  brands: () =>
-    api.get<{ success: boolean; data: Brand[] }>('/brands'),
+  brands: (language?: 'tr' | 'en') => {
+    const lang = language || (i18n.language as 'tr' | 'en') || 'tr';
+    return api.get<{ success: boolean; data: Brand[] }>(`/brands?language=${lang}`);
+  },
 
   shippingConfig: () =>
     api.get<{ success: boolean; data: { shippingFee: number; freeShippingThreshold: number } }>('/shipping-config'),

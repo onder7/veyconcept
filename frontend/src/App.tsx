@@ -34,6 +34,7 @@ import { api } from '@/services/api';
 import { useAuthStore } from '@/store/authStore';
 import Maintenance from '@/pages/Maintenance';
 import { SupportPage } from '@/pages/SupportPage';
+import { useI18nRouting } from '@/hooks/useI18nRouting';
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { staleTime: 1000 * 60 * 5, retry: 1 } },
@@ -41,7 +42,12 @@ const queryClient = new QueryClient({
 
 function AppContent() {
   const location = useLocation();
-  const isAuthPage = ['/giris', '/kayit', '/sifremi-unuttum', '/sifre-sifirla'].includes(location.pathname);
+  useI18nRouting();
+  
+  const authPagePaths = ['/giris', '/kayit', '/sifremi-unuttum', '/sifre-sifirla'];
+  const isAuthPage = authPagePaths.some(path => 
+    location.pathname.endsWith(path) || location.pathname.endsWith(path)
+  );
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -50,48 +56,72 @@ function AppContent() {
       {!isAuthPage && <Header />}
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/:lang" element={<Home />} />
 
         {/* Aşama 3 — Auth */}
         <Route path="/giris" element={<Login />} />
+        <Route path="/:lang/giris" element={<Login />} />
         <Route path="/kayit" element={<Register />} />
+        <Route path="/:lang/kayit" element={<Register />} />
         <Route path="/sifremi-unuttum" element={<ForgotPassword />} />
+        <Route path="/:lang/sifremi-unuttum" element={<ForgotPassword />} />
         <Route path="/sifre-sifirla" element={<ResetPassword />} />
+        <Route path="/:lang/sifre-sifirla" element={<ResetPassword />} />
 
         {/* Aşama 4 — Katalog */}
         <Route path="/kategori/:slug" element={<CategoryPage />} />
+        <Route path="/:lang/kategori/:slug" element={<CategoryPage />} />
         <Route path="/urun/:slug" element={<ProductDetail />} />
+        <Route path="/:lang/urun/:slug" element={<ProductDetail />} />
         <Route path="/kampanya/:id" element={<CampaignDetail />} />
+        <Route path="/:lang/kampanya/:id" element={<CampaignDetail />} />
         <Route path="/ara" element={<Search />} />
+        <Route path="/:lang/ara" element={<Search />} />
 
         {/* Aşama 5 — Sepet */}
         <Route path="/sepet" element={<Cart />} />
+        <Route path="/:lang/sepet" element={<Cart />} />
 
         {/* Aşama 6 — Checkout */}
         <Route path="/siparis-tamamlandi" element={<OrderSuccess />} />
+        <Route path="/:lang/siparis-tamamlandi" element={<OrderSuccess />} />
 
         {/* Müşteri Hizmetleri Rotaları */}
         <Route path="/iletisim" element={<SupportPage />} />
+        <Route path="/:lang/iletisim" element={<SupportPage />} />
         <Route path="/iade" element={<SupportPage />} />
+        <Route path="/:lang/iade" element={<SupportPage />} />
         <Route path="/sss" element={<SupportPage />} />
+        <Route path="/:lang/sss" element={<SupportPage />} />
         <Route path="/sozlesmeler" element={<SupportPage />} />
+        <Route path="/:lang/sozlesmeler" element={<SupportPage />} />
         <Route path="/hakkimizda" element={<SupportPage />} />
+        <Route path="/:lang/hakkimizda" element={<SupportPage />} />
         <Route path="/kvkk" element={<SupportPage />} />
+        <Route path="/:lang/kvkk" element={<SupportPage />} />
         <Route path="/uyelik" element={<SupportPage />} />
+        <Route path="/:lang/uyelik" element={<SupportPage />} />
         <Route path="/sayfa/:slug" element={<SupportPage />} />
+        <Route path="/:lang/sayfa/:slug" element={<SupportPage />} />
 
         {/* Korumalı route'lar */}
         <Route element={<ProtectedRoute />}>
-          {/* Misafir yalnızca ödeme yapabilir; checkout ProtectedRoute altında kalır */}
           <Route path="/odeme" element={<Checkout />} />
+          <Route path="/:lang/odeme" element={<Checkout />} />
 
-          {/* Hesap sayfaları (sipariş geçmişi dahil) yalnızca üyelere açık — misafir erişemez */}
           <Route element={<CustomerOnlyRoute />}>
             <Route path="/hesabim" element={<AccountDashboard />} />
+            <Route path="/:lang/hesabim" element={<AccountDashboard />} />
             <Route path="/hesabim/siparisler" element={<AccountDashboard />} />
+            <Route path="/:lang/hesabim/siparisler" element={<AccountDashboard />} />
             <Route path="/hesabim/siparisler/:id" element={<OrderDetail />} />
+            <Route path="/:lang/hesabim/siparisler/:id" element={<OrderDetail />} />
             <Route path="/hesabim/profil" element={<Navigate to="/hesabim" replace />} />
+            <Route path="/:lang/hesabim/profil" element={<Navigate to="/:lang/hesabim" replace />} />
             <Route path="/hesabim/favoriler" element={<Favorites />} />
+            <Route path="/:lang/hesabim/favoriler" element={<Favorites />} />
             <Route path="/hesabim/adresler" element={<Addresses />} />
+            <Route path="/:lang/hesabim/adresler" element={<Addresses />} />
           </Route>
         </Route>
 

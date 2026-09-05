@@ -1,7 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { productApi } from '@/services/productApi';
 import { api } from '@/services/api';
-import { HeroSlider } from '@/components/home/HeroSlider';
+// import { HeroSlider } from '@/components/home/HeroSlider';
+import { HeroVideo } from '@/components/home/HeroVideo';
 import { HomeJournal } from '@/components/home/HomeJournal';
 import { HomeShop } from '@/components/home/HomeShop';
 import { useState, useEffect } from 'react';
@@ -11,6 +13,7 @@ import { CampaignBanner } from '@/components/common/CampaignDisplay';
 import { useStoreInfo } from '@/hooks/useStoreInfo';
 
 export function Home() {
+  const { t } = useTranslation();
   const { name: storeName, slogan: storeSlogan } = useStoreInfo();
   const [bannerCampaign, setBannerCampaign] = useState<any | null>(null);
 
@@ -29,7 +32,9 @@ export function Home() {
     fetchBannerCampaign();
   }, []);
 
-  const { data: slidesData } = useQuery({
+  /*
+  // Görsel slider — video hero'yu test ederken geçici olarak devre dışı.
+  const { data: slidesData, isError: isSlidesError } = useQuery({
     queryKey: ['homepage-slides'],
     queryFn: async () => {
       const res = await api.get<{ success: boolean; data: { img: string; link: string }[] }>('/slides');
@@ -37,8 +42,8 @@ export function Home() {
     }
   });
 
-  // Slider yalnızca admin panelinden (Slider sekmesi) eklenen görsellerden gelir.
   const slides = slidesData ?? [];
+  */
 
   const { data: featuredData, isLoading: isFeaturedLoading } = useQuery({
     queryKey: ['products', 'featured'],
@@ -51,11 +56,22 @@ export function Home() {
   return (
     <main className="bg-background">
       <SeoHead
-        description={`Hızlı kargo, kolay iade ve uygun fiyat garantisiyle ${storeName} ürünlerini keşfedin.`}
+        description={t('home.description', { storeName })}
         schema={[organizationSchema(storeName), websiteSchema(storeName)]}
       />
-      {/* Tam ekran editorial hero slider (demo.veyconcept.com uyarlaması) */}
-      <HeroSlider slides={slides} storeName={storeName} slogan={storeSlogan} />
+      {/* Görsel slider geçici olarak yorumda; bağımsız video hero gösteriliyor. */}
+      {/*
+      <HeroSlider
+        slides={slides}
+        storeName={storeName}
+        slogan={storeSlogan}
+        loading={slidesData === undefined && !isSlidesError}
+      />
+      */}
+      <HeroVideo
+        storeName={storeName}
+        slogan={storeSlogan}
+      />
 
       {/* Campaign Banner */}
       {bannerCampaign && (

@@ -1,28 +1,19 @@
 import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { ChevronRight } from 'lucide-react';
 import { productApi } from '@/services/productApi';
 import { ProductGrid } from '@/components/product/ProductGrid';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { SeoHead, SITE_URL } from '@/components/seo/SeoHead';
 import { breadcrumbSchema } from '@/lib/schemas';
 import { useStoreInfo } from '@/hooks/useStoreInfo';
 
-const SORTS = [
-  { value: 'newest', label: 'En Yeni' },
-  { value: 'price_asc', label: 'Fiyat: Düşük → Yüksek' },
-  { value: 'price_desc', label: 'Fiyat: Yüksek → Düşük' },
-  { value: 'popular', label: 'En Popüler' },
-];
-
-type Sort = 'newest' | 'price_asc' | 'price_desc' | 'popular';
-
 export function CategoryPage() {
+  const { t } = useTranslation();
   const { slug } = useParams<{ slug: string }>();
   const { name: storeName } = useStoreInfo();
-  const [sort, setSort] = useState<Sort>('newest');
   const [page, setPage] = useState(1);
 
   const { data: catData } = useQuery({
@@ -32,8 +23,8 @@ export function CategoryPage() {
   });
 
   const { data, isLoading } = useQuery({
-    queryKey: ['products', { category: slug, sort, page }],
-    queryFn: () => productApi.list({ category: slug, sort, page, limit: 20 }),
+    queryKey: ['products', { category: slug, page }],
+    queryFn: () => productApi.list({ category: slug, page, limit: 20 }),
     enabled: !!slug,
   });
 
@@ -42,7 +33,7 @@ export function CategoryPage() {
   const pagination = data?.data?.pagination;
 
   const breadcrumbItems = [
-    { name: 'Ana Sayfa', url: SITE_URL },
+    { name: t('breadcrumb.home'), url: SITE_URL },
     ...(category?.parent
       ? [{ name: category.parent.name, url: `${SITE_URL}/kategori/${category.parent.slug}` }]
       : []),
@@ -65,7 +56,7 @@ export function CategoryPage() {
       />
       {/* Breadcrumb */}
       <nav className="flex items-center gap-1 text-sm text-muted-foreground mb-6">
-        <Link to="/" className="hover:text-foreground">Ana Sayfa</Link>
+        <Link to="/" className="hover:text-foreground">{t('breadcrumb.home')}</Link>
         <ChevronRight className="h-4 w-4" />
         {category?.parent && (
           <>
@@ -81,24 +72,14 @@ export function CategoryPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
           <p className="mb-2 flex items-center gap-3 text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
-            <span className="h-px w-8 bg-amber-500" /> Koleksiyon
+            <span className="h-px w-8 bg-amber-500" /> {t('category.collection')}
           </p>
           <h1 className="font-display text-4xl md:text-5xl leading-none text-foreground">{category?.name ?? slug}</h1>
         </div>
         <div className="flex items-center gap-2">
           {pagination && (
-            <span className="text-sm text-muted-foreground">{pagination.total} ürün</span>
+            <span className="text-sm text-muted-foreground">{pagination.total} {t('category.products')}</span>
           )}
-          <Select value={sort} onValueChange={(v) => { setSort(v as Sort); setPage(1); }}>
-            <SelectTrigger className="w-52">
-              <SelectValue>{SORTS.find(s => s.value === sort)?.label}</SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              {SORTS.map((s) => (
-                <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
         </div>
       </div>
 
@@ -128,7 +109,7 @@ export function CategoryPage() {
             disabled={page === 1}
             onClick={() => setPage((p) => p - 1)}
           >
-            Önceki
+            {t('category.previousPage')}
           </Button>
           <span className="flex items-center px-4 text-sm text-muted-foreground">
             {page} / {pagination.totalPages}
@@ -138,7 +119,7 @@ export function CategoryPage() {
             disabled={page === pagination.totalPages}
             onClick={() => setPage((p) => p + 1)}
           >
-            Sonraki
+            {t('category.nextPage')}
           </Button>
         </div>
       )}

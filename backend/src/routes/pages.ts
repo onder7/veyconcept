@@ -4,12 +4,19 @@ import * as svc from '../services/pageService';
 
 const router = Router();
 
+const getLanguage = (req: Request): svc.Language => {
+  const query = req.query;
+  const lang = Array.isArray(query.language) ? query.language[0] : query.language;
+  return (lang === 'en' || lang === 'tr') ? lang : 'tr';
+};
+
 // ─── Public ──────────────────────────────────────────────────────────────────
 
 // Menüde gösterilecek sayfalar (Footer + SupportPage kenar çubuğu)
-router.get('/pages', async (_req: Request, res: Response, next: NextFunction) => {
+router.get('/pages', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const data = await svc.listMenuPages();
+    const language = getLanguage(req);
+    const data = await svc.listMenuPages(language);
     res.json({ success: true, data });
   } catch (err) { next(err); }
 });
@@ -18,7 +25,8 @@ router.get('/pages', async (_req: Request, res: Response, next: NextFunction) =>
 router.get('/pages/:slug', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const slug = Array.isArray(req.params.slug) ? req.params.slug[0] : req.params.slug;
-    const page = await svc.getPageBySlug(slug as string);
+    const language = getLanguage(req);
+    const page = await svc.getPageBySlug(slug as string, language);
     if (!page) return res.status(404).json({ success: false, error: 'Sayfa bulunamadı' });
     res.json({ success: true, data: { slug: page.slug, title: page.title, content: page.content, isSystem: page.isSystem } });
   } catch (err) { next(err); }

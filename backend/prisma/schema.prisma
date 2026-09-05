@@ -8,6 +8,13 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ─── Dil ─────────────────────────────────────────────────────────────────────
+
+enum Language {
+  TR
+  EN
+}
+
 // ─── Kullanıcı ───────────────────────────────────────────────────────────────
 
 enum Role {
@@ -113,8 +120,10 @@ model Category {
   id          String     @id @default(cuid())
   parentId    String?    @map("parent_id")
   name        String
+  nameEn      String?    @map("name_en")
   slug        String     @unique
   description String?
+  descriptionEn String?   @map("description_en")
   imageUrl    String?    @map("image_url")
   sortOrder   Int        @default(0) @map("sort_order")
   isActive    Boolean    @default(true) @map("is_active")
@@ -131,6 +140,7 @@ model Category {
 model Brand {
   id        String   @id @default(cuid())
   name      String
+  nameEn    String?  @map("name_en")
   slug      String   @unique
   logoUrl   String?  @map("logo_url")
   isActive  Boolean  @default(true) @map("is_active")
@@ -148,8 +158,11 @@ model Product {
   categoryId  String   @map("category_id")
   brandId     String?  @map("brand_id")
   name        String
+  nameEn      String?  @map("name_en")
   slug        String   @unique
   description String?
+  descriptionEn String? @map("description_en")
+  descriptionTr String? @map("description_tr")
   isActive    Boolean  @default(true) @map("is_active")
   isFeatured  Boolean  @default(false) @map("is_featured")
   vatRate     Int      @default(20) @map("vat_rate")
@@ -719,7 +732,9 @@ model Page {
   id         String   @id @default(cuid())
   slug       String   @unique
   title      String
+  titleEn    String?  @map("title_en")
   content    String   @db.Text
+  contentEn  String?  @db.Text @map("content_en")
   showInMenu   Boolean  @default(true)  @map("show_in_menu")
   showInHeader Boolean  @default(true)  @map("show_in_header")
   showInFooter Boolean  @default(true)  @map("show_in_footer")

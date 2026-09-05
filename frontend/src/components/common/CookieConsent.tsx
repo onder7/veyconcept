@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { X, Settings } from 'lucide-react';
 
 interface CookiePreferences {
@@ -16,6 +17,7 @@ const DEFAULT_PREFERENCES: CookiePreferences = {
 };
 
 export function CookieConsent() {
+  const { t } = useTranslation();
   const [showConsent, setShowConsent] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [preferences, setPreferences] = useState<CookiePreferences>(DEFAULT_PREFERENCES);
@@ -92,16 +94,14 @@ export function CookieConsent() {
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div className="flex-1">
               <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
-                İzin Tercihlerinizi Özelleştirelim
+                {t('components.cookieConsent.title')}
               </h3>
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                İnternet sitemizde deneyimlerinizi kişiselleştirmek amacıyla çerezler kullanılmaktadır.
-                Zorunlu çerezler haricindeki çerezleri kabul ederseniz, verileriniz yurt dışında yerleşik
-                altyapı tedarikçilerimize aktarılacaktır.
+                {t('components.cookieConsent.description')}
               </p>
               <div className="mt-3 flex flex-wrap gap-2">
                 <a href="/sozlesmeler" className="text-sm text-primary hover:underline">
-                  Çerez Politikası
+                  {t('components.cookieConsent.cookiePolicy')}
                 </a>
                 <span className="text-gray-300">•</span>
                 <button
@@ -109,7 +109,7 @@ export function CookieConsent() {
                   className="text-sm text-primary hover:underline flex items-center gap-1"
                 >
                   <Settings size={14} />
-                  Çerez Ayarları
+                  {t('components.cookieConsent.cookieSettings')}
                 </button>
               </div>
             </div>
@@ -119,13 +119,13 @@ export function CookieConsent() {
                 onClick={rejectAll}
                 className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors"
               >
-                Reddet
+                {t('components.cookieConsent.reject')}
               </button>
               <button
                 onClick={acceptAll}
                 className="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-opacity-90 rounded-lg transition-colors"
               >
-                Kabul Et
+                {t('components.cookieConsent.accept')}
               </button>
             </div>
           </div>
@@ -142,7 +142,7 @@ export function CookieConsent() {
           <div className="fixed inset-x-4 top-1/2 z-[90] w-full max-w-2xl transform -translate-y-1/2 -translate-x-1/2 left-1/2 bg-white rounded-lg shadow-xl dark:bg-gray-900 max-h-screen overflow-y-auto">
             <div className="sticky top-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 p-6 flex items-center justify-between">
               <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-                Çerez Ayarları
+                {t('components.cookieConsent.settingsTitle')}
               </h2>
               <button
                 onClick={() => setShowSettings(false)}
@@ -157,9 +157,9 @@ export function CookieConsent() {
               <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
                 <div className="flex items-start justify-between">
                   <div>
-                    <h3 className="font-semibold text-gray-900 dark:text-white">Zorunlu Çerezler</h3>
+                    <h3 className="font-semibold text-gray-900 dark:text-white">{t('components.cookieConsent.necessaryTitle')}</h3>
                     <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                      Web sitesinin temel işlevlerini sağlamak için gereklidir. Devre dışı bırakılamaz.
+                      {t('components.cookieConsent.necessaryDesc')}
                     </p>
                   </div>
                   <input
@@ -175,9 +175,9 @@ export function CookieConsent() {
               <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
                 <div className="flex items-start justify-between">
                   <div>
-                    <h3 className="font-semibold text-gray-900 dark:text-white">Analitik Çerezleri</h3>
+                    <h3 className="font-semibold text-gray-900 dark:text-white">{t('components.cookieConsent.analyticsTitle')}</h3>
                     <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                      Sitenin nasıl kullanıldığını anlamak için ziyaretçi davranışlarını takip eder.
+                      {t('components.cookieConsent.analyticsDesc')}
                     </p>
                   </div>
                   <input
@@ -193,9 +193,9 @@ export function CookieConsent() {
               <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
                 <div className="flex items-start justify-between">
                   <div>
-                    <h3 className="font-semibold text-gray-900 dark:text-white">Pazarlama Çerezleri</h3>
+                    <h3 className="font-semibold text-gray-900 dark:text-white">{t('components.cookieConsent.marketingTitle')}</h3>
                     <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                      Sizin için ilgi alanlarınıza yönelik kişiselleştirilmiş reklamlar göstermek için kullanılır.
+                      {t('components.cookieConsent.marketingDesc')}
                     </p>
                   </div>
                   <input
@@ -211,9 +211,9 @@ export function CookieConsent() {
               <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
                 <div className="flex items-start justify-between">
                   <div>
-                    <h3 className="font-semibold text-gray-900 dark:text-white">İşlevsel Çerezler</h3>
+                    <h3 className="font-semibold text-gray-900 dark:text-white">{t('components.cookieConsent.functionalTitle')}</h3>
                     <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                      Tercihlerinizi hatırlamak ve sitenin işlevselliğini iyileştirmek için kullanılır.
+                      {t('components.cookieConsent.functionalDesc')}
                     </p>
                   </div>
                   <input
@@ -231,19 +231,19 @@ export function CookieConsent() {
                 onClick={rejectAll}
                 className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors"
               >
-                Tümünü Reddet
+                {t('components.cookieConsent.rejectAll')}
               </button>
               <button
                 onClick={acceptAll}
                 className="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-opacity-90 rounded-lg transition-colors"
               >
-                Tümünü Kabul Et
+                {t('components.cookieConsent.acceptAll')}
               </button>
               <button
                 onClick={() => saveCookiePreferences(preferences)}
                 className="px-4 py-2 text-sm font-medium text-white bg-gray-600 hover:bg-gray-700 rounded-lg transition-colors"
               >
-                Kaydet
+                {t('components.cookieConsent.save')}
               </button>
             </div>
           </div>

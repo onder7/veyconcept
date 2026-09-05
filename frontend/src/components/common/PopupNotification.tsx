@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { X } from 'lucide-react';
 
 const API_BASE = import.meta.env.VITE_API_URL ?? '/api';
@@ -15,6 +16,7 @@ interface PopupData {
 }
 
 export function PopupNotification() {
+  const { t } = useTranslation();
   const [popup, setPopup] = useState<PopupData | null>(null);
   const [visible, setVisible] = useState(false);
 
@@ -74,7 +76,7 @@ export function PopupNotification() {
         <button
           onClick={dismiss}
           className="absolute top-3 right-3 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-black/10 hover:bg-black/20 dark:bg-white/10 dark:hover:bg-white/20 text-gray-700 dark:text-gray-200 transition-colors"
-          aria-label="Kapat"
+          aria-label={t('components.popupNotification.close')}
         >
           <X size={16} />
         </button>
@@ -114,7 +116,7 @@ export function PopupNotification() {
                 onClick={dismiss}
                 className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-sm text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
               >
-                Şimdi Değil
+                {t('components.popupNotification.notNow')}
               </button>
             </div>
           )}

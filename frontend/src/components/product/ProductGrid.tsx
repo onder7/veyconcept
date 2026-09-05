@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ProductCard } from './ProductCard';
 import type { Product } from '@/types';
@@ -6,6 +7,7 @@ interface Props {
   products: Product[];
   loading?: boolean;
   cols?: 2 | 3 | 4;
+  hideDetails?: boolean;
 }
 
 const colClass = {
@@ -14,7 +16,9 @@ const colClass = {
   4: 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4'
 };
 
-export function ProductGrid({ products, loading = false, cols = 4 }: Props) {
+export function ProductGrid({ products, loading = false, cols = 4, hideDetails = false }: Props) {
+  const { t } = useTranslation();
+
   if (loading) {
     return (
       <div className={`grid ${colClass[cols]} gap-2 sm:gap-3 md:gap-4`}>
@@ -36,14 +40,14 @@ export function ProductGrid({ products, loading = false, cols = 4 }: Props) {
   if (!products.length) {
     return (
       <div className="text-center py-16 text-muted-foreground">
-        <p className="text-lg">Bu kategori için hazırlıklarımız devam ediyor</p>
+        <p className="text-lg">{t('components.productGrid.noProducts')}</p>
       </div>
     );
   }
 
   return (
     <div className={`grid ${colClass[cols]} gap-2 sm:gap-3 md:gap-4`}>
-      {products.map((p) => <ProductCard key={p.id} product={p} />)}
+      {products.map((p) => <ProductCard key={p.id} product={p} hideDetails={hideDetails} />)}
     </div>
   );
 }

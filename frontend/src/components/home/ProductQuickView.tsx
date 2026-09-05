@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Minus, Plus, ShoppingBag, ArrowUpRight, Star, Heart } from 'lucide-react';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import type { Product } from '@/types';
@@ -34,6 +35,7 @@ function plainText(html?: string | null): string {
  * ürün detayını gösterir; sepete ekleme gerçek backend'e bağlıdır.
  */
 export function ProductQuickView({ product, open, onOpenChange }: Props) {
+  const { t } = useTranslation();
   const [qty, setQty] = useState(1);
   const [imgIdx, setImgIdx] = useState(0);
   const { taxRate } = useTaxConfig();
@@ -87,7 +89,7 @@ export function ProductQuickView({ product, open, onOpenChange }: Props) {
       onOpenChange(false);
       openCart();
     } catch {
-      toast.error('Sepete eklenemedi.');
+      toast.error(t('components.productCard.addToCart'));
     } finally {
       setAdding(false);
     }
@@ -95,7 +97,7 @@ export function ProductQuickView({ product, open, onOpenChange }: Props) {
 
   const handleFav = () => {
     if (user?.isGuest || !user) {
-      toast.info('Favorilere eklemek için üye olmanız gerekiyor.');
+      toast.info(t('product.favoriteLoginRequired'));
       navigate('/kayit');
       return;
     }
@@ -110,12 +112,12 @@ export function ProductQuickView({ product, open, onOpenChange }: Props) {
 
         <div className="grid max-h-[88vh] grid-cols-1 overflow-y-auto md:grid-cols-2">
           {/* Görsel */}
-          <div className="relative flex flex-col gap-3 bg-secondary p-4 md:p-6">
-            <div className="relative aspect-square overflow-hidden rounded-sm bg-card">
+          <div className="relative flex flex-col gap-3 bg-transparent p-4 md:p-6">
+            <div className="relative aspect-square overflow-hidden rounded-sm bg-transparent">
               {activeImage ? (
                 <img src={activeImage.url} alt={activeImage.altText ?? product.name} className="h-full w-full object-contain" />
               ) : (
-                <div className="flex h-full w-full items-center justify-center text-xs text-muted-foreground">Görsel yok</div>
+                <div className="flex h-full w-full items-center justify-center text-xs text-muted-foreground">{t('components.productCard.noImage')}</div>
               )}
               {discount > 0 && (
                 <span className="absolute left-3 top-3 rounded-sm bg-amber-600 px-2 py-1 text-[11px] font-semibold text-white">
@@ -169,7 +171,7 @@ export function ProductQuickView({ product, open, onOpenChange }: Props) {
             {description && <p className="text-sm leading-relaxed text-foreground/70">{description}…</p>}
 
             {!inStock && (
-              <p className="text-sm font-medium uppercase tracking-[0.14em] text-destructive">Stok yok</p>
+              <p className="text-sm font-medium uppercase tracking-[0.14em] text-destructive">{t('product.outOfStock')}</p>
             )}
 
             <div className="mt-auto space-y-3">
@@ -201,12 +203,12 @@ export function ProductQuickView({ product, open, onOpenChange }: Props) {
                     className="flex h-11 flex-1 items-center justify-center gap-2 rounded-full bg-foreground text-sm font-medium text-background transition-colors hover:bg-amber-900 disabled:opacity-60"
                   >
                     <ShoppingBag className="h-4 w-4" />
-                    {adding ? 'Ekleniyor…' : 'Sepete Ekle'}
+                    {adding ? t('product.addingToCart') : t('product.addToCart')}
                   </button>
                   <button
                     type="button"
                     onClick={handleFav}
-                    aria-label="Favorilere ekle"
+                    aria-label={t('product.addToWishlist')}
                     className="flex h-11 w-11 items-center justify-center rounded-full border border-border text-foreground/60 transition-colors hover:border-red-300 hover:text-red-500"
                   >
                     <Heart className={`h-4.5 w-4.5 ${fav ? 'fill-red-500 text-red-500' : ''}`} />
@@ -219,7 +221,7 @@ export function ProductQuickView({ product, open, onOpenChange }: Props) {
                 onClick={() => onOpenChange(false)}
                 className="inline-flex items-center gap-1.5 text-xs uppercase tracking-[0.14em] text-amber-800 transition-colors hover:text-amber-600 dark:text-amber-500"
               >
-                {hasVariants ? 'Tüm seçenekler ve detay' : 'Ürün detayına git'}
+                {hasVariants ? t('product.details') : 'Ürün detayına git'}
                 <ArrowUpRight className="h-3.5 w-3.5" />
               </Link>
             </div>

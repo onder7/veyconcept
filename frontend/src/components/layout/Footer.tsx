@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { productApi } from '@/services/productApi';
 import { api } from '@/services/api';
 import { Send } from 'lucide-react';
@@ -73,10 +74,11 @@ function SocialBtn({ href, children }: SocialLinkProps) {
 }
 
 export function Footer() {
+  const { t } = useTranslation();
   const { name: storeName, slogan: storeSlogan } = useStoreInfo();
   const location = useLocation();
   // Ana sayfada bülten "Günce" bandında olduğu için footer'daki tekrar gizlenir
-  const isHome = location.pathname === '/';
+  const isHome = location.pathname === '/' || location.pathname === '/en';
   const [email, setEmail] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
@@ -103,13 +105,13 @@ export function Footer() {
     try {
       const res = await api.post<{ success: boolean; message: string }>('/newsletter/subscribe', { email });
       if (res.data.success) {
-        toast.success(res.data.message || 'Bültenimize başarıyla abone oldunuz!');
+        toast.success(res.data.message || t('footer.subscribe'));
         setEmail('');
       } else {
-        toast.error(res.data.message || 'Abonelik sırasında bir hata oluştu.');
+        toast.error(res.data.message || t('errors.serverError'));
       }
     } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Bir hata oluştu, lütfen tekrar deneyin.');
+      toast.error(err.response?.data?.message || t('errors.tryAgain'));
     } finally {
       setSubmitting(false);
     }
@@ -128,17 +130,17 @@ export function Footer() {
           <div className="max-w-xl">
             <p className="mb-3 flex items-center gap-3 text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
               <span className="h-px w-8 bg-amber-500" />
-              Bülten
+              {t('footer.newsletter')}
             </p>
-            <h3 className="font-display text-3xl md:text-4xl text-foreground mb-2">Özel Fırsatlardan Haberdar Olun</h3>
+            <h3 className="font-display text-3xl md:text-4xl text-foreground mb-2">{t('footer.newsletterDesc')}</h3>
             <p className="text-muted-foreground text-sm leading-relaxed">
-              Bültenimize abone olun, yeni ürünlerden, kampanyalardan ve size özel sürpriz indirimlerden ilk siz haberdar olun.
+              {t('footer.newsletterSubtitle')}
             </p>
           </div>
           <form onSubmit={handleSubscribe} className="flex w-full md:w-auto max-w-md items-center gap-2">
             <Input
               type="email"
-              placeholder="E-posta adresiniz"
+              placeholder={t('auth.email')}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="bg-card border-border text-foreground placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-amber-500/40 focus-visible:border-amber-500/60 h-11 w-full md:w-80 rounded-sm"
@@ -146,7 +148,7 @@ export function Footer() {
               disabled={submitting}
             />
             <Button type="submit" disabled={submitting} className="rounded-full bg-foreground hover:bg-amber-800 text-background font-medium px-5 h-11 gap-2 shrink-0 border-none">
-              <span>{submitting ? 'Abone Yapılıyor...' : 'Abone Ol'}</span>
+              <span>{submitting ? t('footer.subscribing') : t('footer.subscribe')}</span>
               <Send className="h-4 w-4" />
             </Button>
           </form>
@@ -206,7 +208,7 @@ export function Footer() {
         </div>
 
         <div>
-          <h3 className="mb-4 text-xs uppercase tracking-[0.3em] text-muted-foreground">Kategoriler</h3>
+          <h3 className="mb-4 text-xs uppercase tracking-[0.3em] text-muted-foreground">{t('footer.categories')}</h3>
           <ul className="space-y-2.5 text-muted-foreground">
             {categories.map((cat) => (
               <li key={cat.id}>
@@ -219,18 +221,18 @@ export function Footer() {
         </div>
 
         <div>
-          <h3 className="mb-4 text-xs uppercase tracking-[0.3em] text-muted-foreground">Hesabım</h3>
+          <h3 className="mb-4 text-xs uppercase tracking-[0.3em] text-muted-foreground">{t('footer.account')}</h3>
           <ul className="space-y-2.5 text-muted-foreground">
-            <li><Link to="/hesabim/siparisler" className="hover:text-amber-800 dark:hover:text-amber-500 transition-colors">Siparişlerim</Link></li>
-            <li><Link to="/hesabim/profil" className="hover:text-amber-800 dark:hover:text-amber-500 transition-colors">Profil Bilgilerim</Link></li>
-            <li><Link to="/sepet" className="hover:text-amber-800 dark:hover:text-amber-500 transition-colors">Sepetim</Link></li>
-            <li><Link to="/hesabim/favoriler" className="hover:text-amber-800 dark:hover:text-amber-500 transition-colors">Favori Ürünlerim</Link></li>
+            <li><Link to="/hesabim/siparisler" className="hover:text-amber-800 dark:hover:text-amber-500 transition-colors">{t('footer.myOrders')}</Link></li>
+            <li><Link to="/hesabim/profil" className="hover:text-amber-800 dark:hover:text-amber-500 transition-colors">{t('footer.profile')}</Link></li>
+            <li><Link to="/sepet" className="hover:text-amber-800 dark:hover:text-amber-500 transition-colors">{t('header.cart')}</Link></li>
+            <li><Link to="/hesabim/favoriler" className="hover:text-amber-800 dark:hover:text-amber-500 transition-colors">{t('footer.favorites')}</Link></li>
           </ul>
         </div>
 
         {menuPages.length > 0 && (
           <div>
-            <h3 className="mb-4 text-xs uppercase tracking-[0.3em] text-muted-foreground">Müşteri Hizmetleri</h3>
+            <h3 className="mb-4 text-xs uppercase tracking-[0.3em] text-muted-foreground">{t('footer.customerService')}</h3>
             <ul className="space-y-2.5 text-muted-foreground">
               {menuPages.map((p) => (
                 <li key={p.slug}>
@@ -249,7 +251,7 @@ export function Footer() {
 
       <div className="border-t border-border bg-secondary/40 py-6 text-center text-xs text-muted-foreground">
         <div className="container mx-auto px-4 text-center space-y-1.5">
-          <p>© {new Date().getFullYear()} {storeName}. Tüm hakları saklıdır.</p>
+          <p>{t('footer.copyright').replace('{year}', new Date().getFullYear().toString()).replace('{storeName}', storeName)}</p>
           <p className="text-muted-foreground/70">
             Yazılım &amp; Geliştirme:{' '}
             <a

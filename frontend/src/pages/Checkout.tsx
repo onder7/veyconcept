@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import {
@@ -45,16 +46,17 @@ function formatPrice(n: number) {
 
 // ─── Step indicators ──────────────────────────────────────────────────────────
 
-const STEPS = ['Adres', 'Özet & Ödeme', 'Tamamlandı'];
-
 function StepBar({ current }: { current: number }) {
+  const { t } = useTranslation();
+  const steps = [t('checkout.steps.address'), t('checkout.steps.summary'), t('checkout.steps.completed')];
+  
   return (
     <ol className="flex items-center gap-0 mb-8">
-      {STEPS.map((label, i) => (
+      {steps.map((label, i) => (
         <li key={label} className="flex items-center flex-1 last:flex-none">
           <div
             className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold border transition-colors
-              ${i < current ? 'bg-foreground border-foreground text-background' : ''}
+              ${i < current ? 'bg-primary border-primary text-primary-foreground' : ''}
               ${i === current ? 'border-amber-600 text-amber-700 dark:text-amber-500' : ''}
               ${i > current ? 'border-border text-muted-foreground' : ''}`}
           >
@@ -63,7 +65,7 @@ function StepBar({ current }: { current: number }) {
           <span className={`ml-2 text-xs uppercase tracking-[0.12em] ${i === current ? 'text-foreground' : 'text-muted-foreground'}`}>
             {label}
           </span>
-          {i < STEPS.length - 1 && <ChevronRight className="h-4 w-4 mx-2 text-muted-foreground flex-shrink-0" />}
+          {i < steps.length - 1 && <ChevronRight className="h-4 w-4 mx-2 text-muted-foreground flex-shrink-0" />}
         </li>
       ))}
     </ol>
@@ -73,6 +75,7 @@ function StepBar({ current }: { current: number }) {
 // ─── Address form ─────────────────────────────────────────────────────────────
 
 function AddressForm({ onSaved }: { onSaved: (addr: Address) => void }) {
+  const { t } = useTranslation();
   const { register, handleSubmit, formState: { errors } } = useForm<AddressFormValues>({
     resolver: zodResolver(addressSchema),
   });
@@ -81,7 +84,7 @@ function AddressForm({ onSaved }: { onSaved: (addr: Address) => void }) {
     mutationFn: (data: AddressFormValues) =>
       checkoutApi.createAddress({ ...data, type: 'SHIPPING', isDefault: true }),
     onSuccess: (res) => onSaved(res.data.data),
-    onError: () => toast.error('Adres kaydedilemedi'),
+    onError: () => toast.error(t('checkout.addressSaveError')),
   });
 
   const field = (id: keyof AddressFormValues, label: string, placeholder = '', fullWidth = false) => (
@@ -95,19 +98,19 @@ function AddressForm({ onSaved }: { onSaved: (addr: Address) => void }) {
   return (
     <form onSubmit={handleSubmit((d) => mut.mutate(d))} className="space-y-4">
       <div className="grid sm:grid-cols-2 gap-4">
-        {field('title', 'Adres Başlığı', 'Ev, İş...')}
-        {field('phone', 'Telefon', '05XX XXX XX XX')}
-        {field('firstName', 'Ad')}
-        {field('lastName', 'Soyad')}
-        {field('city', 'Şehir', 'İstanbul')}
-        {field('district', 'İlçe', 'Kadıköy')}
-        {field('postalCode', 'Posta Kodu (opsiyonel)', '34XXX')}
+        {field('title', t('checkout.addressTitle'), 'Ev, İş...')}
+        {field('phone', t('checkout.phone'), '05XX XXX XX XX')}
+        {field('firstName', t('checkout.firstName'))}
+        {field('lastName', t('checkout.lastName'))}
+        {field('city', t('checkout.city'), 'İstanbul')}
+        {field('district', t('checkout.district'), 'Kadıköy')}
+        {field('postalCode', t('checkout.postalCode'), '34XXX')}
         <div></div>
-        {field('address', 'Adres', 'Cadde, sokak, bina no, daire...', true)}
+        {field('address', t('checkout.address'), 'Cadde, sokak, bina no, daire...', true)}
       </div>
       <Button type="submit" disabled={mut.isPending} className="w-full sm:w-auto">
         {mut.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
-        Adresi Kaydet
+        {t('checkout.saveAddress')}
       </Button>
     </form>
   );
@@ -137,7 +140,7 @@ function PayMethodCard({
       }`}
     >
       <div className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full ${
-        selected ? 'bg-foreground text-background' : 'bg-muted text-muted-foreground'
+        selected ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
       }`}>
         {icon}
       </div>
@@ -153,7 +156,7 @@ function PayMethodCard({
         <p className="text-xs text-muted-foreground mt-0.5">{subtitle}</p>
       </div>
       <div className={`h-5 w-5 rounded-full border flex items-center justify-center flex-shrink-0 transition-colors ${
-        selected ? 'border-foreground bg-foreground' : 'border-muted-foreground'
+        selected ? 'border-primary bg-primary' : 'border-muted-foreground'
       }`}>
         {selected && <div className="h-2 w-2 rounded-full bg-background" />}
       </div>
@@ -164,15 +167,16 @@ function PayMethodCard({
 // ─── Havale Info ──────────────────────────────────────────────────────────────
 
 function HavaleInfo({ info, noteOnly = false }: { info: NonNullable<{ bankName: string; iban: string; accountName: string; description: string; orderNumber?: string }>; noteOnly?: boolean }) {
+  const { t } = useTranslation();
   const copyToClipboard = (text: string, label: string) => {
-    navigator.clipboard.writeText(text).then(() => toast.success(`${label} kopyalandı`)).catch(() => {
+    navigator.clipboard.writeText(text).then(() => toast.success(`${label} ${t('checkout.copied')}`)).catch(() => {
       const el = document.createElement('textarea');
       el.value = text;
       document.body.appendChild(el);
       el.select();
       document.execCommand('copy');
       document.body.removeChild(el);
-      toast.success(`${label} kopyalandı`);
+      toast.success(`${label} ${t('checkout.copied')}`);
     });
   };
 
@@ -182,12 +186,10 @@ function HavaleInfo({ info, noteOnly = false }: { info: NonNullable<{ bankName: 
       <div className="rounded-lg border border-blue-200 bg-blue-50 dark:bg-blue-950/20 dark:border-blue-800 p-4">
         <p className="text-sm font-semibold text-blue-900 dark:text-blue-200 flex items-center gap-2 mb-2">
           <Banknote className="h-4 w-4" />
-          Havale / EFT ile Ödeme
+          {t('checkout.transferPayment')}
         </p>
         <p className="text-xs text-blue-700 dark:text-blue-300 leading-relaxed">
-          Siparişinizi tamamladıktan sonra açılacak ekranda <strong>banka hesap bilgilerimiz</strong> ve size özel
-          <strong> Sipariş Numaranız</strong> görüntülenecektir. Lütfen havale/EFT işlemini gerçekleştirirken açıklama
-          kısmına <strong>Sipariş Numaranızı</strong> yazınız. Ödemeniz doğrulandıktan sonra siparişiniz işleme alınacaktır.
+          {t('checkout.transferNote')}
         </p>
       </div>
     );
@@ -197,19 +199,19 @@ function HavaleInfo({ info, noteOnly = false }: { info: NonNullable<{ bankName: 
     <div className="rounded-lg border border-blue-200 bg-blue-50 dark:bg-blue-950/20 dark:border-blue-800 p-4 space-y-3">
       <p className="text-sm font-semibold text-blue-900 dark:text-blue-200 flex items-center gap-2">
         <Banknote className="h-4 w-4" />
-        Havale / EFT Bilgileri
+        {t('checkout.transferInfo')}
       </p>
       <div className="space-y-2 text-sm">
         {info.orderNumber && (
           <div className="flex justify-between items-center rounded-md bg-blue-100 dark:bg-blue-900/30 px-3 py-2 -mx-1">
-            <span className="text-blue-800 dark:text-blue-200 font-semibold">Sipariş No</span>
+            <span className="text-blue-800 dark:text-blue-200 font-semibold">{t('checkout.orderNumber')}</span>
             <div className="flex items-center gap-2">
               <span className="font-mono font-bold text-blue-900 dark:text-blue-100">#{info.orderNumber}</span>
               <button
                 type="button"
-                onClick={() => copyToClipboard(info.orderNumber!, 'Sipariş numarası')}
+                onClick={() => copyToClipboard(info.orderNumber!, t('checkout.orderNumber'))}
                 className="p-1 rounded hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors"
-                title="Sipariş numarasını kopyala"
+                title={t('checkout.copyOrderNumber')}
               >
                 <Copy className="h-3.5 w-3.5 text-blue-600" />
               </button>
@@ -218,13 +220,13 @@ function HavaleInfo({ info, noteOnly = false }: { info: NonNullable<{ bankName: 
         )}
         {info.bankName && (
           <div className="flex justify-between items-center">
-            <span className="text-muted-foreground">Banka</span>
+            <span className="text-muted-foreground">{t('checkout.bank')}</span>
             <span className="font-medium">{info.bankName}</span>
           </div>
         )}
         {info.accountName && (
           <div className="flex justify-between items-center">
-            <span className="text-muted-foreground">Hesap Sahibi</span>
+            <span className="text-muted-foreground">{t('checkout.accountHolder')}</span>
             <span className="font-medium">{info.accountName}</span>
           </div>
         )}
@@ -237,7 +239,7 @@ function HavaleInfo({ info, noteOnly = false }: { info: NonNullable<{ bankName: 
                 type="button"
                 onClick={() => copyToClipboard(info.iban.replace(/\s/g, ''), 'IBAN')}
                 className="p-1 rounded hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors"
-                title="IBAN'ı kopyala"
+                title={t('checkout.copyIban')}
               >
                 <Copy className="h-3.5 w-3.5 text-blue-600" />
               </button>
@@ -246,14 +248,14 @@ function HavaleInfo({ info, noteOnly = false }: { info: NonNullable<{ bankName: 
         )}
         {info.description && (
           <div className="flex justify-between items-start gap-2">
-            <span className="text-muted-foreground flex-shrink-0">Açıklama</span>
+            <span className="text-muted-foreground flex-shrink-0">{t('checkout.description')}</span>
             <div className="flex items-center gap-2">
               <span className="font-mono text-xs font-semibold">{info.description}</span>
               <button
                 type="button"
-                onClick={() => copyToClipboard(info.description, 'Açıklama')}
+                onClick={() => copyToClipboard(info.description, t('checkout.description'))}
                 className="p-1 rounded hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors"
-                title="Açıklamayı kopyala"
+                title={t('checkout.copyDescription')}
               >
                 <Copy className="h-3.5 w-3.5 text-blue-600" />
               </button>
@@ -262,8 +264,7 @@ function HavaleInfo({ info, noteOnly = false }: { info: NonNullable<{ bankName: 
         )}
       </div>
       <p className="text-xs text-blue-700 dark:text-blue-300 leading-relaxed border-t border-blue-200 dark:border-blue-700 pt-3">
-        Siparişi tamamladığınızda size bir <strong>sipariş numarası</strong> verilir; havale/EFT
-        açıklamasına bu numarayı yazın. Ödemeniz tarafımıza ulaştıktan sonra siparişiniz hazırlanmaya başlar.
+        {t('checkout.transferInstructions')}
       </p>
     </div>
   );
@@ -272,6 +273,7 @@ function HavaleInfo({ info, noteOnly = false }: { info: NonNullable<{ bankName: 
 // ─── Main Checkout ─────────────────────────────────────────────────────────────
 
 export function Checkout() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { isAuthenticated } = useAuthStore();
   const { cart, setCart, appliedCoupon, setAppliedCoupon } = useCartStore();
@@ -329,7 +331,7 @@ export function Checkout() {
       setStep(2);
     },
     onError: (err: { response?: { data?: { message?: string } } }) =>
-      toast.error(err.response?.data?.message ?? 'Ödeme başlatılamadı'),
+      toast.error(err.response?.data?.message ?? t('checkout.paymentInitError')),
   });
 
   // COD / Havale place order
@@ -350,7 +352,7 @@ export function Checkout() {
       }
     },
     onError: (err: { response?: { data?: { error?: string } } }) =>
-      toast.error(err.response?.data?.error ?? 'Sipariş oluşturulamadı'),
+      toast.error(err.response?.data?.error ?? t('checkout.orderCreationError')),
   });
 
   // Inject iyzico form
@@ -388,11 +390,11 @@ export function Checkout() {
     // Fatura bilgisi doğrulama
     if (billingType === 'corporate') {
       if (!billing.billingName.trim() || !/^\d{10}$/.test(billing.taxNumber.trim()) || !billing.taxOffice.trim()) {
-        toast.error('Kurumsal fatura için ünvan, 10 haneli VKN ve vergi dairesi zorunludur');
+        toast.error(t('checkout.corporateValidationError'));
         return;
       }
     } else if (billing.identityNo.trim() && !/^\d{11}$/.test(billing.identityNo.trim())) {
-      toast.error('TC Kimlik No 11 haneli olmalıdır');
+      toast.error(t('checkout.identityValidationError'));
       return;
     }
 
@@ -421,7 +423,7 @@ export function Checkout() {
     <div className="space-y-4">
       <h2 className="font-display text-2xl flex items-center gap-2.5">
         <MapPin className="h-5 w-5 text-amber-700 dark:text-amber-500" />
-        Teslimat Adresi
+        {t('checkout.shippingAddress')}
       </h2>
 
       {addrLoading ? (
@@ -456,13 +458,13 @@ export function Checkout() {
       {!showNewForm && (
         <Button variant="outline" size="sm" onClick={() => setShowNewForm(true)}>
           <Plus className="h-4 w-4 mr-2" />
-          Yeni Adres Ekle
+          {t('checkout.addNewAddress')}
         </Button>
       )}
 
       {showNewForm && (
         <div className="border border-border rounded-sm p-4 space-y-4">
-          <h3 className="font-medium">Yeni Adres</h3>
+          <h3 className="font-medium">{t('checkout.newAddress')}</h3>
           <AddressForm
             onSaved={(addr) => {
               setSelectedAddress(addr);
@@ -474,7 +476,7 @@ export function Checkout() {
       )}
 
       <Button className="w-full h-11 rounded-full" disabled={!selectedAddress} onClick={() => setStep(1)}>
-        Devam Et
+        {t('checkout.proceed')}
         <ChevronRight className="h-4 w-4 ml-2" />
       </Button>
     </div>
@@ -488,7 +490,7 @@ export function Checkout() {
       <div>
         <h2 className="font-display text-2xl flex items-center gap-2.5 mb-3">
           <ShoppingBag className="h-5 w-5 text-amber-700 dark:text-amber-500" />
-          Sipariş Özeti
+          {t('checkout.orderSummary')}
         </h2>
 
         <div className="border border-border rounded-sm divide-y">
@@ -516,7 +518,7 @@ export function Checkout() {
           <div className="border border-border rounded-sm p-4 mt-3">
             <p className="text-sm font-medium mb-1 flex items-center gap-1.5">
               <MapPin className="h-4 w-4 text-muted-foreground" />
-              Teslimat Adresi
+              {t('checkout.shippingAddress')}
             </p>
             <p className="text-sm text-muted-foreground">
               {selectedAddress.firstName} {selectedAddress.lastName}, {selectedAddress.address},{' '}
@@ -530,7 +532,7 @@ export function Checkout() {
       <div>
         <h2 className="font-display text-2xl flex items-center gap-2.5 mb-3">
           <CreditCard className="h-5 w-5 text-amber-700 dark:text-amber-500" />
-          Ödeme Yöntemi
+          {t('checkout.paymentMethod')}
         </h2>
 
         <div className="space-y-2">
@@ -540,8 +542,8 @@ export function Checkout() {
               selected={payMethod === 'card'}
               onSelect={() => setPayMethod('card')}
               icon={<CreditCard className="h-5 w-5" />}
-              title="Kredi / Banka Kartı"
-              subtitle="Güvenli ödeme altyapısı ile online ödeme"
+              title={t('checkout.creditCard')}
+              subtitle={t('checkout.creditCardDesc')}
             />
           )}
           {methods.cod.enabled && (
@@ -550,8 +552,8 @@ export function Checkout() {
               selected={payMethod === 'cod'}
               onSelect={() => setPayMethod('cod')}
               icon={<Truck className="h-5 w-5" />}
-              title="Kapıda Ödeme"
-              subtitle="Sipariş tesliminde nakit veya kartla ödeyin"
+              title={t('checkout.cashOnDelivery')}
+              subtitle={t('checkout.cashOnDeliveryDesc')}
               badge={methods.cod.fee > 0 ? `+${formatPrice(methods.cod.fee)}` : undefined}
             />
           )}
@@ -561,8 +563,8 @@ export function Checkout() {
               selected={payMethod === 'havale'}
               onSelect={() => setPayMethod('havale')}
               icon={<Banknote className="h-5 w-5" />}
-              title="Havale / EFT"
-              subtitle="Banka havalesi veya EFT ile ödeme yapın"
+              title={t('checkout.transferPayment')}
+              subtitle={t('checkout.transferPaymentDesc')}
             />
           )}
         </div>
@@ -579,7 +581,7 @@ export function Checkout() {
       <div>
         <h2 className="font-display text-2xl flex items-center gap-2.5 mb-3">
           <FileText className="h-5 w-5 text-amber-700 dark:text-amber-500" />
-          Fatura Bilgileri
+          {t('checkout.invoiceInfo')}
         </h2>
 
         <div className="flex gap-2 mb-3">
@@ -590,7 +592,7 @@ export function Checkout() {
               billingType === 'individual' ? 'border-foreground bg-secondary text-primary' : 'text-muted-foreground'
             }`}
           >
-            Bireysel
+            {t('checkout.individual')}
           </button>
           <button
             type="button"
@@ -599,7 +601,7 @@ export function Checkout() {
               billingType === 'corporate' ? 'border-foreground bg-secondary text-primary' : 'text-muted-foreground'
             }`}
           >
-            Kurumsal
+            {t('checkout.corporate')}
           </button>
         </div>
 
@@ -611,11 +613,11 @@ export function Checkout() {
               maxLength={11}
               value={billing.identityNo}
               onChange={(e) => setBilling((b) => ({ ...b, identityNo: e.target.value.replace(/\D/g, '') }))}
-              placeholder="TC Kimlik No (opsiyonel)"
+              placeholder={t('checkout.identityNo')}
               className="w-full rounded-sm border border-border px-3 py-2 text-sm focus:border-amber-500 outline-none"
             />
             <p className="text-xs text-muted-foreground mt-1">
-              Bireysel müşteriler için e-Arşiv fatura kesilir. TCKN girilmesi zorunlu değildir.
+              {t('checkout.individualNote')}
             </p>
           </div>
         ) : (
@@ -624,7 +626,7 @@ export function Checkout() {
               type="text"
               value={billing.billingName}
               onChange={(e) => setBilling((b) => ({ ...b, billingName: e.target.value }))}
-              placeholder="Firma Ünvanı *"
+              placeholder={t('checkout.companyName')}
               className="w-full rounded-sm border border-border px-3 py-2 text-sm focus:border-amber-500 outline-none"
             />
             <div className="grid grid-cols-2 gap-2">
@@ -634,19 +636,19 @@ export function Checkout() {
                 maxLength={10}
                 value={billing.taxNumber}
                 onChange={(e) => setBilling((b) => ({ ...b, taxNumber: e.target.value.replace(/\D/g, '') }))}
-                placeholder="Vergi No (VKN) *"
+                placeholder={t('checkout.taxNumber')}
                 className="w-full rounded-sm border border-border px-3 py-2 text-sm focus:border-amber-500 outline-none"
               />
               <input
                 type="text"
                 value={billing.taxOffice}
                 onChange={(e) => setBilling((b) => ({ ...b, taxOffice: e.target.value }))}
-                placeholder="Vergi Dairesi *"
+                placeholder={t('checkout.taxOffice')}
                 className="w-full rounded-sm border border-border px-3 py-2 text-sm focus:border-amber-500 outline-none"
               />
             </div>
             <p className="text-xs text-muted-foreground">
-              Vergi mükellefi kurumlar için e-Fatura kesilir. Tüm alanlar zorunludur.
+              {t('checkout.corporateNote')}
             </p>
           </div>
         )}
@@ -655,46 +657,46 @@ export function Checkout() {
       {/* Price breakdown */}
       <div className="border border-border rounded-sm p-4 space-y-2">
         <div className="flex justify-between text-sm">
-          <span>Ara Toplam</span>
+          <span>{t('checkout.subtotal')}</span>
           <span>{formatPrice(subtotal)}</span>
         </div>
         {discount > 0 && (
           <div className="flex justify-between text-sm text-green-700">
-            <span>İndirim {appliedCoupon ? `(${appliedCoupon.code})` : ''}</span>
+            <span>{t('checkout.discount')} {appliedCoupon ? `(${appliedCoupon.code})` : ''}</span>
             <span>−{formatPrice(discount)}</span>
           </div>
         )}
         <div className="flex justify-between text-sm">
-          <span>Kargo</span>
-          <span>{shippingFee === 0 ? 'Ücretsiz' : formatPrice(shippingFee)}</span>
+          <span>{t('checkout.shipping')}</span>
+          <span>{shippingFee === 0 ? t('checkout.free') : formatPrice(shippingFee)}</span>
         </div>
         {payMethod === 'cod' && methods.cod.fee > 0 && (
           <div className="flex justify-between text-sm text-amber-700">
-            <span>Kapıda Ödeme Ücreti</span>
+            <span>{t('checkout.codFee')}</span>
             <span>{formatPrice(methods.cod.fee)}</span>
           </div>
         )}
         <div className="flex justify-between font-semibold border-t pt-2">
-          <span>Toplam (KDV Dahil)</span>
+          <span>{t('checkout.total')}</span>
           <span>{formatPrice(total)}</span>
         </div>
       </div>
 
       <div className="flex gap-3">
-        <Button variant="outline" onClick={() => setStep(0)} className="flex-1 h-11 rounded-full">Geri</Button>
+        <Button variant="outline" onClick={() => setStep(0)} className="flex-1 h-11 rounded-full">{t('checkout.back')}</Button>
         <Button
           className="flex-1 h-11 rounded-full"
           disabled={isProcessing}
           onClick={handleProceed}
         >
           {isProcessing ? (
-            <><Loader2 className="h-4 w-4 animate-spin mr-2" />İşleniyor...</>
+            <><Loader2 className="h-4 w-4 animate-spin mr-2" />{t('checkout.processing')}</>
           ) : payMethod === 'card' ? (
-            <><CreditCard className="h-4 w-4 mr-2" />Kartla Öde</>
+            <><CreditCard className="h-4 w-4 mr-2" />{t('checkout.payWithCard')}</>
           ) : payMethod === 'cod' ? (
-            <><Truck className="h-4 w-4 mr-2" />Siparişi Tamamla</>
+            <><Truck className="h-4 w-4 mr-2" />{t('checkout.completeOrder')}</>
           ) : (
-            <><Banknote className="h-4 w-4 mr-2" />Siparişi Tamamla</>
+            <><Banknote className="h-4 w-4 mr-2" />{t('checkout.completeOrder')}</>
           )}
         </Button>
       </div>
@@ -707,13 +709,13 @@ export function Checkout() {
     <div className="space-y-4">
       <h2 className="font-display text-2xl flex items-center gap-2.5">
         <CreditCard className="h-5 w-5 text-amber-700 dark:text-amber-500" />
-        Kart Bilgileri
+        {t('checkout.cardInfo')}
       </h2>
 
       {initData && (
         <div className="border border-border rounded-sm p-4 text-sm text-muted-foreground space-y-1">
           <div className="flex justify-between">
-            <span>Toplam Tutar</span>
+            <span>{t('checkout.totalAmount')}</span>
             <span className="font-semibold text-foreground">{formatPrice(initData.total)}</span>
           </div>
         </div>
@@ -722,14 +724,14 @@ export function Checkout() {
       <div ref={paymentDivRef} className="min-h-[200px]" />
 
       <Button variant="outline" onClick={() => setStep(1)} className="w-full">
-        ← Özete Dön
+        ← {t('checkout.backToSummary')}
       </Button>
     </div>
   );
 
   return (
     <main className="container mx-auto px-4 py-8 max-w-2xl">
-      <h1 className="font-display text-4xl mb-6">Ödeme</h1>
+      <h1 className="font-display text-4xl mb-6">{t('checkout.title')}</h1>
       <StepBar current={step} />
 
       {step === 0 && stepAddress()}

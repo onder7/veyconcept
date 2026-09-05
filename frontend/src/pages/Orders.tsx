@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { Package, ChevronRight, Clock, Truck, CheckCircle, XCircle, RefreshCw, AlertCircle, Printer, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -25,20 +26,23 @@ function formatDate(iso: string) {
 }
 
 const STATUS_META: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; icon: React.ReactNode }> = {
-  PENDING:    { label: 'Beklemede',  variant: 'secondary',    icon: <Clock className="h-3 w-3" /> },
-  PROCESSING: { label: 'Hazırlanıyor', variant: 'default',   icon: <RefreshCw className="h-3 w-3" /> },
-  SHIPPED:    { label: 'Kargoda',    variant: 'outline',      icon: <Truck className="h-3 w-3" /> },
-  DELIVERED:  { label: 'Teslim Edildi', variant: 'default',  icon: <CheckCircle className="h-3 w-3" /> },
-  CANCELLED:  { label: 'İptal Edildi', variant: 'destructive', icon: <XCircle className="h-3 w-3" /> },
-  REFUNDED:   { label: 'İade Edildi', variant: 'outline',    icon: <RefreshCw className="h-3 w-3" /> },
+  PENDING:    { label: 'order.statusPending',  variant: 'secondary',    icon: <Clock className="h-3 w-3" /> },
+  PROCESSING: { label: 'order.statusProcessing', variant: 'default',   icon: <RefreshCw className="h-3 w-3" /> },
+  SHIPPED:    { label: 'order.statusShipped',    variant: 'outline',      icon: <Truck className="h-3 w-3" /> },
+  DELIVERED:  { label: 'order.statusDelivered', variant: 'default',  icon: <CheckCircle className="h-3 w-3" /> },
+  CANCELLED:  { label: 'order.statusCancelled', variant: 'destructive', icon: <XCircle className="h-3 w-3" /> },
+  REFUNDED:   { label: 'order.statusRefunded', variant: 'outline',    icon: <RefreshCw className="h-3 w-3" /> },
 };
 
 function StatusBadge({ status }: { status: string }) {
-  const meta = STATUS_META[status] ?? { label: status, variant: 'outline' as const, icon: null };
+  const { t } = useTranslation();
+  const meta = STATUS_META[status];
+  const labelKey = meta?.label;
+  const label = labelKey ? t(labelKey) : status;
   return (
-    <Badge variant={meta.variant} className="flex items-center gap-1 w-fit">
-      {meta.icon}
-      {meta.label}
+    <Badge variant={meta?.variant ?? 'outline'} className="flex items-center gap-1 w-fit">
+      {meta?.icon}
+      {label}
     </Badge>
   );
 }
@@ -106,6 +110,7 @@ function OrderCard({ order }: { order: Order }) {
 // ─── Orders List ──────────────────────────────────────────────────────────────
 
 export function Orders() {
+  const { t } = useTranslation();
   const { data: orders, isLoading } = useQuery<Order[]>({
     queryKey: ['orders'],
     queryFn: async () => (await checkoutApi.listOrders()).data.data,
@@ -115,7 +120,7 @@ export function Orders() {
     <main className="container mx-auto px-4 py-8 max-w-2xl">
       <h1 className="font-display text-4xl mb-6 flex items-center gap-2.5">
         <Package className="h-6 w-6" />
-        Siparişlerim
+        {t('account.myOrders')}
       </h1>
 
       {isLoading ? (
@@ -125,9 +130,9 @@ export function Orders() {
       ) : !orders?.length ? (
         <div className="text-center py-16">
           <Package className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-          <h2 className="text-lg font-semibold mb-2">Henüz siparişiniz yok</h2>
-          <p className="text-muted-foreground mb-6">İlk siparişinizi vermek için alışverişe başlayın.</p>
-          <Button render={<Link to="/ara" />}>Alışverişe Başla</Button>
+          <h2 className="text-lg font-semibold mb-2">{t('order.noOrders')}</h2>
+          <p className="text-muted-foreground mb-6">{t('order.startShopping')}</p>
+          <Button render={<Link to="/ara" />}>{t('cart.continueShopping')}</Button>
         </div>
       ) : (
         <div className="space-y-3">
@@ -141,6 +146,7 @@ export function Orders() {
 // ─── Order Detail ─────────────────────────────────────────────────────────────
 
 export function OrderDetail() {
+  const { t } = useTranslation();
   const { id: orderId = '' } = useParams<{ id: string }>();
   const qc = useQueryClient();
   const [isCancellationModalOpen, setIsCancellationModalOpen] = useState(false);
@@ -347,8 +353,8 @@ thead th:nth-child(3),thead th:nth-child(4){text-align:right}
   if (isError || !order) {
     return (
       <main className="container mx-auto px-4 py-16 text-center">
-        <p className="text-muted-foreground mb-4">Sipariş bulunamadı.</p>
-        <Button render={<Link to="/hesabim/siparisler" />} variant="outline">Geri Dön</Button>
+        <p className="text-muted-foreground mb-4">{t('order.notFound')}</p>
+        <Button render={<Link to="/hesabim/siparisler" />} variant="outline">{t('common.back')}</Button>
       </main>
     );
   }
@@ -371,7 +377,7 @@ thead th:nth-child(3),thead th:nth-child(4){text-align:right}
     <main className="container mx-auto px-4 py-8 max-w-7xl">
       {/* Breadcrumb */}
       <nav className="flex items-center gap-1 text-sm text-muted-foreground mb-6">
-        <Link to="/hesabim/siparisler" className="hover:text-foreground">Siparişlerim</Link>
+        <Link to="/hesabim/siparisler" className="hover:text-foreground">{t('account.myOrders')}</Link>
         <ChevronRight className="h-4 w-4" />
         <span className="text-foreground font-medium">#{order.id.slice(-8).toUpperCase()}</span>
       </nav>
@@ -583,7 +589,7 @@ thead th:nth-child(3),thead th:nth-child(4){text-align:right}
           className="flex items-center gap-2"
         >
           <Printer className="h-4 w-4" />
-          Fatura Yazdır
+          {t('order.printInvoice')}
         </Button>
         <Button
           variant="outline"
@@ -592,7 +598,7 @@ thead th:nth-child(3),thead th:nth-child(4){text-align:right}
           className="flex items-center gap-2"
         >
           <Mail className="h-4 w-4" />
-          {invoiceSending ? 'Gönderiliyor…' : 'Fatura E-postası Gönder'}
+          {invoiceSending ? t('order.sendingInvoice') : t('order.sendInvoiceEmail')}
         </Button>
       </div>
 

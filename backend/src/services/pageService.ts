@@ -2,11 +2,15 @@ import { prisma } from '../config/database';
 import { getStoreIdentity } from './settingsService';
 import { AppError } from '../types';
 
+export type Language = 'tr' | 'en';
+
 export interface PageDto {
   id: string;
   slug: string;
   title: string;
+  titleEn?: string | null;
   content: string;
+  contentEn?: string | null;
   showInMenu: boolean;
   showInHeader: boolean;
   showInFooter: boolean;
@@ -201,18 +205,31 @@ export async function seedDefaultPagesIfEmpty(): Promise<number> {
 }
 
 // ─── Public ──────────────────────────────────────────────────────────────────
-export async function listMenuPages(): Promise<Array<{ slug: string; title: string; isSystem: boolean; showInHeader: boolean; showInFooter: boolean }>> {
-  return prisma.page.findMany({
+export async function listMenuPages(language: Language = 'tr'): Promise<Array<{ slug: string; title: string; isSystem: boolean; showInHeader: boolean; showInFooter: boolean }>> {
+  const pages = await prisma.page.findMany({
     where: { isActive: true },
     orderBy: { sortOrder: 'asc' },
-    select: { slug: true, title: true, isSystem: true, showInHeader: true, showInFooter: true },
+    select: { slug: true, title: true, titleEn: true, isSystem: true, showInHeader: true, showInFooter: true },
   });
+
+  return pages.map(page => ({
+    slug: page.slug,
+    title: language === 'en' && page.titleEn ? page.titleEn : page.title,
+    isSystem: page.isSystem,
+    showInHeader: page.showInHeader,
+    showInFooter: page.showInFooter,
+  }));
 }
 
-export async function getPageBySlug(slug: string): Promise<PageDto | null> {
+export async function getPageBySlug(slug: string, language: Language = 'tr'): Promise<PageDto | null> {
   const page = await prisma.page.findUnique({ where: { slug } });
   if (!page || !page.isActive) return null;
-  return page;
+  
+  return {
+    ...page,
+    title: language === 'en' && page.titleEn ? page.titleEn : page.title,
+    content: language === 'en' && page.contentEn ? page.contentEn : page.content,
+  };
 }
 
 // ─── Admin ───────────────────────────────────────────────────────────────────

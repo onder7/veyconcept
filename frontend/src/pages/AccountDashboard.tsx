@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { CancellationModal } from '@/components/order/CancellationModal';
 import { CancellationStatus } from '@/components/order/CancellationStatus';
 import { ReturnModal } from '@/components/order/ReturnModal';
@@ -39,16 +40,19 @@ function formatPrice2(price: number) {
   return price.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY', minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
-const ORDER_STATUS_MAP: Record<string, { label: string; color: string }> = {
-  PENDING: { label: 'Beklemede', color: 'bg-yellow-100 text-yellow-800' },
-  PROCESSING: { label: 'İşleniyor', color: 'bg-blue-100 text-blue-800' },
-  SHIPPED: { label: 'Kargoda', color: 'bg-purple-100 text-purple-800' },
-  DELIVERED: { label: 'Teslim Edildi', color: 'bg-green-100 text-green-800' },
-  CANCELLED: { label: 'İptal Edildi', color: 'bg-red-100 text-red-800' },
-  REFUNDED: { label: 'İade Edildi', color: 'bg-orange-100 text-orange-800' },
-};
+function getOrderStatusMap(t: (key: string) => string): Record<string, { label: string; color: string }> {
+  return {
+    PENDING: { label: t('account.orderStatusPending'), color: 'bg-yellow-100 text-yellow-800' },
+    PROCESSING: { label: t('account.orderStatusProcessing'), color: 'bg-blue-100 text-blue-800' },
+    SHIPPED: { label: t('account.orderStatusShipped'), color: 'bg-purple-100 text-purple-800' },
+    DELIVERED: { label: t('account.orderStatusDelivered'), color: 'bg-green-100 text-green-800' },
+    CANCELLED: { label: t('account.orderStatusCancelled'), color: 'bg-red-100 text-red-800' },
+    REFUNDED: { label: t('account.orderStatusRefunded'), color: 'bg-orange-100 text-orange-800' },
+  };
+}
 
 export function AccountDashboard() {
+  const { t } = useTranslation();
   const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
   const setUser = useAuthStore((s) => s.setUser);
@@ -377,53 +381,55 @@ export function AccountDashboard() {
     }
   }
 
+  const ORDER_STATUS_MAP = getOrderStatusMap(t);
+
   const menuItems = [
     {
       id: 'overview',
       icon: User,
-      label: 'Hesap Özeti',
+      label: t('account.accountOverview'),
       badge: null,
     },
     {
       id: 'cart',
       icon: ShoppingBag,
-      label: 'Sepetim',
+      label: t('common.myCart'),
       badge: cartData?.items?.length ? String(cartData.items.length) : null,
     },
     {
       id: 'orders',
       icon: ShoppingBag,
-      label: 'Siparişlerim',
+      label: t('account.myOrders'),
       badge: ordersData.length > 0 ? String(ordersData.length) : null,
     },
     {
       id: 'favorites',
       icon: Heart,
-      label: 'Beğendiklerim',
+      label: t('account.myFavorites'),
       badge: favoritesData.length > 0 ? String(favoritesData.length) : null,
     },
     {
       id: 'reviews',
       icon: Star,
-      label: 'Değerlendirmelerim',
+      label: t('account.myReviews'),
       badge: reviewsData.length > 0 ? String(reviewsData.length) : null,
     },
     {
       id: 'questions',
       icon: MessageCircle,
-      label: 'Soru & Cevaplarım',
+      label: t('account.questionsAnswers'),
       badge: questionsData.length > 0 ? String(questionsData.length) : null,
     },
     {
       id: 'coupons',
       icon: Gift,
-      label: 'İndirimlerim',
+      label: t('account.myCoupons'),
       badge: null,
     },
     {
       id: 'profile',
       icon: User,
-      label: 'Profil Bilgileri',
+      label: t('account.profileInfo'),
       badge: null,
     },
   ];
@@ -542,7 +548,7 @@ export function AccountDashboard() {
                 <div className="bg-white rounded-lg border border-gray-200 p-6 dark:bg-gray-900 dark:border-gray-700">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">Toplam Sipariş</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">{t('account.totalOrders')}</p>
                       <p className="font-display text-4xl text-foreground">
                         {ordersData.length}
                       </p>
@@ -554,7 +560,7 @@ export function AccountDashboard() {
                 <div className="bg-white rounded-lg border border-gray-200 p-6 dark:bg-gray-900 dark:border-gray-700">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">Beğendiler</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">{t('account.favorites')}</p>
                       <p className="font-display text-4xl text-foreground">
                         {favoritesData.length}
                       </p>
@@ -566,7 +572,7 @@ export function AccountDashboard() {
                 <div className="bg-white rounded-lg border border-gray-200 p-6 dark:bg-gray-900 dark:border-gray-700">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">Kuponlarım</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">{t('account.myCoupons')}</p>
                       <p className="font-display text-4xl text-foreground">0</p>
                     </div>
                     <Gift size={32} className="text-purple-500 opacity-20" />
@@ -576,7 +582,7 @@ export function AccountDashboard() {
                 <div className="bg-white rounded-lg border border-gray-200 p-6 dark:bg-gray-900 dark:border-gray-700">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">Değerlendirmelerim</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">{t('account.myReviews')}</p>
                       <p className="font-display text-4xl text-foreground">
                         {reviewsData.length}
                       </p>
@@ -591,7 +597,7 @@ export function AccountDashboard() {
                 <div className="bg-white rounded-lg border border-gray-200 dark:bg-gray-900 dark:border-gray-700">
                   <div className="p-6 border-b border-gray-200 dark:border-gray-700">
                     <h2 className="font-display text-xl text-foreground">
-                      Son Siparişler
+                      {t('account.recentOrders')}
                     </h2>
                   </div>
 
@@ -612,8 +618,8 @@ export function AccountDashboard() {
                               <p className="font-semibold text-gray-900 dark:text-white">
                                 {order.total ? formatPrice(order.total) : '-'}
                               </p>
-                              <span className={`inline-block text-sm font-medium px-2 py-1 rounded mt-1 ${ORDER_STATUS_MAP[order.status]?.color || 'bg-gray-100 text-gray-800'}`}>
-                                {ORDER_STATUS_MAP[order.status]?.label || order.status}
+                              <span className={`inline-block text-sm font-medium px-2 py-1 rounded mt-1 ${getOrderStatusMap(t)[order.status]?.color || 'bg-gray-100 text-gray-800'}`}>
+                                {getOrderStatusMap(t)[order.status]?.label || order.status}
                               </span>
                             </div>
                             <ChevronRight size={20} className="text-gray-400" />
@@ -631,7 +637,7 @@ export function AccountDashboard() {
           {activeSection === 'cart' && (
             <div className="bg-white rounded-lg border border-gray-200 dark:bg-gray-900 dark:border-gray-700">
               <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-                <h2 className="font-display text-3xl text-foreground">Sepetim</h2>
+                <h2 className="font-display text-3xl text-foreground">{t('common.myCart')}</h2>
               </div>
 
               {cartLoading ? (
@@ -641,12 +647,12 @@ export function AccountDashboard() {
               ) : !cartData || !cartData.items || cartData.items.length === 0 ? (
                 <div className="p-12 text-center text-gray-500 dark:text-gray-400">
                   <ShoppingBag size={48} className="mx-auto mb-4 opacity-20" />
-                  <p className="mb-4">Sepetiniz boş</p>
+                  <p className="mb-4">{t('account.emptyCart')}</p>
                   <Link
                     to="/"
                     className="inline-block text-primary hover:underline font-medium"
                   >
-                    Alışverişe başla →
+                    {t('account.startShopping')} →
                   </Link>
                 </div>
               ) : (

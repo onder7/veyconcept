@@ -81,8 +81,10 @@ export interface AdminProductInput {
   categoryId: string;
   brandId?: string;
   name: string;
+  nameEn?: string;
   slug: string;
   description?: string;
+  descriptionEn?: string;
   isActive?: boolean;
   isFeatured?: boolean;
   vatRate?: number;
@@ -181,8 +183,10 @@ export async function adminCreateProduct(data: AdminProductInput) {
       categoryId: data.categoryId,
       brandId: data.brandId || null,
       name: data.name,
+      nameEn: data.nameEn || null,
       slug: data.slug,
       description: data.description,
+      descriptionEn: data.descriptionEn || null,
       isActive: data.isActive ?? true,
       isFeatured: data.isFeatured ?? false,
       vatRate: data.vatRate ?? 20,
@@ -231,8 +235,10 @@ export async function adminUpdateProduct(id: string, data: Partial<AdminProductI
         categoryId: data.categoryId,
         brandId: data.brandId || null,
         name: data.name,
+        nameEn: data.nameEn || null,
         slug: data.slug,
         description: data.description,
+        descriptionEn: data.descriptionEn || null,
         isActive: data.isActive,
         isFeatured: data.isFeatured,
         vatRate: data.vatRate,

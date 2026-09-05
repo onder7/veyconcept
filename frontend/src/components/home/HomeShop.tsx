@@ -1,17 +1,13 @@
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ArrowUpRight } from 'lucide-react';
 import type { Product } from '@/types';
 import { cn } from '@/lib/utils';
-import { useTaxConfig } from '@/hooks/useTaxConfig';
 import { ProductQuickView } from '@/components/home/ProductQuickView';
 
 interface Props {
   products: Product[];
   loading?: boolean;
-}
-
-function formatPrice(n: number): string {
-  return n.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY', maximumFractionDigits: 0 });
 }
 
 /**
@@ -20,7 +16,7 @@ function formatPrice(n: number): string {
  * (ProductQuickView) açılır. Kategori pill filtreleri, aspect-[4/5] editorial kartlar.
  */
 export function HomeShop({ products, loading = false }: Props) {
-  const { taxRate } = useTaxConfig();
+  const { t } = useTranslation();
   const [activeCat, setActiveCat] = useState<string>('all');
   const [selected, setSelected] = useState<Product | null>(null);
   const [open, setOpen] = useState(false);
@@ -42,13 +38,6 @@ export function HomeShop({ products, loading = false }: Props) {
     [products, activeCat],
   );
 
-  const grossOf = (p: Product): number => {
-    if (!p.variants?.length) return 0;
-    const cheapest = p.variants.reduce((min, v) => (Number(v.price) < Number(min.price) ? v : min), p.variants[0]);
-    const price = Number(cheapest.price);
-    return p.vatIncluded ? price : price * (1 + taxRate / 100);
-  };
-
   const openProduct = (p: Product) => {
     setSelected(p);
     setOpen(true);
@@ -61,14 +50,13 @@ export function HomeShop({ products, loading = false }: Props) {
         <div className="mb-12 md:mb-16">
           <p className="mb-5 flex items-center gap-4 text-[10px] uppercase tracking-[0.32em] text-muted-foreground">
             <span className="h-px w-10 bg-amber-500" />
-            Mağaza · Seçkiler
+            {t('components.homeShop.title')}
           </p>
           <h2 className="font-display text-5xl leading-[0.95] text-foreground md:text-7xl">
-            Öne Çıkan <span className="italic text-amber-700">Parçalar</span>
+            {t('components.homeShop.heading')} <span className="italic text-amber-700">{t('product.details')}</span>
           </h2>
           <p className="mt-6 max-w-xl text-sm leading-relaxed text-muted-foreground">
-            Seçkin koleksiyonumuzdan öne çıkan ürünler. İncelemek istediğinize dokunun — sayfadan
-            ayrılmadan detayları görüp sepetinize ekleyin.
+            {t('components.homeShop.description')}
           </p>
 
           {/* Kategori pill filtreleri */}
@@ -84,7 +72,7 @@ export function HomeShop({ products, loading = false }: Props) {
                     : 'border-border text-muted-foreground hover:border-foreground/40 hover:text-foreground',
                 )}
               >
-                Tümü
+                {t('components.homeShop.all')}
               </button>
               {categories.map((cat) => (
                 <button
@@ -106,7 +94,7 @@ export function HomeShop({ products, loading = false }: Props) {
         </div>
 
         {/* Ürün ızgarası */}
-        <div className="grid grid-cols-2 gap-x-4 gap-y-10 sm:gap-x-6 lg:grid-cols-3 xl:gap-x-8">
+        <div className="mx-auto grid max-w-[1000px] grid-cols-2 gap-x-4 gap-y-10 sm:gap-x-6 xl:gap-x-8">
           {loading
             ? Array.from({ length: 6 }).map((_, i) => (
                 <div key={i} className="animate-pulse">
@@ -130,7 +118,7 @@ export function HomeShop({ products, loading = false }: Props) {
                         />
                       ) : (
                         <div className="flex h-full w-full items-center justify-center text-xs text-muted-foreground">
-                          Görsel yok
+                          {t('components.homeShop.imageNotAvailable')}
                         </div>
                       )}
                       <span className="absolute left-4 top-4 z-10 font-mono text-xs text-white mix-blend-difference">
@@ -139,30 +127,18 @@ export function HomeShop({ products, loading = false }: Props) {
                       {/* Hover overlay pill */}
                       <div className="absolute inset-0 flex items-end justify-start bg-gradient-to-t from-black/20 to-transparent p-4 opacity-0 transition-opacity duration-500 group-hover:opacity-100">
                         <span className="flex items-center gap-1.5 rounded-full bg-background px-4 py-2 text-xs font-medium text-foreground">
-                          İncele <ArrowUpRight className="h-3.5 w-3.5" />
+                          {t('components.homeShop.explore')} <ArrowUpRight className="h-3.5 w-3.5" />
                         </span>
                       </div>
                     </div>
 
-                    <div className="mt-4 flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <h3 className="font-display text-lg text-foreground transition-colors group-hover:text-amber-800 dark:group-hover:text-amber-500">
-                          {product.brand?.name ? `${product.brand.name} ` : ''}
-                          {product.name}
-                        </h3>
-                        <p className="mt-0.5 truncate text-xs text-muted-foreground">{product.category?.name}</p>
-                      </div>
-                      <span className="shrink-0 font-display text-lg text-foreground">
-                        {product.variants?.length ? formatPrice(grossOf(product)) : ''}
-                      </span>
-                    </div>
                   </article>
                 );
               })}
         </div>
 
         {!loading && filtered.length === 0 && (
-          <p className="py-12 text-center text-sm text-muted-foreground">Bu kategoride ürün bulunamadı.</p>
+          <p className="py-12 text-center text-sm text-muted-foreground">{t('components.homeShop.noProducts')}</p>
         )}
       </div>
 

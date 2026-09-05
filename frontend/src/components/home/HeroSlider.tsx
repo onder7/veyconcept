@@ -13,19 +13,10 @@ export interface HeroSlide {
 interface Props {
   slides: HeroSlide[];
   storeName: string;
-  /** Mağaza sloganı (HTML olabilir) — slayt yokken overlay başlığı için düz metne indirgenir */
-  slogan?: string;
+
 }
 
 const SLIDE_DURATION = 6000;
-
-/** HTML slogandan düz metin çıkar */
-function plainText(html?: string): string {
-  if (!html) return '';
-  const tmp = document.createElement('div');
-  tmp.innerHTML = html;
-  return (tmp.textContent || tmp.innerText || '').replace(/\s+/g, ' ').trim();
-}
 
 /**
  * Tam ekran editorial hero slider.
@@ -35,9 +26,9 @@ function plainText(html?: string): string {
  *   admin'de tanımlı `link` adresine gider. Promo görselleri kendi metnini taşıdığı
  *   için üzerine sabit başlık/CTA konmaz — yalnızca editorial kontroller (ilerleme
  *   çubuğu, sayaç, ok butonları, KAYDIR) gösterilir.
- * - Slayt yoksa mağaza adı + "Mağazayı Keşfet" CTA'lı editorial fallback gösterilir.
+ * - Admin panelinde slayt yoksa yalnızca slider zemini gösterilir; varsayılan mağaza metni eklenmez.
  */
-export function HeroSlider({ slides, storeName, slogan }: Props) {
+export function HeroSlider({ slides, storeName }: Props) {
   const hasSlides = slides.length > 0;
   const count = Math.max(slides.length, 1);
   const [index, setIndex] = useState(0);
@@ -83,7 +74,7 @@ export function HeroSlider({ slides, storeName, slogan }: Props) {
   return (
     <section
       id="hero"
-      className="relative h-screen min-h-[600px] max-h-[940px] w-full overflow-hidden bg-foreground"
+      className="relative h-[72svh] min-h-[500px] max-h-[940px] w-full overflow-hidden bg-foreground md:h-screen"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
@@ -135,25 +126,25 @@ export function HeroSlider({ slides, storeName, slogan }: Props) {
       {hasSlides && (slides[index]?.title || slides[index]?.subtitle || slides[index]?.buttonText) && (
         <div
           key={index}
-          className="pointer-events-none relative z-10 mx-auto flex h-full max-w-[1600px] flex-col justify-end px-6 pb-24 animate-fade-up md:px-12 md:pb-28"
+          className="pointer-events-none relative z-10 mx-auto flex h-full max-w-[1600px] -translate-y-10 flex-col justify-center px-4 text-center animate-fade-up sm:-translate-y-14 sm:px-6 md:-translate-y-20 md:px-12"
         >
-          <div className="max-w-3xl">
-            <span className="mb-6 block h-px w-12 bg-amber-400" />
+          <div className="mx-auto max-w-3xl">
+            <span className="mx-auto mb-6 block h-px w-12 bg-amber-400" />
             {slides[index]?.title && (
-              <h1 className="font-display text-5xl leading-[0.95] text-white sm:text-7xl md:text-8xl">
+              <h1 className="font-display text-4xl leading-[1.02] text-white sm:text-7xl md:text-8xl">
                 {slides[index].title}
               </h1>
             )}
             {slides[index]?.subtitle && (
-              <p className="mt-5 max-w-xl text-base leading-relaxed text-white/80 md:text-lg">
+              <p className="mx-auto mt-5 max-w-xl text-base leading-relaxed text-white/80 md:text-lg">
                 {slides[index].subtitle}
               </p>
             )}
             {slides[index]?.buttonText && (
-              <div className="pointer-events-auto mt-9">
+              <div className="pointer-events-auto mt-9 flex justify-center">
                 <Link
                   to={slides[index].link || '#'}
-                  className="group inline-flex items-center gap-2 rounded-full bg-white px-7 py-3.5 text-sm font-medium text-foreground transition-all hover:bg-amber-50"
+                  className="group inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-6 py-3.5 text-sm font-medium text-foreground transition-all hover:bg-amber-50 sm:w-auto sm:px-7"
                 >
                   {slides[index].buttonText}
                   <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
@@ -164,33 +155,7 @@ export function HeroSlider({ slides, storeName, slogan }: Props) {
         </div>
       )}
 
-      {/* ─── Slayt yokken: editorial fallback overlay ─────────────────── */}
-      {!hasSlides && (
-        <div className="pointer-events-none relative z-10 mx-auto flex h-full max-w-[1600px] flex-col justify-end px-6 pb-24 md:px-12 md:pb-28">
-          <div className="max-w-4xl animate-fade-up">
-            <p className="mb-5 text-xs uppercase tracking-[0.35em] text-white/70">{storeName}</p>
-            <h1 className="font-display text-5xl leading-[0.95] text-white sm:text-7xl md:text-8xl lg:text-[8rem]">
-              {plainText(slogan) || storeName}
-            </h1>
-            <div className="pointer-events-auto mt-9 flex flex-wrap items-center gap-4">
-              <Link
-                to="/ara"
-                className="group inline-flex items-center gap-2 rounded-full bg-white px-7 py-3.5 text-sm font-medium text-foreground transition-all hover:bg-amber-50"
-              >
-                Mağazayı Keşfet
-                <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-              </Link>
-              <button
-                type="button"
-                onClick={scrollDown}
-                className="inline-flex items-center gap-2 rounded-full border border-white/40 px-7 py-3.5 text-sm font-medium text-white backdrop-blur-sm transition-all hover:border-white hover:bg-white/10"
-              >
-                Koleksiyonlar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+
 
       {/* ─── Editorial kontroller (yalnızca birden fazla slayt varsa) ── */}
       {count > 1 && (
@@ -203,7 +168,7 @@ export function HeroSlider({ slides, storeName, slogan }: Props) {
                   type="button"
                   onClick={() => go(i)}
                   aria-label={`Slayt ${i + 1}`}
-                  className="group relative h-0.5 flex-1 overflow-hidden bg-white/25"
+                  className="group relative h-0.5 min-h-0 flex-1 overflow-hidden bg-white/25"
                 >
                   <span
                     className="absolute inset-y-0 left-0 bg-amber-400"
@@ -243,7 +208,7 @@ export function HeroSlider({ slides, storeName, slogan }: Props) {
       <button
         type="button"
         onClick={scrollDown}
-        className="absolute bottom-8 right-8 z-20 hidden flex-col items-center gap-2 text-white/60 transition-colors hover:text-white md:flex"
+        className="absolute bottom-6 right-6 z-20 hidden flex-col items-center gap-2 text-white/60 transition-colors hover:text-white md:flex"
       >
         <span className="text-[10px] uppercase tracking-[0.3em]">Kaydır</span>
         <span className="h-12 w-px bg-white/40" />

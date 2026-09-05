@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { MapPin, Trash2, Edit2, Plus, ArrowLeft } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 
@@ -86,6 +87,7 @@ const inputClass =
 const selectClass = inputClass + ' disabled:opacity-50 disabled:cursor-not-allowed';
 
 export function Addresses() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
   const [isAdding, setIsAdding] = useState(false);
@@ -251,8 +253,8 @@ export function Addresses() {
               <ArrowLeft size={24} />
             </button>
             <div>
-              <h1 className="font-display text-4xl text-foreground">Adreslerim</h1>
-              <p className="text-gray-600 dark:text-gray-400">Gönderim ve fatura adreslerinizi yönetin</p>
+              <h1 className="font-display text-4xl text-foreground">{t('account.myAddresses')}</h1>
+              <p className="text-gray-600 dark:text-gray-400">{t('account.manageAddresses')}</p>
             </div>
           </div>
           <button
@@ -260,7 +262,7 @@ export function Addresses() {
             className="flex items-center gap-2 rounded-full bg-foreground px-5 py-2.5 text-background font-medium hover:bg-amber-900 transition-all"
           >
             <Plus size={20} />
-            Yeni Adres
+            {t('account.addNewAddress')}
           </button>
         </div>
 
@@ -272,9 +274,9 @@ export function Addresses() {
         ) : addresses.length === 0 && !isAdding ? (
           <div className="rounded-lg border-2 border-dashed border-gray-300 bg-gray-100 p-12 text-center dark:border-gray-700 dark:bg-gray-800">
             <MapPin size={48} className="mx-auto text-gray-400 mb-4" />
-            <p className="text-gray-600 dark:text-gray-400 mb-4">Henüz kayıtlı adres bulunmamaktadır</p>
+            <p className="text-gray-600 dark:text-gray-400 mb-4">{t('account.noAddresses')}</p>
             <button onClick={openNew} className="inline-block text-amber-800 dark:text-amber-500 hover:underline font-medium">
-              İlk adresini ekle →
+              {t('account.addFirstAddress')} →
             </button>
           </div>
         ) : (
@@ -318,62 +320,62 @@ export function Addresses() {
         {isAdding && (
           <div className="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
             <h2 className="font-display text-3xl text-foreground mb-6">
-              {editingId ? 'Adresi Düzenle' : 'Yeni Adres Ekle'}
+              {editingId ? t('account.editAddress') : t('account.addNewAddress')}
             </h2>
 
             <div className="space-y-4">
               {/* Ad Soyadı */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Ad</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('auth.firstName')}</label>
                   <input type="text" value={formData.firstName} onChange={(e) => setFormData({ ...formData, firstName: e.target.value })} className={inputClass} />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Soyadı</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('auth.lastName')}</label>
                   <input type="text" value={formData.lastName} onChange={(e) => setFormData({ ...formData, lastName: e.target.value })} className={inputClass} />
                 </div>
               </div>
 
               {/* Telefon */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Telefon</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('auth.phone')}</label>
                 <input type="tel" placeholder="+90 5XX XXX XXXX" value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} className={inputClass} />
               </div>
 
               {/* İl / İlçe / Mahalle */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">İl</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('account.city')}</label>
                   <select
                     value={formData.city}
                     onChange={(e) => setFormData({ ...formData, city: e.target.value, district: '', neighborhood: '' })}
                     className={selectClass}
                   >
-                    <option value="">Seçiniz</option>
+                    <option value="">{t('common.select')}</option>
                     {iller.map((il) => <option key={il} value={il}>{il}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">İlçe</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('account.district')}</label>
                   <select
                     value={formData.district}
                     onChange={(e) => setFormData({ ...formData, district: e.target.value, neighborhood: '' })}
                     disabled={!formData.city}
                     className={selectClass}
                   >
-                    <option value="">{formData.city ? 'Seçiniz' : 'Önce il seçin'}</option>
+                    <option value="">{formData.city ? t('common.select') : t('account.selectCityFirst')}</option>
                     {ilceler.map((ilce) => <option key={ilce} value={ilce}>{ilce}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Mahalle / Köy</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('account.neighborhood')}</label>
                   <select
                     value={formData.neighborhood}
                     onChange={(e) => setFormData({ ...formData, neighborhood: e.target.value })}
                     disabled={!formData.district}
                     className={selectClass}
                   >
-                    <option value="">{formData.district ? 'Seçiniz' : 'Önce ilçe seçin'}</option>
+                    <option value="">{formData.district ? t('common.select') : t('account.selectDistrictFirst')}</option>
                     {mahalleler.map((mah) => <option key={mah} value={mah}>{mah}</option>)}
                   </select>
                 </div>
@@ -381,14 +383,14 @@ export function Addresses() {
 
               {/* Açık Adres */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Açık Adres (cadde, sokak, bina, daire no)</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('account.fullAddress')}</label>
                 <textarea value={formData.address} onChange={(e) => setFormData({ ...formData, address: e.target.value })} rows={3} className={inputClass} />
               </div>
 
               {/* Posta Kodu */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Posta Kodu</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('account.postalCode')}</label>
                   <input type="text" placeholder="34200" value={formData.postalCode} onChange={(e) => setFormData({ ...formData, postalCode: e.target.value })} className={inputClass} />
                 </div>
               </div>
@@ -396,7 +398,7 @@ export function Addresses() {
               {/* Adres Türü — çoklu seçim */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Adres Türü <span className="text-xs text-gray-400 font-normal">(birden fazla seçilebilir)</span>
+                  {t('account.addressType')} <span className="text-xs text-gray-400 font-normal">({t('account.multipleSelect')})</span>
                 </label>
                 <div className="flex flex-wrap gap-3">
                   <label className={`flex items-center gap-2.5 cursor-pointer px-4 py-2.5 rounded-lg border-2 transition-all select-none ${
@@ -410,7 +412,7 @@ export function Addresses() {
                       onChange={(e) => { setFormData({ ...formData, isShipping: e.target.checked }); setTypeError(''); }}
                       className="h-4 w-4 accent-primary"
                     />
-                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">📦 Gönderim Adresi</span>
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">📦 {t('account.shippingAddress')}</span>
                   </label>
                   <label className={`flex items-center gap-2.5 cursor-pointer px-4 py-2.5 rounded-lg border-2 transition-all select-none ${
                     formData.isBilling
@@ -423,7 +425,7 @@ export function Addresses() {
                       onChange={(e) => { setFormData({ ...formData, isBilling: e.target.checked }); setTypeError(''); }}
                       className="h-4 w-4 accent-primary"
                     />
-                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">💳 Fatura Adresi</span>
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">💳 {t('account.billingAddress')}</span>
                   </label>
                 </div>
                 {typeError && <p className="text-xs text-red-500 mt-1.5">{typeError}</p>}
@@ -447,7 +449,7 @@ export function Addresses() {
                   onClick={() => { setIsAdding(false); setEditingId(null); setFormData(buildEmptyForm(user ?? undefined)); setTypeError(''); setSaveError(''); }}
                   className="flex-1 px-4 py-2 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                 >
-                  İptal
+                  {t('common.cancel')}
                 </button>
               </div>
             </div>
