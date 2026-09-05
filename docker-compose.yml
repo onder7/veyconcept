@@ -4,8 +4,8 @@ services:
   nginx:
     image: nginx:alpine
     ports:
-      - '172.20.0.7:80:80'
-      - '172.20.0.7:443:443'
+      - '8180:80'
+      - '8443:443'
     volumes:
       - ./nginx/conf.d:/etc/nginx/conf.d:ro
     depends_on:
