@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { productApi } from '@/services/productApi';
 import { api } from '@/services/api';
-import { HeroSlider } from '@/components/home/HeroSlider';
+import { HeroVideo } from '@/components/home/HeroVideo';
 import { HomeJournal } from '@/components/home/HomeJournal';
 import { HomeShop } from '@/components/home/HomeShop';
 import { useState, useEffect } from 'react';
@@ -34,15 +34,6 @@ export function Home() {
   /*
   // Görsel slider — video hero'yu test ederken geçici olarak devre dışı.
   */
-  const { data: slidesData } = useQuery({
-    queryKey: ['homepage-slides'],
-    queryFn: async () => {
-      const res = await api.get<{ success: boolean; data: { img: string; link: string }[] }>('/slides');
-      return res.data.data;
-    }
-  });
-
-  const slides = slidesData ?? [];
 
   const { data: featuredData, isLoading: isFeaturedLoading } = useQuery({
     queryKey: ['products', 'featured'],
@@ -58,18 +49,17 @@ export function Home() {
         description={t('home.description', { storeName })}
         schema={[organizationSchema(storeName), websiteSchema(storeName)]}
       />
-      {/* Görsel slider aktif; video hero geçici olarak devre dışı. */}
+      {/* Video hero aktif; görsel slider geçici olarak devre dışı. */}
+      {/*
       <HeroSlider
         slides={slides}
         storeName={storeName}
       />
+      */}
       
-      {/*
       <HeroVideo
         storeName={storeName}
-        slogan={storeSlogan}
       />
-      */}
 
       {/* Campaign Banner */}
       {bannerCampaign && (
