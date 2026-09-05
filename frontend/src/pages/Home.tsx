@@ -2,8 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { productApi } from '@/services/productApi';
 import { api } from '@/services/api';
-// import { HeroSlider } from '@/components/home/HeroSlider';
-import { HeroVideo } from '@/components/home/HeroVideo';
+import { HeroSlider } from '@/components/home/HeroSlider';
 import { HomeJournal } from '@/components/home/HomeJournal';
 import { HomeShop } from '@/components/home/HomeShop';
 import { useState, useEffect } from 'react';
@@ -14,7 +13,7 @@ import { useStoreInfo } from '@/hooks/useStoreInfo';
 
 export function Home() {
   const { t } = useTranslation();
-  const { name: storeName, slogan: storeSlogan } = useStoreInfo();
+  const { name: storeName } = useStoreInfo();
   const [bannerCampaign, setBannerCampaign] = useState<any | null>(null);
 
   // Fetch banner campaign
@@ -34,7 +33,8 @@ export function Home() {
 
   /*
   // Görsel slider — video hero'yu test ederken geçici olarak devre dışı.
-  const { data: slidesData, isError: isSlidesError } = useQuery({
+  */
+  const { data: slidesData } = useQuery({
     queryKey: ['homepage-slides'],
     queryFn: async () => {
       const res = await api.get<{ success: boolean; data: { img: string; link: string }[] }>('/slides');
@@ -43,7 +43,6 @@ export function Home() {
   });
 
   const slides = slidesData ?? [];
-  */
 
   const { data: featuredData, isLoading: isFeaturedLoading } = useQuery({
     queryKey: ['products', 'featured'],
@@ -59,19 +58,18 @@ export function Home() {
         description={t('home.description', { storeName })}
         schema={[organizationSchema(storeName), websiteSchema(storeName)]}
       />
-      {/* Görsel slider geçici olarak yorumda; bağımsız video hero gösteriliyor. */}
-      {/*
+      {/* Görsel slider aktif; video hero geçici olarak devre dışı. */}
       <HeroSlider
         slides={slides}
         storeName={storeName}
-        slogan={storeSlogan}
-        loading={slidesData === undefined && !isSlidesError}
       />
-      */}
+      
+      {/*
       <HeroVideo
         storeName={storeName}
         slogan={storeSlogan}
       />
+      */}
 
       {/* Campaign Banner */}
       {bannerCampaign && (
