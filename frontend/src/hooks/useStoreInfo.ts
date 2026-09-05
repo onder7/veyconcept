@@ -67,8 +67,8 @@ export function useFooterSlogan(): string {
   const { i18n } = useTranslation();
   const storeInfo = useStoreInfo();
   
-  // Language değişirse, yeni slogan computed
+  // Language değişirse, yeni slogan computed — i18n objesini dependency'ye ekle
   return useMemo(() => {
     return i18n.language === 'en' ? storeInfo.sloganEn || storeInfo.slogan : storeInfo.slogan;
-  }, [i18n.language, storeInfo.slogan, storeInfo.sloganEn]);
+  }, [i18n, storeInfo.slogan, storeInfo.sloganEn]);
 }
