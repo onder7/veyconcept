@@ -102,12 +102,13 @@ export function ProductCard({ product, hideDetails = false, cols = 4 }: Props) {
 
   // 2li gösterimde resim daha küçük aspect ratio, 4lü gösterimde daha büyük
   const aspectRatio = cols === 2 ? 'aspect-[2/3]' : 'aspect-[5/6]';
+  const scale = cols === 2 ? 'scale-75' : 'scale-100';
 
   return (
     <Link
       to={`/urun/${product.slug}`}
       className={`group flex flex-col rounded-sm overflow-hidden text-left transition-all duration-300 ${
-        hideDetails ? 'border-none bg-transparent scale-75 origin-top-left' : 'border border-border bg-card dark:bg-neutral-900 hover:border-foreground/30 dark:hover:border-neutral-600'
+        hideDetails ? `border-none bg-transparent ${scale} origin-top-left` : 'border border-border bg-card dark:bg-neutral-900 hover:border-foreground/30 dark:hover:border-neutral-600'
       }`}
     >
       {/* Görsel Kutusu */}
