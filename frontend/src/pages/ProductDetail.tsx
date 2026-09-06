@@ -208,7 +208,7 @@ export function ProductDetail() {
 
   const fav = product ? isFavorite(product.id) : false;
   const variant = product?.variants?.[0] ?? null;
-  const activeImage = product?.images?.[activeImageIdx] ?? product?.images?.[0];
+
   const hasDiscount = variant?.compareAt && Number(variant.compareAt) > Number(variant.price);
   const avgRating = product?.reviews?.length
     ? (product.reviews as { rating: number }[]).reduce((s, r) => s + r.rating, 0) / product.reviews.length
@@ -292,106 +292,59 @@ export function ProductDetail() {
       </nav>
 
       <div className="grid md:grid-cols-2 gap-4 sm:gap-8 lg:gap-12">
-        {/* Görsel Galerisi */}
+        {/* Görsel Galerisi — Resimler Alt Alta (Vertical) */}
         <div className="space-y-4">
-          <div className="relative mx-auto w-full max-w-none">
-            <div
-              className="aspect-[4/5] sm:aspect-square rounded-sm overflow-hidden bg-transparent cursor-zoom-in group/img"
-              onClick={() => activeImage && setLightboxOpen(true)}
-            >
-              {activeImage ? (
-                <>
-                  <img
-                    src={activeImage.url}
-                    alt={activeImage.altText ?? product.name}
-                    className="w-full h-full object-contain"
-                  />
-                  <div className="absolute inset-0 flex items-end justify-end p-3 opacity-0 group-hover/img:opacity-100 transition-opacity pointer-events-none">
-                    <div className="bg-black/40 backdrop-blur-sm rounded-full p-1.5">
-                      <ZoomIn className="h-4 w-4 text-white" />
-                    </div>
+          <div className="flex flex-col gap-4">
+            {product.images.map((img, i) => (
+              <div
+                key={i}
+                className="relative w-full aspect-square rounded-sm overflow-hidden bg-transparent cursor-zoom-in group/img"
+                onClick={() => {
+                  setActiveImageIdx(i);
+                  setLightboxOpen(true);
+                }}
+              >
+                <img
+                  src={img.url}
+                  alt={img.altText ?? `${product.name} - ${t('product.image')} ${i + 1}`}
+                  className="w-full h-full object-contain"
+                />
+                <div className="absolute inset-0 flex items-end justify-end p-3 opacity-0 group-hover/img:opacity-100 transition-opacity pointer-events-none">
+                  <div className="bg-black/40 backdrop-blur-sm rounded-full p-1.5">
+                    <ZoomIn className="h-4 w-4 text-white" />
                   </div>
-                </>
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-muted-foreground">Görsel yok</div>
-              )}
-            </div>
+                </div>
 
-            {/* Favori butonu — resmin sağ üst köşesi */}
-            <button
-              type="button"
-              title={fav ? t('product.removeFromWishlist') : t('product.addToWishlist')}
-              onClick={() => {
-                if (authUser?.isGuest || !authUser) {
-                  toast.info(t('product.favoriteLoginRequired'));
-                  navigate('/kayit');
-                  return;
-                }
-                toggleFavorite(product.id);
-              }}
-              className={`absolute top-3 right-3 flex h-10 w-10 items-center justify-center rounded-full shadow-lg transition-all duration-200 ${
-                fav
-                  ? 'bg-red-500 hover:bg-red-600 text-white scale-110'
-                  : 'bg-white/90 backdrop-blur-sm text-neutral-400 hover:text-red-400 hover:bg-white hover:scale-110'
-              }`}
-            >
-              <Heart className={`h-5 w-5 transition-all duration-200 ${fav ? 'fill-white' : ''}`} />
-            </button>
-
-            {/* İleri / geri okları (birden fazla görsel varsa) */}
-            {product.images.length > 1 && (
-              <>
-                <button
-                  type="button"
-                  aria-label={t('product.previousImage')}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setActiveImageIdx((i) => (i - 1 + product.images.length) % product.images.length);
-                  }}
-                  className="absolute left-2 top-1/2 -translate-y-1/2 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white/85 dark:bg-neutral-800/85 backdrop-blur-sm text-neutral-700 dark:text-neutral-200 shadow-md hover:bg-white dark:hover:bg-neutral-700 active:scale-95 transition-all"
-                >
-                  <ChevronLeft className="h-5 w-5" />
-                </button>
-                <button
-                  type="button"
-                  aria-label={t('product.nextImage')}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setActiveImageIdx((i) => (i + 1) % product.images.length);
-                  }}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white/85 dark:bg-neutral-800/85 backdrop-blur-sm text-neutral-700 dark:text-neutral-200 shadow-md hover:bg-white dark:hover:bg-neutral-700 active:scale-95 transition-all"
-                >
-                  <ChevronRight className="h-5 w-5" />
-                </button>
-              </>
-            )}
+                {/* Favori butonu — ilk resimde sadece */}
+                {i === 0 && (
+                  <button
+                    type="button"
+                    title={fav ? t('product.removeFromWishlist') : t('product.addToWishlist')}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (authUser?.isGuest || !authUser) {
+                        toast.info(t('product.favoriteLoginRequired'));
+                        navigate('/kayit');
+                        return;
+                      }
+                      toggleFavorite(product.id);
+                    }}
+                    className={`absolute top-3 right-3 flex h-10 w-10 items-center justify-center rounded-full shadow-lg transition-all duration-200 ${
+                      fav
+                        ? 'bg-red-500 hover:bg-red-600 text-white scale-110'
+                        : 'bg-white/90 backdrop-blur-sm text-neutral-400 hover:text-red-400 hover:bg-white hover:scale-110'
+                    }`}
+                  >
+                    <Heart className={`h-5 w-5 transition-all duration-200 ${fav ? 'fill-white' : ''}`} />
+                  </button>
+                )}
+              </div>
+            ))}
           </div>
-          {product.images.length > 1 && (
-            <div className="flex gap-2 overflow-x-auto px-1 pb-1 scrollbar-thin justify-start">
-              {product.images.map((img, i) => (
-                <button
-                  key={i}
-                  type="button"
-                  onClick={() => setActiveImageIdx(i)}
-                  className={`shrink-0 h-20 w-20 sm:h-16 sm:w-16 rounded-sm overflow-hidden border transition-colors ${
-                    i === activeImageIdx
-                      ? 'border-foreground'
-                      : 'border-border hover:border-muted-foreground/50'
-                  }`}
-                >
-                  <img
-                    src={img.url}
-                    alt={img.altText ?? `${t('product.image')} ${i + 1}`}
-                    className="w-full h-full object-contain"
-                  />
-                </button>
-              ))}
-            </div>
-          )}
         </div>
 
-        {/* Bilgi */}
-        <div className="space-y-4">
+        {/* Bilgi — Sticky Sağ Taraf */}
+        <div className="sticky top-4 h-fit space-y-4">
           <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">
             {product.category.name}{product.brand ? ` · ${product.brand.name}` : ''}
           </p>
@@ -410,7 +363,7 @@ export function ProductDetail() {
 
           {/* Fiyat - Miktar - Sepet (Grid Layout) */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-end py-6 border-y border-border">
-            {/* Orta: Fiyat */}
+            {/* Fiyat */}
             <div className="text-center md:text-left">
               {variant && (
                 <div className="space-y-2">
@@ -430,7 +383,7 @@ export function ProductDetail() {
               )}
             </div>
 
-            {/* Sağ: Miktar + Sepete Ekle */}
+            {/* Miktar + Sepete Ekle */}
             <div className="flex flex-col gap-2">
               <div className="flex items-center gap-2 justify-end">
                 <div className="flex items-center rounded-full border border-border">
