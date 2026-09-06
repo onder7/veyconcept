@@ -3,8 +3,6 @@ name: onder_online_shop
 services:
   nginx:
     image: nginx:alpine
-    ports:
-      - '8080:80'
     volumes:
       - ./nginx/conf.d:/etc/nginx/conf.d:ro
     depends_on:
