@@ -100,8 +100,8 @@ export function ProductCard({ product, hideDetails = false, cols = 4 }: Props) {
     }
   };
 
-  // 2li gösterimde resim daha küçük aspect ratio
-  const aspectRatio = cols === 2 ? 'aspect-[3/4]' : 'aspect-[4/5]';
+  // 2li gösterimde resim daha küçük aspect ratio, 4lü gösterimde daha büyük
+  const aspectRatio = cols === 2 ? 'aspect-[2/3]' : 'aspect-[5/6]';
 
   return (
     <Link
