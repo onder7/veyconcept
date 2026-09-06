@@ -243,8 +243,6 @@ export function ProductDetail() {
       if (!attributeMap.has(av.attribute.id)) attributeMap.set(av.attribute.id, av.attribute);
     })
   );
-  const attributeKeys = [...attributeMap.values()].sort((a, b) => a.sortOrder - b.sortOrder);
-
   const primaryImage =
     product.images?.find((img) => img.isPrimary) ?? product.images?.[0];
 
@@ -410,41 +408,10 @@ export function ProductDetail() {
             </div>
           )}
 
-          {/* Fiyat - KDV - Stok - Miktar - Sepet (Grid Layout) */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end py-6 border-y border-border">
-            {/* Sol: Bilgiler */}
-            <div className="space-y-3">
-              {/* Renk/Varyant */}
-              {attributeKeys.length > 0 && (
-                <div>
-                  {attributeKeys.map((attr) => {
-                    const selected = variant?.attributeValues?.find((x: any) => x.attributeValue.attribute.id === attr.id);
-                    return (
-                      <div key={attr.id}>
-                        <p className="text-xs text-muted-foreground mb-1">{attr.name}</p>
-                        <p className="text-sm font-medium">{selected?.attributeValue.value ?? '-'}</p>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-              
-              {/* Stok */}
-              {variant && (
-                <div>
-                  <p className="text-xs text-muted-foreground mb-1">{t('product.stock')}</p>
-                  <p className={`text-sm font-medium ${variant.stockQty > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    {variant.stockQty > 0 ? `${variant.stockQty} adet` : t('product.outOfStock')}
-                  </p>
-                </div>
-              )}
-              
-              {/* KDV Dahil */}
-              <p className="text-xs text-muted-foreground">KDV Dahil</p>
-            </div>
-
+          {/* Fiyat - Miktar - Sepet (Grid Layout) */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-end py-6 border-y border-border">
             {/* Orta: Fiyat */}
-            <div className="text-center">
+            <div className="text-center md:text-left">
               {variant && (
                 <div className="space-y-2">
                   {hasDiscount && (
