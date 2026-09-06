@@ -1,8 +1,7 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ArrowUpRight } from 'lucide-react';
 import type { Product } from '@/types';
-import { cn } from '@/lib/utils';
 import { ProductQuickView } from '@/components/home/ProductQuickView';
 
 interface Props {
@@ -17,26 +16,8 @@ interface Props {
  */
 export function HomeShop({ products, loading = false }: Props) {
   const { t } = useTranslation();
-  const [activeCat, setActiveCat] = useState<string>('all');
   const [selected, setSelected] = useState<Product | null>(null);
   const [open, setOpen] = useState(false);
-
-  const categories = useMemo(
-    () =>
-      Array.from(
-        new Map(
-          products
-            .filter((p) => p.category?.slug)
-            .map((p) => [p.category!.slug, p.category as { id: string; name: string; slug: string }]),
-        ).values(),
-      ),
-    [products],
-  );
-
-  const filtered = useMemo(
-    () => (activeCat === 'all' ? products : products.filter((p) => p.category?.slug === activeCat)),
-    [products, activeCat],
-  );
 
   const openProduct = (p: Product) => {
     setSelected(p);
@@ -59,38 +40,7 @@ export function HomeShop({ products, loading = false }: Props) {
             {t('components.homeShop.description')}
           </p>
 
-          {/* Kategori pill filtreleri */}
-          {categories.length > 1 && (
-            <div className="mt-8 flex flex-wrap gap-2">
-              <button
-                type="button"
-                onClick={() => setActiveCat('all')}
-                className={cn(
-                  'rounded-full border px-4 py-1.5 text-xs uppercase tracking-[0.12em] transition-all',
-                  activeCat === 'all'
-                    ? 'border-foreground bg-foreground text-background'
-                    : 'border-border text-muted-foreground hover:border-foreground/40 hover:text-foreground',
-                )}
-              >
-                {t('components.homeShop.all')}
-              </button>
-              {categories.map((cat) => (
-                <button
-                  key={cat.slug}
-                  type="button"
-                  onClick={() => setActiveCat(cat.slug)}
-                  className={cn(
-                    'rounded-full border px-4 py-1.5 text-xs uppercase tracking-[0.12em] transition-all',
-                    activeCat === cat.slug
-                      ? 'border-foreground bg-foreground text-background'
-                      : 'border-border text-muted-foreground hover:border-foreground/40 hover:text-foreground',
-                  )}
-                >
-                  {cat.name}
-                </button>
-              ))}
-            </div>
-          )}
+          {/* Kategori pill filtreleri - Kaldırıldı */}
         </div>
 
         {/* Ürün ızgarası */}
@@ -103,7 +53,7 @@ export function HomeShop({ products, loading = false }: Props) {
                   <div className="mt-2 h-3 w-1/3 rounded bg-muted" />
                 </div>
               ))
-            : filtered.map((product, index) => {
+            : products.map((product, index) => {
                 const img =
                   product.images?.find((im) => im.isPrimary)?.url || product.images?.[0]?.url || '';
                 return (
@@ -137,7 +87,7 @@ export function HomeShop({ products, loading = false }: Props) {
               })}
         </div>
 
-        {!loading && filtered.length === 0 && (
+        {!loading && products.length === 0 && (
           <p className="py-12 text-center text-sm text-muted-foreground">{t('components.homeShop.noProducts')}</p>
         )}
       </div>

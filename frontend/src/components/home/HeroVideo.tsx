@@ -42,7 +42,7 @@ export function HeroVideo({ storeName, slogan }: Props) {
     <section
       id="hero-video"
       aria-label={`${storeName} tanıtım videosu`}
-      className="relative h-[72svh] min-h-[500px] max-h-[940px] w-full overflow-hidden bg-neutral-950 md:h-screen"
+      className="relative h-[50svh] min-h-[360px] max-h-[600px] w-full overflow-hidden bg-neutral-950 md:h-[55svh]"
     >
       <video
         className="absolute inset-0 h-full w-full object-cover"
