@@ -87,7 +87,7 @@ export function HomeShop({ products, loading = false }: Props) {
                         <div className="flex items-center justify-between w-full">
                           {product.variants?.[0]?.price && (
                             <span className="text-sm font-medium text-white">
-                              ₺{product.variants[0].price.toFixed(2)}
+                              ₺{Number(product.variants[0].price).toFixed(2)}
                             </span>
                           )}
                           <span className="flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1.5 text-xs font-medium text-white hover:bg-white/20">
