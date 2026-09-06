@@ -153,7 +153,7 @@ export function ProductCard({ product, hideDetails = false, cols = 4 }: Props) {
             </h3>
             {product.description && (
               <p className="text-[10px] text-white/70 line-clamp-2 mb-1.5">
-                {product.description}
+                {product.description.replace(/<[^>]*>/g, '').replace(/&[^;]+;/g, '').substring(0, 100)}
               </p>
             )}
             <div className="w-full">
