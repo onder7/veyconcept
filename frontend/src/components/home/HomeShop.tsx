@@ -44,7 +44,7 @@ export function HomeShop({ products, loading = false }: Props) {
         </div>
 
         {/* Ürün ızgarası */}
-        <div className="mx-auto grid max-w-[1000px] grid-cols-2 gap-x-4 gap-y-10 sm:gap-x-6 xl:gap-x-8">
+        <div className="mx-auto grid max-w-[900px] grid-cols-2 gap-x-3 gap-y-8 sm:gap-x-4 xl:gap-x-6">
           {loading
             ? Array.from({ length: 6 }).map((_, i) => (
                 <div key={i} className="animate-pulse">
