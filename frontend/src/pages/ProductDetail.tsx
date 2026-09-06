@@ -284,10 +284,6 @@ export function ProductDetail() {
       <nav className="flex flex-wrap items-center gap-1 text-sm text-muted-foreground mb-6">
         <Link to="/" className="hover:text-foreground">{t('breadcrumb.home')}</Link>
         <ChevronRight className="h-4 w-4" />
-        <Link to={`/kategori/${product.category.slug}`} className="hover:text-foreground">
-          {product.category.name}
-        </Link>
-        <ChevronRight className="h-4 w-4" />
         <span className="text-foreground font-medium line-clamp-1">{product.name}</span>
       </nav>
 
