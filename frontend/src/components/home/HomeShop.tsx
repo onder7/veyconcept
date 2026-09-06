@@ -58,7 +58,7 @@ export function HomeShop({ products, loading = false }: Props) {
                   product.images?.find((im) => im.isPrimary)?.url || product.images?.[0]?.url || '';
                 return (
                   <article key={product.id} className="group cursor-pointer" onClick={() => openProduct(product)}>
-                    <div className="relative aspect-[4/5] overflow-hidden rounded-sm bg-secondary">
+                    <div className="relative aspect-[4/5] overflow-hidden rounded-none bg-transparent">
                       {img ? (
                         <img
                           src={img}
@@ -67,18 +67,33 @@ export function HomeShop({ products, loading = false }: Props) {
                           className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                         />
                       ) : (
-                        <div className="flex h-full w-full items-center justify-center text-xs text-muted-foreground">
+                        <div className="flex h-full w-full items-center justify-center text-xs text-muted-foreground bg-muted">
                           {t('components.homeShop.imageNotAvailable')}
                         </div>
                       )}
                       <span className="absolute left-4 top-4 z-10 font-mono text-xs text-white mix-blend-difference">
                         {String(index + 1).padStart(2, '0')}
                       </span>
-                      {/* Hover overlay pill */}
-                      <div className="absolute inset-0 flex items-end justify-start bg-gradient-to-t from-black/20 to-transparent p-4 opacity-0 transition-opacity duration-500 group-hover:opacity-100">
-                        <span className="flex items-center gap-1.5 rounded-full bg-background px-4 py-2 text-xs font-medium text-foreground">
-                          {t('components.homeShop.explore')} <ArrowUpRight className="h-3.5 w-3.5" />
-                        </span>
+                      {/* Hover overlay - ürün bilgileri */}
+                      <div className="absolute inset-0 flex flex-col items-start justify-end bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4 opacity-0 transition-opacity duration-500 group-hover:opacity-100">
+                        <h3 className="font-display text-sm leading-tight text-white mb-2">
+                          {product.name}
+                        </h3>
+                        {product.description && (
+                          <p className="text-xs text-white/70 line-clamp-2 mb-2">
+                            {product.description}
+                          </p>
+                        )}
+                        <div className="flex items-center justify-between w-full">
+                          {product.variants?.[0]?.price && (
+                            <span className="text-sm font-medium text-white">
+                              ₺{product.variants[0].price.toFixed(2)}
+                            </span>
+                          )}
+                          <span className="flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1.5 text-xs font-medium text-white hover:bg-white/20">
+                            {t('components.homeShop.explore')} <ArrowUpRight className="h-3 w-3" />
+                          </span>
+                        </div>
                       </div>
                     </div>
 
