@@ -107,7 +107,7 @@ export function ProductCard({ product, hideDetails = false, cols = 4 }: Props) {
     <Link
       to={`/urun/${product.slug}`}
       className={`group flex flex-col rounded-sm overflow-hidden text-left transition-all duration-300 ${
-        hideDetails ? 'border-none bg-transparent' : 'border border-border bg-card dark:bg-neutral-900 hover:border-foreground/30 dark:hover:border-neutral-600'
+        hideDetails ? 'border-none bg-transparent scale-75 origin-top-left' : 'border border-border bg-card dark:bg-neutral-900 hover:border-foreground/30 dark:hover:border-neutral-600'
       }`}
     >
       {/* Görsel Kutusu */}
