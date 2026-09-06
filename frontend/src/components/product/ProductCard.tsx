@@ -137,6 +137,27 @@ export function ProductCard({ product, hideDetails = false }: Props) {
             </span>
           </div>
         )}
+
+        {/* Hover overlay - hideDetails'a göre bilgi göster */}
+        {hideDetails && (
+          <div className="absolute inset-0 flex flex-col items-start justify-end bg-gradient-to-t from-black/80 via-black/40 to-transparent p-3 opacity-0 transition-opacity duration-500 group-hover:opacity-100">
+            <h3 className="font-display text-xs leading-tight text-white mb-1">
+              {product.name}
+            </h3>
+            {product.description && (
+              <p className="text-[10px] text-white/70 line-clamp-2 mb-1.5">
+                {product.description}
+              </p>
+            )}
+            <div className="w-full">
+              {cheapestVariant && (
+                <span className="text-xs font-medium text-white">
+                  {formatPrice(grossPrice)}
+                </span>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Detaylar */}

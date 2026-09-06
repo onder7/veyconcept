@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
+import { Grid2X2, Grid3X3 } from 'lucide-react';
 import { productApi } from '@/services/productApi';
 import { ProductGrid } from '@/components/product/ProductGrid';
 import { Button } from '@/components/ui/button';
@@ -53,7 +54,7 @@ export function Search() {
           <div>
             <p className="mb-2 text-[10px] uppercase tracking-[0.22em] text-muted-foreground">VEY Concept</p>
             <h1 className="font-display text-4xl text-foreground md:text-5xl">
-              {q ? t('search.searchResults', { query: q }) : t('search.allProducts')}
+              {q && t('search.searchResults', { query: q })}
             </h1>
           </div>
 
@@ -66,7 +67,7 @@ export function Search() {
                 onClick={() => changeGridCols(2)}
                 className={`flex h-8 min-w-8 items-center justify-center rounded-sm px-2 text-xs font-semibold transition-colors ${gridCols === 2 ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-secondary'}`}
               >
-                {t('search.gridView2Short')}
+                <Grid2X2 className="h-4 w-4" />
               </button>
               <button
                 type="button"
@@ -75,13 +76,13 @@ export function Search() {
                 onClick={() => changeGridCols(4)}
                 className={`flex h-8 min-w-8 items-center justify-center rounded-sm px-2 text-xs font-semibold transition-colors ${gridCols === 4 ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-secondary'}`}
               >
-                {t('search.gridView4Short')}
+                <Grid3X3 className="h-4 w-4" />
               </button>
             </div>
           </div>
         </div>
 
-        <ProductGrid products={products} loading={isProductsLoading} cols={gridCols} hideDetails={true} />
+        <ProductGrid products={products} loading={isProductsLoading} cols={gridCols} hideDetails={false} />
 
         {pagination && pagination.totalPages > 1 && (
           <div className="mt-10 flex justify-center gap-2">
