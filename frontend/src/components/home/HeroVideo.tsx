@@ -81,7 +81,7 @@ export function HeroVideo({ storeName, slogan }: Props) {
       <button
         type="button"
         onClick={() => window.scrollTo({ top: window.innerHeight - 80, behavior: 'smooth' })}
-        className={`absolute bottom-6 right-6 z-30 hidden flex-col items-center gap-2 text-white/60 transition-all duration-700 hover:text-white md:flex ${videoLoaded ? 'opacity-100' : 'opacity-0'}`}
+        className={`absolute right-6 top-1/2 z-30 -translate-y-1/2 flex flex-col items-center gap-2 text-white/60 transition-all duration-700 hover:text-white md:flex ${videoLoaded ? 'opacity-100' : 'opacity-0'}`}
       >
         <span className="text-[10px] uppercase tracking-[0.3em]">{t('hero.scroll')}</span>
         <span className="h-12 w-px bg-white/40" />
