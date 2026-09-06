@@ -14,13 +14,14 @@ import { useTaxConfig } from '@/hooks/useTaxConfig';
 interface Props {
   product: Product;
   hideDetails?: boolean;
+  cols?: 2 | 3 | 4;
 }
 
 function formatPrice(price: number | string): string {
   return Number(price).toLocaleString('tr-TR', { minimumFractionDigits: 0, maximumFractionDigits: 2 }) + ' TL';
 }
 
-export function ProductCard({ product, hideDetails = false }: Props) {
+export function ProductCard({ product, hideDetails = false, cols = 4 }: Props) {
   const { t } = useTranslation();
   
   // Görseller: birincil önce, ardından diğerleri — hover'da sırayla döner
@@ -99,14 +100,19 @@ export function ProductCard({ product, hideDetails = false }: Props) {
     }
   };
 
+  // 2li gösterimde resim daha küçük aspect ratio
+  const aspectRatio = cols === 2 ? 'aspect-[3/4]' : 'aspect-[4/5]';
+
   return (
     <Link
       to={`/urun/${product.slug}`}
-      className="group flex flex-col rounded-sm border border-border bg-card dark:bg-neutral-900 overflow-hidden text-left hover:border-foreground/30 dark:hover:border-neutral-600 transition-all duration-300"
+      className={`group flex flex-col rounded-sm overflow-hidden text-left transition-all duration-300 ${
+        hideDetails ? 'border-none bg-transparent' : 'border border-border bg-card dark:bg-neutral-900 hover:border-foreground/30 dark:hover:border-neutral-600'
+      }`}
     >
       {/* Görsel Kutusu */}
       <div
-        className="relative aspect-[4/5] bg-transparent flex items-center justify-center overflow-hidden"
+        className={`relative ${aspectRatio} bg-transparent flex items-center justify-center overflow-hidden`}
         onMouseEnter={startCycle}
         onMouseLeave={stopCycle}
       >

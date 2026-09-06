@@ -47,7 +47,7 @@ export function ProductGrid({ products, loading = false, cols = 4, hideDetails =
 
   return (
     <div className={`grid ${colClass[cols]} gap-2 sm:gap-3 md:gap-4`}>
-      {products.map((p) => <ProductCard key={p.id} product={p} hideDetails={hideDetails} />)}
+      {products.map((p) => <ProductCard key={p.id} product={p} hideDetails={hideDetails} cols={cols} />)}
     </div>
   );
 }
