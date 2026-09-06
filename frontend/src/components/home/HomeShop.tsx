@@ -76,17 +76,17 @@ export function HomeShop({ products, loading = false }: Props) {
                       </span>
                       {/* Hover overlay - ürün bilgileri */}
                       <div className="absolute inset-0 flex flex-col items-start justify-end bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4 opacity-0 transition-opacity duration-500 group-hover:opacity-100">
-                        <h3 className="font-display text-sm leading-tight text-white mb-2">
+                        <h3 className="font-display text-base leading-tight text-white mb-2">
                           {product.name}
                         </h3>
                         {product.description && (
-                          <p className="text-xs text-white/70 line-clamp-2 mb-2">
-                            {product.description}
+                          <p className="text-sm text-white/70 line-clamp-2 mb-2">
+                            {product.description.replace(/<[^>]*>/g, '').replace(/&[^;]+;/g, '').substring(0, 120)}
                           </p>
                         )}
                         <div className="flex items-center justify-between w-full">
                           {product.variants?.[0]?.price && (
-                            <span className="text-sm font-medium text-white">
+                            <span className="text-base font-medium text-white">
                               ₺{Number(product.variants[0].price).toFixed(2)}
                             </span>
                           )}
