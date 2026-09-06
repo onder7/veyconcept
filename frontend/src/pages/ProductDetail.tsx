@@ -9,10 +9,8 @@ import { useCartStore } from '@/store/cartStore';
 import { useWishlistStore } from '@/store/wishlistStore';
 import { useAuthStore } from '@/store/authStore';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
-import type { ProductVariant } from '@/types';
 import { ProductReviews } from '@/components/product/ProductReviews';
 import { ProductQA } from '@/components/product/ProductQA';
 import { RecentlyViewed } from '@/components/product/RecentlyViewed';
@@ -146,7 +144,6 @@ export function ProductDetail() {
   const { slug } = useParams<{ slug: string }>();
   const { name: storeName } = useStoreInfo();
   const { taxRate } = useTaxConfig();
-  const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
   const [qty, setQty] = useState(1);
   const [activeTab, setActiveTab] = useState<'reviews' | 'qa'>('reviews');
   const [activeImageIdx, setActiveImageIdx] = useState(0);
@@ -210,7 +207,7 @@ export function ProductDetail() {
   }, [lightboxOpen, product?.images?.length]);
 
   const fav = product ? isFavorite(product.id) : false;
-  const variant = selectedVariant ?? product?.variants?.[0] ?? null;
+  const variant = product?.variants?.[0] ?? null;
   const activeImage = product?.images?.[activeImageIdx] ?? product?.images?.[0];
   const hasDiscount = variant?.compareAt && Number(variant.compareAt) > Number(variant.price);
   const avgRating = product?.reviews?.length
@@ -413,123 +410,91 @@ export function ProductDetail() {
             </div>
           )}
 
-          {/* Fiyat */}
-          {variant && (
-            <div className="space-y-1">
-              <div className="flex items-baseline gap-3">
-                <span className={`font-display text-4xl ${hasDiscount ? 'text-amber-800 dark:text-amber-400' : 'text-foreground'}`}>
-                  {product.vatIncluded
-                    ? formatPrice(variant.price)
-                    : formatPrice(Number(variant.price) * (1 + taxRate / 100))}
-                </span>
-                {hasDiscount && (
-                  <span className="text-lg text-muted-foreground line-through">
-                    {product.vatIncluded
-                      ? formatPrice(variant.compareAt!)
-                      : formatPrice(Number(variant.compareAt!) * (1 + taxRate / 100))}
-                  </span>
-                )}
-              </div>
-              <p className="text-xs text-muted-foreground">KDV Dahil</p>
-            </div>
-          )}
-
-          {/* Varyantlar — gruplar yan yana */}
-          {attributeKeys.length > 0 && (
-          <div className="flex flex-wrap gap-x-8 gap-y-4">
-          {attributeKeys.map((attr) => {
-            const uniqueValues = [
-              ...new Map(
-                product.variants
-                  .flatMap((v) => v.attributeValues ?? [])
-                  .filter(({ attributeValue: av }) => av.attribute.id === attr.id)
-                  .map(({ attributeValue: av }) => [av.id, av])
-              ).values(),
-            ].sort((a, b) => a.sortOrder - b.sortOrder);
-
-            return (
-              <div key={attr.id}>
-                <p className="text-sm font-medium mb-2">{attr.name}</p>
-                <div className="flex flex-wrap gap-2">
-                  {uniqueValues.map((av) => {
-                    // Önce mevcut diğer attribute seçimlerini koruyarak bu değere uyan varyantı bul
-                    const matchVariant = (() => {
-                      const perfect = product.variants.find((pv) => {
-                        if (!pv.attributeValues?.some((x) => x.attributeValue.id === av.id)) return false;
-                        for (const { attributeValue: curAv } of variant?.attributeValues ?? []) {
-                          if (curAv.attribute.id === attr.id) continue;
-                          if (!pv.attributeValues?.some((x) => x.attributeValue.id === curAv.id)) return false;
-                        }
-                        return true;
-                      });
-                      return perfect ?? product.variants.find((pv) =>
-                        pv.attributeValues?.some((x) => x.attributeValue.id === av.id)
-                      );
-                    })();
-                    const isSelected = variant?.attributeValues?.some((x) => x.attributeValue.id === av.id);
+          {/* Fiyat - KDV - Stok - Miktar - Sepet (Grid Layout) */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end py-6 border-y border-border">
+            {/* Sol: Bilgiler */}
+            <div className="space-y-3">
+              {/* Renk/Varyant */}
+              {attributeKeys.length > 0 && (
+                <div>
+                  {attributeKeys.map((attr) => {
+                    const selected = variant?.attributeValues?.find((x: any) => x.attributeValue.attribute.id === attr.id);
                     return (
-                      <button
-                        key={av.id}
-                        onClick={() => matchVariant && setSelectedVariant(matchVariant)}
-                        className={`px-3.5 py-1.5 text-sm border rounded-sm transition-colors ${
-                          isSelected ? 'border-foreground bg-foreground/5 font-medium' : 'border-border hover:border-foreground/50'
-                        } ${matchVariant?.stockQty === 0 ? 'opacity-40 cursor-not-allowed line-through' : ''}`}
-                        disabled={matchVariant?.stockQty === 0}
-                      >
-                        {attr.inputType === 'color' && av.colorHex ? (
-                          <span className="flex items-center gap-1.5">
-                            <span className="w-3.5 h-3.5 rounded-full border border-gray-200 inline-block shrink-0" style={{ backgroundColor: av.colorHex }} />
-                            {av.value}
-                          </span>
-                        ) : (
-                          av.value
-                        )}
-                      </button>
+                      <div key={attr.id}>
+                        <p className="text-xs text-muted-foreground mb-1">{attr.name}</p>
+                        <p className="text-sm font-medium">{selected?.attributeValue.value ?? '-'}</p>
+                      </div>
                     );
                   })}
                 </div>
-              </div>
-            );
-          })}
-          </div>
-          )}
-
-          {/* Stok */}
-          {variant && (
-            <Badge variant={variant.stockQty > 0 ? 'default' : 'destructive'}>
-              {variant.stockQty > 0 ? `${t('product.stock')}: ${variant.stockQty} adet` : t('product.outOfStock')}
-            </Badge>
-          )}
-
-          {/* Miktar + Sepet */}
-          <div className="flex flex-col items-stretch gap-3 pt-2 sm:flex-row sm:items-center">
-            <div className="mx-auto flex items-center rounded-full border border-border sm:mx-0">
-              <button
-                type="button"
-                aria-label={t('product.decrease')}
-                className="flex h-11 w-11 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
-                onClick={() => setQty((q) => Math.max(1, q - 1))}
-              >
-                <Minus className="h-4 w-4" />
-              </button>
-              <span className="w-8 text-center text-sm tabular-nums">{qty}</span>
-              <button
-                type="button"
-                aria-label={t('product.increase')}
-                className="flex h-11 w-11 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
-                onClick={() => setQty((q) => Math.min(variant?.stockQty ?? 1, q + 1))}
-              >
-                <Plus className="h-4 w-4" />
-              </button>
+              )}
+              
+              {/* Stok */}
+              {variant && (
+                <div>
+                  <p className="text-xs text-muted-foreground mb-1">{t('product.stock')}</p>
+                  <p className={`text-sm font-medium ${variant.stockQty > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {variant.stockQty > 0 ? `${variant.stockQty} adet` : t('product.outOfStock')}
+                  </p>
+                </div>
+              )}
+              
+              {/* KDV Dahil */}
+              <p className="text-xs text-muted-foreground">KDV Dahil</p>
             </div>
-            <Button
-              className="flex-1 h-11 rounded-full bg-primary text-primary-foreground hover:bg-primary/90"
-              disabled={!variant || variant.stockQty === 0 || addToCartMut.isPending}
-              onClick={() => variant && addToCartMut.mutate({ variantId: variant.id, quantity: qty })}
-            >
-              <ShoppingCart className="h-4 w-4 mr-2" />
-              {addToCartMut.isPending ? t('product.addingToCart') : t('product.addToCart')}
-            </Button>
+
+            {/* Orta: Fiyat */}
+            <div className="text-center">
+              {variant && (
+                <div className="space-y-2">
+                  {hasDiscount && (
+                    <p className="text-sm text-muted-foreground line-through">
+                      {product.vatIncluded
+                        ? formatPrice(variant.compareAt!)
+                        : formatPrice(Number(variant.compareAt!) * (1 + taxRate / 100))}
+                    </p>
+                  )}
+                  <p className={`font-display text-3xl ${hasDiscount ? 'text-amber-800 dark:text-amber-400' : 'text-foreground'}`}>
+                    {product.vatIncluded
+                      ? formatPrice(variant.price)
+                      : formatPrice(Number(variant.price) * (1 + taxRate / 100))}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Sağ: Miktar + Sepete Ekle */}
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-2 justify-end">
+                <div className="flex items-center rounded-full border border-border">
+                  <button
+                    type="button"
+                    aria-label={t('product.decrease')}
+                    className="flex h-9 w-9 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
+                    onClick={() => setQty((q) => Math.max(1, q - 1))}
+                  >
+                    <Minus className="h-4 w-4" />
+                  </button>
+                  <span className="w-8 text-center text-sm tabular-nums">{qty}</span>
+                  <button
+                    type="button"
+                    aria-label={t('product.increase')}
+                    className="flex h-9 w-9 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
+                    onClick={() => setQty((q) => Math.min(variant?.stockQty ?? 1, q + 1))}
+                  >
+                    <Plus className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+              <Button
+                className="w-full h-11 rounded-full bg-primary text-primary-foreground hover:bg-primary/90"
+                disabled={!variant || variant.stockQty === 0 || addToCartMut.isPending}
+                onClick={() => variant && addToCartMut.mutate({ variantId: variant.id, quantity: qty })}
+              >
+                <ShoppingCart className="h-4 w-4 mr-2" />
+                {addToCartMut.isPending ? t('product.addingToCart') : t('product.addToCart')}
+              </Button>
+            </div>
           </div>
 
           {/* Sosyal Medya Paylaşım */}
