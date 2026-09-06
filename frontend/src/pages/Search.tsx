@@ -82,7 +82,7 @@ export function Search() {
           </div>
         </div>
 
-        <ProductGrid products={products} loading={isProductsLoading} cols={gridCols} hideDetails={false} />
+        <ProductGrid products={products} loading={isProductsLoading} cols={gridCols} hideDetails={true} />
 
         {pagination && pagination.totalPages > 1 && (
           <div className="mt-10 flex justify-center gap-2">
