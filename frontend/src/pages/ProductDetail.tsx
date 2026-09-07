@@ -20,6 +20,69 @@ import { productSchema, breadcrumbSchema } from '@/lib/schemas';
 import { useTaxConfig } from '@/hooks/useTaxConfig';
 import { useStoreInfo } from '@/hooks/useStoreInfo';
 
+// ─── Accordion Helper ───────────────────────────────────────────────────────
+interface AccordionItem {
+  title: string;
+  content: string;
+}
+
+function parseDescriptionToAccordion(html: string): AccordionItem[] {
+  const sections: AccordionItem[] = [];
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, 'text/html');
+  const h3Elements = doc.querySelectorAll('h3');
+
+  h3Elements.forEach((h3) => {
+    const title = h3.textContent || '';
+    let content = '';
+    let sibling = h3.nextElementSibling;
+    
+    // Collect all content until next h3
+    while (sibling && sibling.tagName !== 'H3') {
+      content += sibling.outerHTML;
+      sibling = sibling.nextElementSibling;
+    }
+
+    if (title && content) {
+      sections.push({ title, content });
+    }
+  });
+
+  // Fallback: if no h3 sections found, use entire description
+  if (sections.length === 0) {
+    sections.push({ title: 'Ürün Açıklaması', content: html });
+  }
+
+  return sections;
+}
+
+// ─── AccordionSection Component ──────────────────────────────────────────────
+function AccordionSection({ title, content }: AccordionItem) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div className="border-b border-border">
+      <button
+        onClick={() => setOpen(!open)}
+        className="w-full flex items-center justify-between py-4 px-0 text-left transition-colors hover:text-foreground/80"
+      >
+        <h4 className="font-display text-base sm:text-lg font-medium text-foreground">
+          {title}
+        </h4>
+        <span className={`text-2xl text-foreground/60 transition-transform ${open ? 'rotate-45' : ''}`}>
+          +
+        </span>
+      </button>
+      
+      {open && (
+        <div className="pb-4 text-sm text-muted-foreground leading-relaxed space-y-3 product-description">
+          <div dangerouslySetInnerHTML={{ __html: content }} />
+        </div>
+      )}
+    </div>
+  );
+}
+
 function ProductShareBar({ name, url }: { name: string; url: string }) {
   const [copied, setCopied] = useState(false);
   const { name: storeName } = useStoreInfo();
@@ -303,12 +366,26 @@ export function ProductDetail() {
                 <img
                   src={img.url}
                   alt={img.altText ?? `${product.name} - ${t('product.image')} ${i + 1}`}
-                  className="w-full h-full object-contain"
+                  className="w-full h-full object-contain group-hover/img:scale-105 transition-transform duration-700"
                 />
                 <div className="absolute inset-0 flex items-end justify-end p-3 opacity-0 group-hover/img:opacity-100 transition-opacity pointer-events-none">
                   <div className="bg-black/40 backdrop-blur-sm rounded-full p-1.5">
                     <ZoomIn className="h-4 w-4 text-white" />
                   </div>
+                </div>
+
+                {/* Hover overlay - ürün adı ve fiyat */}
+                <div className="absolute inset-0 flex flex-col items-center justify-end bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4 opacity-0 transition-opacity duration-500 group-hover/img:opacity-100">
+                  <h3 className="font-display text-base sm:text-lg leading-tight text-white text-center mb-2 line-clamp-2">
+                    {product.name}
+                  </h3>
+                  {variant && (
+                    <span className="text-lg sm:text-xl font-display font-semibold text-white">
+                      {product.vatIncluded
+                        ? formatPrice(variant.price)
+                        : formatPrice(Number(variant.price) * (1 + taxRate / 100))}
+                    </span>
+                  )}
                 </div>
 
                 {/* Favori butonu — ilk resimde sadece */}
@@ -420,12 +497,10 @@ export function ProductDetail() {
           />
 
           {product.description && (
-            <div className="border-t border-border pt-5">
-              <h3 className="font-display text-2xl mb-3">{t('product.productDescription')}</h3>
-              <div
-                className="text-sm text-muted-foreground leading-relaxed product-description"
-                dangerouslySetInnerHTML={{ __html: product.description }}
-              />
+            <div className="border-t border-border pt-5 space-y-0">
+              {parseDescriptionToAccordion(product.description).map((section, idx) => (
+                <AccordionSection key={idx} title={section.title} content={section.content} />
+              ))}
             </div>
           )}
         </div>
