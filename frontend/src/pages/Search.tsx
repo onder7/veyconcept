@@ -13,12 +13,12 @@ export function Search() {
   const [searchParams, setSearchParams] = useSearchParams();
   const q = searchParams.get('q') ?? searchParams.get('search') ?? '';
   const page = Number(searchParams.get('page') ?? '1');
-  const [gridCols, setGridCols] = useState<2 | 4>(() => {
+  const [gridCols, setGridCols] = useState<2 | 3 | 4>(() => {
     const saved = Number(localStorage.getItem('catalog-grid-cols'));
-    return saved === 4 ? 4 : 2;
+    return saved === 2 ? 2 : saved === 4 ? 4 : 3;
   });
 
-  const changeGridCols = (cols: 2 | 4) => {
+  const changeGridCols = (cols: 2 | 3 | 4) => {
     setGridCols(cols);
     localStorage.setItem('catalog-grid-cols', String(cols));
   };
@@ -68,6 +68,15 @@ export function Search() {
                 className={`flex h-8 min-w-8 items-center justify-center rounded-sm px-2 text-xs font-semibold transition-colors ${gridCols === 2 ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-secondary'}`}
               >
                 <Grid2X2 className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                aria-label="3 sütun"
+                aria-pressed={gridCols === 3}
+                onClick={() => changeGridCols(3)}
+                className={`flex h-8 min-w-8 items-center justify-center rounded-sm px-2 text-xs font-semibold transition-colors ${gridCols === 3 ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-secondary'}`}
+              >
+                <span className="text-[10px] font-bold">3</span>
               </button>
               <button
                 type="button"
