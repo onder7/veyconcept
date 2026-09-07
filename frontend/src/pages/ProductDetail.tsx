@@ -396,20 +396,6 @@ export function ProductDetail() {
                   </div>
                 </div>
 
-                {/* Hover overlay - ürün adı ve fiyat */}
-                <div className="absolute inset-0 flex flex-col items-center justify-end bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4 opacity-0 transition-opacity duration-500 group-hover/img:opacity-100">
-                  <h3 className="font-display text-base sm:text-lg leading-tight text-white text-center mb-2 line-clamp-2">
-                    {product.name}
-                  </h3>
-                  {variant && (
-                    <span className="text-lg sm:text-xl font-display font-semibold text-white">
-                      {product.vatIncluded
-                        ? formatPrice(variant.price)
-                        : formatPrice(Number(variant.price) * (1 + taxRate / 100))}
-                    </span>
-                  )}
-                </div>
-
                 {/* Favori butonu — ilk resimde sadece */}
                 {i === 0 && (
                   <button
