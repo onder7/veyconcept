@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { Grid2X2, Grid3X3 } from 'lucide-react';
+import { Grid3X3 } from 'lucide-react';
 import { productApi } from '@/services/productApi';
 import { ProductGrid } from '@/components/product/ProductGrid';
 import { Button } from '@/components/ui/button';
@@ -13,12 +13,12 @@ export function Search() {
   const [searchParams, setSearchParams] = useSearchParams();
   const q = searchParams.get('q') ?? searchParams.get('search') ?? '';
   const page = Number(searchParams.get('page') ?? '1');
-  const [gridCols, setGridCols] = useState<2 | 3 | 4>(() => {
+  const [gridCols, setGridCols] = useState<3 | 4>(() => {
     const saved = Number(localStorage.getItem('catalog-grid-cols'));
-    return saved === 2 ? 2 : saved === 4 ? 4 : 3;
+    return saved === 4 ? 4 : 3;
   });
 
-  const changeGridCols = (cols: 2 | 3 | 4) => {
+  const changeGridCols = (cols: 3 | 4) => {
     setGridCols(cols);
     localStorage.setItem('catalog-grid-cols', String(cols));
   };
@@ -60,15 +60,6 @@ export function Search() {
 
           <div className="flex flex-wrap items-center justify-end gap-3">
             <div className="flex items-center rounded-sm border border-border bg-card p-0.5" aria-label={t('search.gridView')}>
-              <button
-                type="button"
-                aria-label={t('search.gridView2')}
-                aria-pressed={gridCols === 2}
-                onClick={() => changeGridCols(2)}
-                className={`flex h-8 min-w-8 items-center justify-center rounded-sm px-2 text-xs font-semibold transition-colors ${gridCols === 2 ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-secondary'}`}
-              >
-                <Grid2X2 className="h-4 w-4" />
-              </button>
               <button
                 type="button"
                 aria-label="3 sütun"
