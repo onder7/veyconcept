@@ -35,6 +35,11 @@ export function HomeShop({ products, loading = false }: Props) {
           <h2 className="font-display text-5xl leading-[0.95] text-foreground md:text-7xl">
             {t('components.homeShop.heading')}
           </h2>
+          {t('components.homeShop.description') && (
+            <p className="mt-6 max-w-xl text-sm leading-relaxed text-muted-foreground">
+              {t('components.homeShop.description')}
+            </p>
+          )}
 
           {/* Kategori pill filtreleri - Kaldırıldı */}
         </div>

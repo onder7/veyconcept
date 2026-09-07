@@ -523,8 +523,8 @@
     },
     "homeShop": {
       "title": "Mağaza · Seçkiler",
-      "heading": "Biçim. Malzeme. Zanaat.",
-      "description": "",
+    "heading": "Biçim. Malzeme. Zanaat.",
+    "description": "",
       "all": "Tümü",
       "explore": "İncele",
       "noProducts": "Bu kategoride ürün bulunamadı.",

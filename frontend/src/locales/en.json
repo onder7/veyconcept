@@ -524,8 +524,8 @@
     },
     "homeShop": {
       "title": "Shop · Selections",
-      "heading": "Form. Material. Craft",
-      "description": "",
+    "heading": "Form. Material. Craft",
+    "description": "",
       "all": "All",
       "explore": "Explore",
       "noProducts": "No products available in this category.",
