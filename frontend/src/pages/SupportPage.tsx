@@ -335,23 +335,7 @@ export function SupportPage() {
                         </div>
                       </div>
 
-                      {/* Map Section */}
-                      {companyInfo && (
-                        <div className="mt-8 pt-8 border-t border-neutral-100 dark:border-neutral-800">
-                          <h3 className="mb-5 font-display text-2xl text-foreground md:text-3xl">{t('support.location')}</h3>
-                          <div className="h-[400px] rounded-2xl overflow-hidden border border-neutral-100 dark:border-neutral-800 shadow-xs">
-                            <iframe
-                              src={companyInfo.mapEmbed}
-                              width="100%"
-                              height="100%"
-                              style={{ border: 0 }}
-                              allowFullScreen
-                              loading="lazy"
-                              referrerPolicy="no-referrer-when-downgrade"
-                            ></iframe>
-                          </div>
-                        </div>
-                      )}
+                      {/* Map Section Removed */}
                     </div>
                   )}
                 </div>
