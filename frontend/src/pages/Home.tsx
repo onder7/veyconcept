@@ -15,9 +15,23 @@ export function Home() {
   const { t } = useTranslation();
   const { name: storeName } = useStoreInfo();
   const [bannerCampaign, setBannerCampaign] = useState<any | null>(null);
+  const [slides, setSlides] = useState<HeroSlide[]>([]);
 
-  // Demo slides - admin panelinden gelecek
-  const slides: HeroSlide[] = [];
+  // Fetch slider slides from admin settings
+  useEffect(() => {
+    const fetchSlides = async () => {
+      try {
+        const res = await api.get('/admin/settings/homepage');
+        if (res.data?.slides) {
+          const parsedSlides = JSON.parse(res.data.slides);
+          setSlides(parsedSlides || []);
+        }
+      } catch (e) {
+        console.error('Failed to fetch slider slides:', e);
+      }
+    };
+    fetchSlides();
+  }, []);
 
   // Fetch banner campaign
   useEffect(() => {
