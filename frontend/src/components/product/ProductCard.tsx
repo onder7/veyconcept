@@ -144,6 +144,18 @@ export function ProductCard({ product, hideDetails = false, cols = 4 }: Props) {
             </span>
           </div>
         )}
+
+        {/* Hover overlay - ürün adı ve fiyat */}
+        <div className="absolute inset-0 flex flex-col items-center justify-end bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4 opacity-0 transition-opacity duration-500 group-hover:opacity-100">
+          <h3 className="font-display text-sm sm:text-base leading-tight text-white text-center mb-2 line-clamp-2">
+            {product.name}
+          </h3>
+          {cheapestVariant && (
+            <span className="text-base sm:text-lg font-display font-semibold text-white">
+              {formatPrice(grossPrice)}
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Detaylar */}
