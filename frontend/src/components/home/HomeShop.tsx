@@ -33,11 +33,8 @@ export function HomeShop({ products, loading = false }: Props) {
             {t('components.homeShop.title')}
           </p>
           <h2 className="font-display text-5xl leading-[0.95] text-foreground md:text-7xl">
-            {t('components.homeShop.heading')} <span className="italic text-amber-700">{t('product.details')}</span>
+            Biçim. Malzeme. Zanaat.
           </h2>
-          <p className="mt-6 max-w-xl text-sm leading-relaxed text-muted-foreground">
-            {t('components.homeShop.description')}
-          </p>
 
           {/* Kategori pill filtreleri - Kaldırıldı */}
         </div>
