@@ -74,7 +74,7 @@ export function HeroSlider({ slides, storeName }: Props) {
   return (
     <section
       id="hero"
-      className="relative h-[50svh] min-h-[350px] max-h-[660px] w-full overflow-hidden bg-foreground md:h-[56svh]"
+      className="relative h-[57.5svh] min-h-[403px] max-h-[759px] w-full overflow-hidden bg-foreground md:h-[64.4svh]"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
