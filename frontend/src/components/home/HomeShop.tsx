@@ -27,10 +27,11 @@ export function HomeShop({ products, loading = false }: Props) {
     <section id="shop" className="bg-background">
       <div className="mx-auto max-w-[1600px] px-4 py-20 sm:px-6 md:px-12 md:py-28">
         {/* Bölüm başlığı */}
-        <div className="mb-12 md:mb-16">
-          <p className="mb-5 flex items-center gap-4 text-[10px] uppercase tracking-[0.32em] text-muted-foreground">
+        <div className="mb-12 md:mb-16 text-center">
+          <p className="mb-5 flex items-center justify-center gap-4 text-[10px] uppercase tracking-[0.32em] text-muted-foreground">
             <span className="h-px w-10 bg-amber-500" />
             {t('components.homeShop.title')}
+            <span className="h-px w-10 bg-amber-500" />
           </p>
           <h2 className="font-display text-5xl leading-[0.95] text-foreground md:text-7xl">
             {t('components.homeShop.heading')}
