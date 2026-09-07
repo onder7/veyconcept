@@ -21,10 +21,11 @@ export function Home() {
   useEffect(() => {
     const fetchSlides = async () => {
       try {
-        const res = await api.get('/admin/settings/homepage');
-        if (res.data?.slides) {
-          const parsedSlides = JSON.parse(res.data.slides);
-          setSlides(parsedSlides || []);
+        const res = await api.get('/slides');
+        if (res.data?.data) {
+          const slides = res.data.data;
+          console.log('Parsed slides:', slides);
+          setSlides(slides || []);
         }
       } catch (e) {
         console.error('Failed to fetch slider slides:', e);

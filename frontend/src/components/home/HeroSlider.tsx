@@ -74,7 +74,7 @@ export function HeroSlider({ slides, storeName }: Props) {
   return (
     <section
       id="hero"
-      className="relative h-[72svh] min-h-[500px] max-h-[940px] w-full overflow-hidden bg-foreground md:h-screen"
+      className="relative h-[50svh] min-h-[350px] max-h-[660px] w-full overflow-hidden bg-foreground md:h-[56svh]"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
@@ -126,9 +126,9 @@ export function HeroSlider({ slides, storeName }: Props) {
       {hasSlides && (slides[index]?.title || slides[index]?.subtitle || slides[index]?.buttonText) && (
         <div
           key={index}
-          className="pointer-events-none relative z-10 mx-auto flex h-full max-w-[1600px] -translate-y-10 flex-col justify-center px-4 text-center animate-fade-up sm:-translate-y-14 sm:px-6 md:-translate-y-20 md:px-12"
+          className="pointer-events-none relative z-10 mx-auto flex h-full max-w-[1600px] -translate-y-10 flex-col justify-center px-4 text-left animate-fade-up sm:-translate-y-14 sm:px-6 md:-translate-y-20 md:px-12"
         >
-          <div className="mx-auto max-w-3xl">
+          <div className="max-w-3xl">
             <span className="mx-auto mb-6 block h-px w-12 bg-amber-400" />
             {slides[index]?.title && (
               <h1 className="font-display text-4xl leading-[1.02] text-white sm:text-7xl md:text-8xl">
