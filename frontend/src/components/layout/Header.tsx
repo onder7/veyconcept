@@ -149,16 +149,16 @@ export function Header() {
 
         <Link to="/" className="flex flex-col items-center leading-none" aria-label={t('header.home')}>
           <>
-            <span className="font-display text-[2.65rem] font-semibold uppercase tracking-[0.14em] text-[#6b1017] sm:text-[3.2rem]">VEY</span>
+            <span className="font-display text-[2.78rem] font-semibold uppercase tracking-[0.14em] text-[#6b1017] sm:text-[3.36rem]">VEY</span>
             <span className="mt-1 text-[0.48rem] font-semibold uppercase tracking-[0.48em] text-[#6b1017] sm:text-[0.55rem]">CONCEPT</span>
           </>
         </Link>
 
         <nav className="mt-6 hidden items-center justify-center gap-7 sm:gap-8 md:flex" aria-label="Ana menü">
-          <Link to="/" className="text-[0.68rem] uppercase tracking-[0.08em] text-[#7a6a5a] transition-colors hover:text-[#6b1017]">{t('header.home')}</Link>
-          <Link to="/ara" className="text-[0.68rem] uppercase tracking-[0.08em] text-[#7a6a5a] transition-colors hover:text-[#6b1017]">{t('header.shop')}</Link>
-          <Link to="/hakkimizda" className="text-[0.68rem] uppercase tracking-[0.08em] text-[#7a6a5a] transition-colors hover:text-[#6b1017]">{t('header.about')}</Link>
-          <Link to="/iletisim" className="text-[0.68rem] uppercase tracking-[0.08em] text-[#7a6a5a] transition-colors hover:text-[#6b1017]">{t('header.contact')}</Link>
+          <Link to="/" className="text-[0.816rem] uppercase tracking-[0.08em] text-[#7a6a5a] transition-colors hover:text-[#6b1017]">{t('header.home')}</Link>
+          <Link to="/ara" className="text-[0.816rem] uppercase tracking-[0.08em] text-[#7a6a5a] transition-colors hover:text-[#6b1017]">{t('header.shop')}</Link>
+          <Link to="/hakkimizda" className="text-[0.816rem] uppercase tracking-[0.08em] text-[#7a6a5a] transition-colors hover:text-[#6b1017]">{t('header.about')}</Link>
+          <Link to="/iletisim" className="text-[0.816rem] uppercase tracking-[0.08em] text-[#7a6a5a] transition-colors hover:text-[#6b1017]">{t('header.contact')}</Link>
         </nav>
 
         <div className="absolute right-4 top-5 hidden items-center gap-1 sm:flex md:right-6 md:top-6">
