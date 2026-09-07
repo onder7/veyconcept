@@ -1,8 +1,6 @@
-import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { Grid3X3 } from 'lucide-react';
 import { productApi } from '@/services/productApi';
 import { ProductGrid } from '@/components/product/ProductGrid';
 import { Button } from '@/components/ui/button';
@@ -13,15 +11,7 @@ export function Search() {
   const [searchParams, setSearchParams] = useSearchParams();
   const q = searchParams.get('q') ?? searchParams.get('search') ?? '';
   const page = Number(searchParams.get('page') ?? '1');
-  const [gridCols, setGridCols] = useState<3 | 4>(() => {
-    const saved = Number(localStorage.getItem('catalog-grid-cols'));
-    return saved === 4 ? 4 : 3;
-  });
-
-  const changeGridCols = (cols: 3 | 4) => {
-    setGridCols(cols);
-    localStorage.setItem('catalog-grid-cols', String(cols));
-  };
+  const gridCols = 3;
 
   const updateParams = (updates: Record<string, string | null | undefined>) => {
     const params = new URLSearchParams(searchParams);
@@ -59,26 +49,6 @@ export function Search() {
           </div>
 
           <div className="flex flex-wrap items-center justify-end gap-3">
-            <div className="flex items-center rounded-sm border border-border bg-card p-0.5" aria-label={t('search.gridView')}>
-              <button
-                type="button"
-                aria-label="3 sütun"
-                aria-pressed={gridCols === 3}
-                onClick={() => changeGridCols(3)}
-                className={`flex h-8 min-w-8 items-center justify-center rounded-sm px-2 text-xs font-semibold transition-colors ${gridCols === 3 ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-secondary'}`}
-              >
-                <span className="text-[10px] font-bold">3</span>
-              </button>
-              <button
-                type="button"
-                aria-label={t('search.gridView4')}
-                aria-pressed={gridCols === 4}
-                onClick={() => changeGridCols(4)}
-                className={`flex h-8 min-w-8 items-center justify-center rounded-sm px-2 text-xs font-semibold transition-colors ${gridCols === 4 ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-secondary'}`}
-              >
-                <Grid3X3 className="h-4 w-4" />
-              </button>
-            </div>
           </div>
         </div>
 
