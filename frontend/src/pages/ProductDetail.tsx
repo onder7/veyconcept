@@ -26,12 +26,31 @@ interface AccordionItem {
   content: string;
 }
 
-function parseDescriptionToAccordion(html: string): AccordionItem[] {
+interface DescriptionParts {
+  intro: string;
+  sections: AccordionItem[];
+}
+
+function parseDescriptionToAccordion(html: string): DescriptionParts {
   const sections: AccordionItem[] = [];
   const parser = new DOMParser();
   const doc = parser.parseFromString(html, 'text/html');
   const h3Elements = doc.querySelectorAll('h3');
 
+  let introContent = '';
+
+  // Collect content before first h3 as intro
+  if (h3Elements.length > 0) {
+    let sibling = doc.body.firstChild;
+    while (sibling && sibling !== h3Elements[0]) {
+      if (sibling.nodeType === 1) { // Element node
+        introContent += (sibling as Element).outerHTML;
+      }
+      sibling = sibling.nextSibling;
+    }
+  }
+
+  // Parse h3 sections
   h3Elements.forEach((h3) => {
     const title = h3.textContent || '';
     let content = '';
@@ -48,12 +67,15 @@ function parseDescriptionToAccordion(html: string): AccordionItem[] {
     }
   });
 
-  // Fallback: if no h3 sections found, use entire description
-  if (sections.length === 0) {
-    sections.push({ title: 'Ürün Açıklaması', content: html });
+  // Fallback: if no h3 sections found, entire description is intro
+  if (sections.length === 0 && !introContent) {
+    introContent = html;
   }
 
-  return sections;
+  return {
+    intro: introContent,
+    sections
+  };
 }
 
 // ─── AccordionSection Component ──────────────────────────────────────────────
@@ -498,9 +520,24 @@ export function ProductDetail() {
 
           {product.description && (
             <div className="border-t border-border pt-5 space-y-0">
-              {parseDescriptionToAccordion(product.description).map((section, idx) => (
-                <AccordionSection key={idx} title={section.title} content={section.content} />
-              ))}
+              {(() => {
+                const { intro, sections } = parseDescriptionToAccordion(product.description);
+                return (
+                  <>
+                    {/* Intro metni */}
+                    {intro && (
+                      <div className="mb-6 text-sm text-muted-foreground leading-relaxed space-y-3 product-description pb-6 border-b border-border">
+                        <div dangerouslySetInnerHTML={{ __html: intro }} />
+                      </div>
+                    )}
+
+                    {/* Accordion sections */}
+                    {sections.map((section, idx) => (
+                      <AccordionSection key={idx} title={section.title} content={section.content} />
+                    ))}
+                  </>
+                );
+              })()}
             </div>
           )}
         </div>
