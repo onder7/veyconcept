@@ -1,7 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { productApi } from '@/services/productApi';
 import { api } from '@/services/api';
 import { Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -83,13 +82,6 @@ export function Footer() {
   const [email, setEmail] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  const { data: categoriesData } = useQuery({
-    queryKey: ['categories'],
-    queryFn: () => productApi.categories(),
-  });
-  const categories = categoriesData?.data?.data?.slice(0, 5) ?? [];
-
-  // Müşteri Hizmetleri menüsü — admin tarafından yönetilen sayfalar
   const { data: menuPagesData } = useQuery({
     queryKey: ['menu-pages'],
     queryFn: () => api.get<{ success: boolean; data: Array<{ slug: string; title: string; isSystem: boolean; showInHeader: boolean; showInFooter: boolean }> }>('/pages'),
@@ -165,19 +157,6 @@ export function Footer() {
             className="text-muted-foreground mb-6 leading-relaxed [&_a]:underline [&_a]:text-foreground hover:[&_a]:text-amber-800 [&_p]:mb-2 [&_strong]:text-foreground [&_h1]:text-base [&_h1]:font-bold [&_h2]:text-sm [&_h2]:font-semibold [&_ul]:list-disc [&_ul]:pl-5"
             dangerouslySetInnerHTML={{ __html: storeSlogan || 'Güvenli ödeme ve hızlı kargo seçenekleriyle binlerce ürünü keşfedin.' }}
           />
-        </div>
-
-        <div>
-          <h3 className="mb-4 text-xs uppercase tracking-[0.3em] text-muted-foreground">{t('footer.categories')}</h3>
-          <ul className="space-y-2.5 text-muted-foreground">
-            {categories.map((cat) => (
-              <li key={cat.id}>
-                <Link to={`/kategori/${cat.slug}`} className="hover:text-amber-800 dark:hover:text-amber-500 transition-colors">
-                  {cat.name}
-                </Link>
-              </li>
-            ))}
-          </ul>
         </div>
 
         <div>
