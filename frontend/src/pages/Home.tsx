@@ -2,20 +2,22 @@ import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { productApi } from '@/services/productApi';
 import { api } from '@/services/api';
-import { HeroVideo } from '@/components/home/HeroVideo';
+import { HeroSlider, type HeroSlide } from '@/components/home/HeroSlider';
 import { HomeJournal } from '@/components/home/HomeJournal';
 import { HomeShop } from '@/components/home/HomeShop';
 import { useState, useEffect } from 'react';
 import { SeoHead } from '@/components/seo/SeoHead';
 import { organizationSchema, websiteSchema } from '@/lib/schemas';
 import { CampaignBanner } from '@/components/common/CampaignDisplay';
-import { useStoreInfo, useFooterSlogan } from '@/hooks/useStoreInfo';
+import { useStoreInfo } from '@/hooks/useStoreInfo';
 
 export function Home() {
   const { t } = useTranslation();
   const { name: storeName } = useStoreInfo();
-  const heroSlogan = useFooterSlogan();
   const [bannerCampaign, setBannerCampaign] = useState<any | null>(null);
+
+  // Demo slides - admin panelinden gelecek
+  const slides: HeroSlide[] = [];
 
   // Fetch banner campaign
   useEffect(() => {
@@ -50,18 +52,18 @@ export function Home() {
         description={t('home.description', { storeName })}
         schema={[organizationSchema(storeName), websiteSchema(storeName)]}
       />
-      {/* Video hero aktif; görsel slider geçici olarak devre dışı. */}
-      {/*
+      {/* Resim slider aktif; video hero geçici olarak devre dışı. */}
       <HeroSlider
         slides={slides}
         storeName={storeName}
       />
-      */}
       
+      {/*
       <HeroVideo
         storeName={storeName}
         slogan={heroSlogan}
       />
+      */}
 
       {/* Campaign Banner */}
       {bannerCampaign && (
