@@ -158,54 +158,13 @@ export function Footer() {
       )}
 
       {/* Main Links Section */}
-      <div className="container mx-auto px-4 py-16 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-10 text-sm">
+      <div className="container mx-auto px-4 py-16 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-10 text-sm">
         <div>
           <h3 className="font-display text-3xl text-foreground mb-4">{storeName}</h3>
           <div
             className="text-muted-foreground mb-6 leading-relaxed [&_a]:underline [&_a]:text-foreground hover:[&_a]:text-amber-800 [&_p]:mb-2 [&_strong]:text-foreground [&_h1]:text-base [&_h1]:font-bold [&_h2]:text-sm [&_h2]:font-semibold [&_ul]:list-disc [&_ul]:pl-5"
             dangerouslySetInnerHTML={{ __html: storeSlogan || 'Güvenli ödeme ve hızlı kargo seçenekleriyle binlerce ürünü keşfedin.' }}
           />
-
-          {/* Sosyal medya iconları — sadece admin panelinde girilmişse görünür */}
-          {hasSocialLinks && (
-            <div className="flex items-center flex-wrap gap-3">
-              {socialLinks.whatsapp && (
-                <SocialBtn href={`https://wa.me/${socialLinks.whatsapp.replace(/\D/g, '')}`}>
-                  <WhatsAppIcon />
-                </SocialBtn>
-              )}
-              {socialLinks.instagram && (
-                <SocialBtn href={socialLinks.instagram}>
-                  <InstagramIcon />
-                </SocialBtn>
-              )}
-              {socialLinks.facebook && (
-                <SocialBtn href={socialLinks.facebook}>
-                  <FacebookIcon />
-                </SocialBtn>
-              )}
-              {socialLinks.twitter && (
-                <SocialBtn href={socialLinks.twitter}>
-                  <TwitterIcon />
-                </SocialBtn>
-              )}
-              {socialLinks.youtube && (
-                <SocialBtn href={socialLinks.youtube}>
-                  <YoutubeIcon />
-                </SocialBtn>
-              )}
-              {socialLinks.linkedin && (
-                <SocialBtn href={socialLinks.linkedin}>
-                  <LinkedinIcon />
-                </SocialBtn>
-              )}
-              {socialLinks.tiktok && (
-                <SocialBtn href={socialLinks.tiktok}>
-                  <TiktokIcon />
-                </SocialBtn>
-              )}
-            </div>
-          )}
         </div>
 
         <div>
@@ -246,6 +205,50 @@ export function Footer() {
                 </li>
               ))}
             </ul>
+          </div>
+        )}
+
+        {/* Sosyal Medya Bölümü */}
+        {hasSocialLinks && (
+          <div>
+            <h3 className="mb-4 text-xs uppercase tracking-[0.3em] text-muted-foreground">Platformlar</h3>
+            <div className="flex flex-wrap gap-3">
+              {socialLinks.whatsapp && (
+                <SocialBtn href={`https://wa.me/${socialLinks.whatsapp.replace(/\D/g, '')}`}>
+                  <WhatsAppIcon />
+                </SocialBtn>
+              )}
+              {socialLinks.instagram && (
+                <SocialBtn href={socialLinks.instagram}>
+                  <InstagramIcon />
+                </SocialBtn>
+              )}
+              {socialLinks.facebook && (
+                <SocialBtn href={socialLinks.facebook}>
+                  <FacebookIcon />
+                </SocialBtn>
+              )}
+              {socialLinks.twitter && (
+                <SocialBtn href={socialLinks.twitter}>
+                  <TwitterIcon />
+                </SocialBtn>
+              )}
+              {socialLinks.youtube && (
+                <SocialBtn href={socialLinks.youtube}>
+                  <YoutubeIcon />
+                </SocialBtn>
+              )}
+              {socialLinks.linkedin && (
+                <SocialBtn href={socialLinks.linkedin}>
+                  <LinkedinIcon />
+                </SocialBtn>
+              )}
+              {socialLinks.tiktok && (
+                <SocialBtn href={socialLinks.tiktok}>
+                  <TiktokIcon />
+                </SocialBtn>
+              )}
+            </div>
           </div>
         )}
       </div>
