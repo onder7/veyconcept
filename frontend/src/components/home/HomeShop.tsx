@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ArrowUpRight } from 'lucide-react';
 import type { Product } from '@/types';
 import { ProductQuickView } from '@/components/home/ProductQuickView';
 
@@ -74,26 +73,16 @@ export function HomeShop({ products, loading = false }: Props) {
                       <span className="absolute left-4 top-4 z-10 font-mono text-xs text-white mix-blend-difference">
                         {String(index + 1).padStart(2, '0')}
                       </span>
-                      {/* Hover overlay - ürün bilgileri */}
-                      <div className="absolute inset-0 flex flex-col items-start justify-end bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4 opacity-0 transition-opacity duration-500 group-hover:opacity-100">
-                        <h3 className="font-display text-base leading-tight text-white mb-2">
+                      {/* Hover overlay - ürün adı ve fiyat */}
+                      <div className="absolute inset-0 flex flex-col items-center justify-end bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4 opacity-0 transition-opacity duration-500 group-hover:opacity-100">
+                        <h3 className="font-display text-base sm:text-lg leading-tight text-white text-center mb-2 line-clamp-2">
                           {product.name}
                         </h3>
-                        {product.description && (
-                          <p className="text-sm text-white/70 line-clamp-2 mb-2">
-                            {product.description.replace(/<[^>]*>/g, '').replace(/&[^;]+;/g, '').substring(0, 120)}
-                          </p>
-                        )}
-                        <div className="flex items-center justify-between w-full">
-                          {product.variants?.[0]?.price && (
-                            <span className="text-base font-medium text-white">
-                              ₺{Number(product.variants[0].price).toFixed(2)}
-                            </span>
-                          )}
-                          <span className="flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1.5 text-xs font-medium text-white hover:bg-white/20">
-                            {t('components.homeShop.explore')} <ArrowUpRight className="h-3 w-3" />
+                        {product.variants?.[0]?.price && (
+                          <span className="text-lg sm:text-xl font-display font-semibold text-white">
+                            ₺{Number(product.variants[0].price).toFixed(2)}
                           </span>
-                        </div>
+                        )}
                       </div>
                     </div>
 
