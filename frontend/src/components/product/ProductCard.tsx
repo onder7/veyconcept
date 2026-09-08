@@ -107,12 +107,12 @@ export function ProductCard({ product, hideDetails = false, cols = 4 }: Props) {
     <Link
       to={`/urun/${product.slug}`}
       className={`group flex flex-col rounded-sm overflow-hidden text-left transition-all duration-300 ${
-        hideDetails ? `border-none bg-transparent ${scale} origin-top-left` : 'border border-border bg-card dark:bg-neutral-900 hover:border-foreground/30 dark:hover:border-neutral-600'
+        hideDetails ? `border-none bg-transparent ${scale} origin-top-left` : ''
       }`}
     >
       {/* Görsel Kutusu */}
       <div
-        className={`relative ${aspectRatio} bg-transparent flex items-center justify-center overflow-hidden`}
+        className={`relative ${aspectRatio} bg-transparent flex items-center justify-center overflow-hidden border border-border rounded-sm`}
         onMouseEnter={startCycle}
         onMouseLeave={stopCycle}
       >
@@ -145,16 +145,16 @@ export function ProductCard({ product, hideDetails = false, cols = 4 }: Props) {
         )}
       </div>
 
-      {/* Detaylar */}
+      {/* Ürün Bilgisi - Resmin Altında */}
       {!hideDetails && (
-        <div className="flex flex-col gap-1.5 p-3 flex-1">
+        <div className="flex flex-col gap-2 p-3 bg-card dark:bg-neutral-900 border border-t-0 border-border rounded-b-sm">
           {/* Ürün Adı */}
-          <h3 className="font-sans text-base sm:text-lg font-semibold text-foreground line-clamp-2 leading-snug">
+          <h3 className="font-sans text-sm sm:text-base font-semibold text-foreground line-clamp-2 leading-snug">
             {product.brand?.name && <span className="font-semibold">{product.brand.name} </span>}
             {product.name}
           </h3>
 
-          {/* Fiyat (Sabit - overlay'dan taşındı) */}
+          {/* Fiyat */}
           {cheapestVariant && (
             <span className="text-base sm:text-lg font-display font-semibold text-foreground">
               {formatPrice(grossPrice)}
@@ -172,11 +172,11 @@ export function ProductCard({ product, hideDetails = false, cols = 4 }: Props) {
             </div>
           )}
 
-          {/* Fiyat bilgisi (gri alan) + Sepete Ekle */}
-          <div className="mt-auto rounded-sm bg-secondary dark:bg-neutral-800 px-3 py-2.5 flex items-end justify-between gap-2">
+          {/* Discount + Sepete Ekle */}
+          <div className="flex items-end justify-between gap-2 pt-1">
             <div className="min-w-0">
               {discount > 0 && (
-                <div className="flex items-center gap-2 mb-0.5">
+                <div className="flex items-center gap-2 mb-1">
                   <span className="text-xs text-muted-foreground line-through">{formatPrice(grossCompareAt)}</span>
                   <span className="text-[11px] font-semibold text-amber-800 dark:text-amber-300 bg-amber-100 dark:bg-amber-900/40 rounded-sm px-1.5 py-0.5">%{discount}</span>
                 </div>
