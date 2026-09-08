@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, ArrowUpRight } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export interface HeroSlide {
   img: string;
@@ -29,6 +30,7 @@ const SLIDE_DURATION = 6000;
  * - Admin panelinde slayt yoksa yalnızca slider zemini gösterilir; varsayılan mağaza metni eklenmez.
  */
 export function HeroSlider({ slides, storeName }: Props) {
+  const { t } = useTranslation();
   const hasSlides = slides.length > 0;
   const count = Math.max(slides.length, 1);
   const [index, setIndex] = useState(0);
@@ -209,7 +211,7 @@ export function HeroSlider({ slides, storeName }: Props) {
         onClick={scrollDown}
         className="absolute right-6 bottom-12 z-20 hidden flex-col items-center gap-2 text-white/60 transition-colors hover:text-white md:flex"
       >
-        <span className="text-[10px] uppercase tracking-[0.3em]">Kaydır</span>
+        <span className="text-[10px] uppercase tracking-[0.3em]">{t('hero.scroll')}</span>
         <span className="h-12 w-px bg-white/40" />
       </button>
     </section>
