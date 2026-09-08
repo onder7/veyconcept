@@ -145,7 +145,10 @@ ${allUrls
   }
 });
 
-app.use('/api', maintenanceCheck, apiRoutes);
+app.use('/api', maintenanceCheck, (req, res, next) => {
+  res.setHeader('Content-Type', 'application/json; charset=utf-8');
+  next();
+}, apiRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

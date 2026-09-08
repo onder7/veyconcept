@@ -12,6 +12,8 @@ services:
     restart: unless-stopped
     networks:
       - app
+    ports:
+      - "80:80"
 
   frontend:
     build:
@@ -22,6 +24,8 @@ services:
     restart: unless-stopped
     networks:
       - app
+    ports:
+      - "3000:80"
 
   admin:
     build:

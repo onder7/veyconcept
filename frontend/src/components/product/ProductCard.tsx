@@ -8,7 +8,6 @@ import { useCartStore } from '@/store/cartStore';
 import { useAuthStore } from '@/store/authStore';
 import { cartApi } from '@/services/cartApi';
 import { toast } from 'sonner';
-import { CampaignBadges } from '@/components/common/CampaignDisplay';
 import { useTaxConfig } from '@/hooks/useTaxConfig';
 
 interface Props {
@@ -144,33 +143,23 @@ export function ProductCard({ product, hideDetails = false, cols = 4 }: Props) {
             </span>
           </div>
         )}
-
-        {/* Hover overlay - ürün adı ve fiyat */}
-        <div className="absolute inset-0 flex flex-col items-center justify-end bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4">
-          <h3 className="font-display text-sm sm:text-base leading-tight text-white text-center mb-2 line-clamp-2">
-            {product.name}
-          </h3>
-          {cheapestVariant && (
-            <span className="text-base sm:text-lg font-display font-semibold text-white">
-              {formatPrice(grossPrice)}
-            </span>
-          )}
-        </div>
       </div>
 
       {/* Detaylar */}
       {!hideDetails && (
         <div className="flex flex-col gap-1.5 p-3 flex-1">
-          {/* Kampanya / Kupon rozeti */}
-          <div className="flex justify-center">
-            <CampaignBadges />
-          </div>
-
-          {/* Ürün Adı (marka + ad, 2 satır) */}
-          <h3 className="font-sans text-base sm:text-lg font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-2 leading-snug min-h-[3.25rem]">
+          {/* Ürün Adı */}
+          <h3 className="font-sans text-base sm:text-lg font-semibold text-foreground line-clamp-2 leading-snug">
             {product.brand?.name && <span className="font-semibold">{product.brand.name} </span>}
             {product.name}
           </h3>
+
+          {/* Fiyat (Sabit - overlay'dan taşındı) */}
+          {cheapestVariant && (
+            <span className="text-base sm:text-lg font-display font-semibold text-foreground">
+              {formatPrice(grossPrice)}
+            </span>
+          )}
 
           {/* Puan */}
           {avgRating !== null && (
@@ -192,9 +181,6 @@ export function ProductCard({ product, hideDetails = false, cols = 4 }: Props) {
                   <span className="text-[11px] font-semibold text-amber-800 dark:text-amber-300 bg-amber-100 dark:bg-amber-900/40 rounded-sm px-1.5 py-0.5">%{discount}</span>
                 </div>
               )}
-              <span className={`font-display text-xl ${discount > 0 ? 'text-amber-800 dark:text-amber-400' : 'text-foreground'}`}>
-                {cheapestVariant ? formatPrice(grossPrice) : t('components.productCard.noPrice')}
-              </span>
             </div>
             {inStock && (
               <button
