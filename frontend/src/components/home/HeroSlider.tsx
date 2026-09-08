@@ -207,7 +207,7 @@ export function HeroSlider({ slides, storeName }: Props) {
       <button
         type="button"
         onClick={scrollDown}
-        className="absolute right-6 top-1/4 z-20 hidden flex-col items-center gap-2 text-white/60 transition-colors hover:text-white md:flex"
+        className="absolute right-6 bottom-12 z-20 hidden flex-col items-center gap-2 text-white/60 transition-colors hover:text-white md:flex"
       >
         <span className="text-[10px] uppercase tracking-[0.3em]">Kaydır</span>
         <span className="h-12 w-px bg-white/40" />
