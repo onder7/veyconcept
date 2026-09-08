@@ -74,7 +74,7 @@ export function HeroSlider({ slides, storeName }: Props) {
   return (
     <section
       id="hero"
-      className="relative h-[57.5svh] min-h-[403px] max-h-[759px] w-full overflow-hidden bg-foreground md:h-[64.4svh]"
+      className="relative h-[75svh] min-h-[500px] max-h-[900px] w-full overflow-hidden bg-foreground md:h-[80svh]"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
@@ -126,25 +126,24 @@ export function HeroSlider({ slides, storeName }: Props) {
       {hasSlides && (slides[index]?.title || slides[index]?.subtitle || slides[index]?.buttonText) && (
         <div
           key={index}
-          className="pointer-events-none relative z-10 mx-auto flex h-full max-w-[1600px] -translate-y-10 flex-col justify-center px-4 text-left animate-fade-up sm:-translate-y-14 sm:px-6 md:-translate-y-20 md:px-12"
+          className="pointer-events-none relative z-10 mx-auto flex h-full max-w-[1600px] flex-col justify-start px-4 pt-20 text-left animate-fade-up sm:px-6 sm:pt-28 md:px-12 md:pt-40"
         >
           <div className="max-w-3xl">
-            <span className="mx-auto mb-6 block h-px w-12 bg-amber-400" />
             {slides[index]?.title && (
-              <h1 className="font-display text-4xl leading-[1.02] text-white sm:text-7xl md:text-8xl">
+              <h1 className="font-display text-4xl font-bold leading-[1.02] text-white sm:text-7xl md:text-8xl tracking-tight">
                 {slides[index].title}
               </h1>
             )}
             {slides[index]?.subtitle && (
-              <p className="mx-auto mt-5 max-w-xl text-base leading-relaxed text-white/80 md:text-lg">
+              <p className="mt-5 max-w-xl text-base leading-relaxed text-white/80 md:text-lg">
                 {slides[index].subtitle}
               </p>
             )}
             {slides[index]?.buttonText && (
-              <div className="pointer-events-auto mt-9 flex justify-center">
+              <div className="pointer-events-auto mt-9 flex justify-start">
                 <Link
                   to={slides[index].link || '#'}
-                  className="group inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-6 py-3.5 text-sm font-medium text-foreground transition-all hover:bg-amber-50 sm:w-auto sm:px-7"
+                  className="group inline-flex items-center justify-center gap-2 rounded-full bg-white px-6 py-3.5 text-sm font-medium text-foreground transition-all hover:bg-amber-50 sm:px-7"
                 >
                   {slides[index].buttonText}
                   <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
