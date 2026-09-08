@@ -130,7 +130,7 @@ export function HeroSlider({ slides, storeName }: Props) {
         >
           <div className="max-w-3xl">
             {slides[index]?.title && (
-              <h1 className="font-display text-4xl font-bold leading-[1.02] text-white sm:text-7xl md:text-8xl tracking-tight">
+              <h1 className="font-display text-4xl font-bold leading-[1.02] text-emerald-900 sm:text-7xl md:text-8xl tracking-tight" style={{ fontFamily: 'serif' }}>
                 {slides[index].title}
               </h1>
             )}
@@ -207,7 +207,7 @@ export function HeroSlider({ slides, storeName }: Props) {
       <button
         type="button"
         onClick={scrollDown}
-        className="absolute bottom-6 right-6 z-20 hidden flex-col items-center gap-2 text-white/60 transition-colors hover:text-white md:flex"
+        className="absolute right-6 top-1/2 -translate-y-1/2 z-20 hidden flex-col items-center gap-2 text-white/60 transition-colors hover:text-white md:flex"
       >
         <span className="text-[10px] uppercase tracking-[0.3em]">Kaydır</span>
         <span className="h-12 w-px bg-white/40" />
