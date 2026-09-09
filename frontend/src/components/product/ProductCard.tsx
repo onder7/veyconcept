@@ -106,13 +106,13 @@ export function ProductCard({ product, hideDetails = false, cols = 4 }: Props) {
   return (
     <Link
       to={`/urun/${product.slug}`}
-      className={`group flex flex-col rounded-sm overflow-hidden text-left transition-all duration-300 ${
+      className={`group flex flex-col text-left transition-all duration-300 ${
         hideDetails ? `border-none bg-transparent ${scale} origin-top-left` : ''
       }`}
     >
-      {/* Görsel Kutusu */}
+      {/* Görsel Kutusu - Sadece resim, border ile ayrı */}
       <div
-        className={`relative ${aspectRatio} bg-transparent flex items-center justify-center overflow-visible border border-border rounded-sm`}
+        className={`relative ${aspectRatio} bg-transparent flex items-center justify-center overflow-hidden border border-border rounded-t-sm`}
         onMouseEnter={startCycle}
         onMouseLeave={stopCycle}
       >
@@ -145,9 +145,9 @@ export function ProductCard({ product, hideDetails = false, cols = 4 }: Props) {
         )}
       </div>
 
-      {/* Ürün Bilgisi - Resmin Altında */}
+      {/* Ürün Bilgisi - Altında ayrı alan */}
       {!hideDetails && (
-        <div className="flex flex-col gap-2 p-3">
+        <div className="flex flex-col gap-2 p-3 border border-t-0 border-border rounded-b-sm bg-transparent">
           {/* Ürün Adı */}
           <h3 className="font-sans text-sm sm:text-base font-semibold text-foreground line-clamp-2 leading-snug">
             {product.brand?.name && <span className="font-semibold">{product.brand.name} </span>}
