@@ -24,7 +24,7 @@ export function HomeShop({ products, loading = false }: Props) {
   };
 
   return (
-    <section id="shop" className="bg-background">
+    <section id="shop" className="scroll-mt-[148px] bg-background md:scroll-mt-[166px]">
       <div className="mx-auto max-w-[1600px] px-4 py-20 sm:px-6 md:px-12 md:py-28">
         {/* Bölüm başlığı */}
         <div className="mb-12 md:mb-16 text-center">

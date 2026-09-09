@@ -70,13 +70,13 @@ export function HeroSlider({ slides, storeName }: Props) {
   }, [isPaused, index, count]);
 
   const scrollDown = () => {
-    window.scrollTo({ top: window.innerHeight - 80, behavior: 'smooth' });
+    document.getElementById('shop')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
   return (
     <section
       id="hero"
-      className="relative aspect-[1672/941] min-h-0 w-full overflow-hidden bg-foreground"
+      className="relative aspect-[1672/941] min-h-0 w-full overflow-hidden bg-[#b8a58d]"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
@@ -92,7 +92,7 @@ export function HeroSlider({ slides, storeName }: Props) {
               <img
                 src={slide.img}
                 alt=""
-                className="h-full w-full object-contain"
+                className="h-full w-full object-fill"
               />
             );
             // Buton metni varsa CTA yönlendirir → görsel düz; yoksa tüm slayt tıklanabilir bağlantı
@@ -117,10 +117,6 @@ export function HeroSlider({ slides, storeName }: Props) {
           <div className="absolute inset-0 bg-gradient-to-br from-neutral-900 via-neutral-800 to-neutral-900" />
         )}
       </div>
-
-      {/* Okunabilirlik için degradeler — tıklamayı engellemez */}
-      <div className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-b from-black/25 via-black/5 to-black/70" />
-      <div className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-r from-black/40 via-transparent to-transparent" />
 
       {/* ─── Slayt metni (admin: başlık/alt-başlık/buton) — aktif slayt ── */}
       {hasSlides && (slides[index]?.title || slides[index]?.subtitle || slides[index]?.buttonText) && (

@@ -9,6 +9,7 @@ import { useCartStore } from '@/store/cartStore';
 import { useWishlistStore } from '@/store/wishlistStore';
 import { useAuthStore } from '@/store/authStore';
 import { useTaxConfig } from '@/hooks/useTaxConfig';
+import { productApi } from '@/services/productApi';
 import { toast } from 'sonner';
 
 interface Props {
@@ -34,8 +35,11 @@ function plainText(html?: string | null): string {
  * (demo.veyconcept.com product-detail pop-up mantığı). Sayfa değişmeden
  * ürün detayını gösterir; sepete ekleme gerçek backend'e bağlıdır.
  */
-export function ProductQuickView({ product, open, onOpenChange }: Props) {
-  const { t } = useTranslation();
+export function ProductQuickView({ product: sourceProduct, open, onOpenChange }: Props) {
+  const { t, i18n } = useTranslation();
+  const language: 'tr' | 'en' = i18n.language === 'en' ? 'en' : 'tr';
+  const [localizedProduct, setLocalizedProduct] = useState<Product | null>(sourceProduct);
+  const [loadingProduct, setLoadingProduct] = useState(false);
   const [qty, setQty] = useState(1);
   const [imgIdx, setImgIdx] = useState(0);
   const { taxRate } = useTaxConfig();
@@ -46,11 +50,36 @@ export function ProductQuickView({ product, open, onOpenChange }: Props) {
   const [adding, setAdding] = useState(false);
 
   useEffect(() => {
+    setLocalizedProduct(sourceProduct);
+    if (!sourceProduct || !open) return;
+
+    let cancelled = false;
+    setLoadingProduct(true);
+    productApi.get(sourceProduct.slug, language)
+      .then((response) => {
+        if (!cancelled && response.data?.data) setLocalizedProduct(response.data.data);
+      })
+      .catch(() => {
+        // Liste verisi mevcut dildeyse modal onu kullanmaya devam eder.
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingProduct(false);
+      });
+
+    return () => { cancelled = true; };
+  }, [sourceProduct, open, language]);
+
+  useEffect(() => {
     setQty(1);
     setImgIdx(0);
-  }, [product?.id]);
+  }, [sourceProduct?.id]);
 
-  if (!product) return null;
+  const displayedProduct = localizedProduct ?? sourceProduct;
+  if (!displayedProduct) return null;
+
+  // Dil değişiminde kısa süre eski detayların görünmesini engelle.
+  const productForRender = loadingProduct ? displayedProduct : displayedProduct;
+  const product = productForRender;
 
   const images = (product.images ?? [])
     .slice()
