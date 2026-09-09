@@ -112,7 +112,7 @@ export function ProductCard({ product, hideDetails = false, cols = 4 }: Props) {
     >
       {/* Görsel Kutusu */}
       <div
-        className={`relative ${aspectRatio} bg-transparent flex items-center justify-center overflow-hidden border border-border rounded-sm`}
+        className={`relative ${aspectRatio} bg-transparent flex items-center justify-center overflow-visible border border-border rounded-sm`}
         onMouseEnter={startCycle}
         onMouseLeave={stopCycle}
       >
