@@ -147,7 +147,7 @@ export function ProductCard({ product, hideDetails = false, cols = 4 }: Props) {
 
       {/* Ürün Bilgisi - Resmin Altında */}
       {!hideDetails && (
-        <div className="flex flex-col gap-2 p-3 bg-card dark:bg-neutral-900 border border-t-0 border-border rounded-b-sm">
+        <div className="flex flex-col gap-2 p-3">
           {/* Ürün Adı */}
           <h3 className="font-sans text-sm sm:text-base font-semibold text-foreground line-clamp-2 leading-snug">
             {product.brand?.name && <span className="font-semibold">{product.brand.name} </span>}
