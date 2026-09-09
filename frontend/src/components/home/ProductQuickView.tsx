@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Minus, Plus, ShoppingBag, ArrowUpRight, Star, Heart } from 'lucide-react';
+import { Minus, Plus, ShoppingBag, ArrowUpRight, ArrowLeft, ArrowRight, Star, Heart } from 'lucide-react';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import type { Product } from '@/types';
 import { cartApi } from '@/services/cartApi';
@@ -147,6 +147,26 @@ export function ProductQuickView({ product: sourceProduct, open, onOpenChange }:
                 <img src={activeImage.url} alt={activeImage.altText ?? product.name} className="h-full w-full object-contain" />
               ) : (
                 <div className="flex h-full w-full items-center justify-center text-xs text-muted-foreground">{t('components.productCard.noImage')}</div>
+              )}
+              {images.length > 1 && (
+                <>
+                  <button
+                    type="button"
+                    aria-label="Önceki görsel"
+                    onClick={() => setImgIdx((imgIdx - 1 + images.length) % images.length)}
+                    className="absolute left-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-background/85 text-foreground shadow-sm backdrop-blur-sm transition-colors hover:bg-background"
+                  >
+                    <ArrowLeft className="h-4 w-4" />
+                  </button>
+                  <button
+                    type="button"
+                    aria-label="Sonraki görsel"
+                    onClick={() => setImgIdx((imgIdx + 1) % images.length)}
+                    className="absolute right-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-background/85 text-foreground shadow-sm backdrop-blur-sm transition-colors hover:bg-background"
+                  >
+                    <ArrowRight className="h-4 w-4" />
+                  </button>
+                </>
               )}
               {discount > 0 && (
                 <span className="absolute left-3 top-3 rounded-sm bg-amber-600 px-2 py-1 text-[11px] font-semibold text-white">
