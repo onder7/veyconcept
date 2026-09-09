@@ -221,7 +221,7 @@ export function ProductQuickView({ product, open, onOpenChange }: Props) {
                 onClick={() => onOpenChange(false)}
                 className="inline-flex items-center gap-1.5 text-xs uppercase tracking-[0.14em] text-amber-800 transition-colors hover:text-amber-600 dark:text-amber-500"
               >
-                {hasVariants ? t('product.details') : 'Ürün detayına git'}
+                {hasVariants ? t('product.details') : t('product.goToDetails')}
                 <ArrowUpRight className="h-3.5 w-3.5" />
               </Link>
             </div>

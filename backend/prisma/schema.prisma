@@ -782,9 +782,13 @@ model FeatureCard {
 model ChatbotRule {
   id           String   @id @default(cuid())
   title        String                          // Kısa başlık (yönetim için)
+  titleEn      String?  @map("title_en")
   keywords     String[]                        // Tetikleyici kelimeler
+  keywordsEn   String[] @default([]) @map("keywords_en")
   response     String   @db.Text              // Asistanın yanıtı
+  responseEn   String?  @db.Text @map("response_en")
   quickReplies String[] @map("quick_replies") // Hızlı cevap butonları
+  quickRepliesEn String[] @default([]) @map("quick_replies_en")
   sortOrder    Int      @default(0) @map("sort_order")
   isActive     Boolean  @default(true) @map("is_active")
   createdAt    DateTime @default(now()) @map("created_at")
@@ -900,5 +904,4 @@ model StockMovement {
   @@index([createdAt])
   @@map("stock_movements")
 }
-
 

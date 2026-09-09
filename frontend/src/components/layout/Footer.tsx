@@ -73,7 +73,7 @@ function SocialBtn({ href, children }: SocialLinkProps) {
 }
 
 export function Footer() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { name: storeName } = useStoreInfo();
   const storeSlogan = useFooterSlogan();
   const location = useLocation();
@@ -81,10 +81,11 @@ export function Footer() {
   const isHome = location.pathname === '/' || location.pathname === '/en';
   const [email, setEmail] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const pageLanguage = i18n.language === 'en' ? 'en' : 'tr';
 
   const { data: menuPagesData } = useQuery({
-    queryKey: ['menu-pages'],
-    queryFn: () => api.get<{ success: boolean; data: Array<{ slug: string; title: string; isSystem: boolean; showInHeader: boolean; showInFooter: boolean }> }>('/pages'),
+    queryKey: ['menu-pages', pageLanguage],
+    queryFn: () => api.get<{ success: boolean; data: Array<{ slug: string; title: string; isSystem: boolean; showInHeader: boolean; showInFooter: boolean }> }>(`/pages?language=${pageLanguage}`),
     staleTime: 5 * 60 * 1000,
   });
   const menuPages = (menuPagesData?.data?.data ?? []).filter((p) => p.showInFooter);

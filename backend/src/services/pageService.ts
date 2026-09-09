@@ -248,7 +248,7 @@ function slugify(input: string): string {
 }
 
 export async function createPage(data: {
-  title: string; content: string; slug?: string; showInMenu?: boolean; showInHeader?: boolean; showInFooter?: boolean; isActive?: boolean; sortOrder?: number;
+  title: string; titleEn?: string; content: string; contentEn?: string; slug?: string; showInMenu?: boolean; showInHeader?: boolean; showInFooter?: boolean; isActive?: boolean; sortOrder?: number;
 }): Promise<PageDto> {
   const title = (data.title || '').trim();
   if (!title) throw new AppError('Başlık gerekli', 400);
@@ -269,7 +269,9 @@ export async function createPage(data: {
     data: {
       slug,
       title,
+      titleEn: data.titleEn?.trim() || null,
       content: data.content ?? '',
+      contentEn: data.contentEn?.trim() || null,
       showInMenu: data.showInMenu ?? true,
       showInHeader: data.showInHeader ?? true,
       showInFooter: data.showInFooter ?? true,
@@ -281,7 +283,7 @@ export async function createPage(data: {
 }
 
 export async function updatePage(id: string, data: {
-  title?: string; content?: string; showInMenu?: boolean; showInHeader?: boolean; showInFooter?: boolean; isActive?: boolean; sortOrder?: number; slug?: string;
+  title?: string; titleEn?: string; content?: string; contentEn?: string; showInMenu?: boolean; showInHeader?: boolean; showInFooter?: boolean; isActive?: boolean; sortOrder?: number; slug?: string;
 }): Promise<PageDto> {
   const page = await prisma.page.findUnique({ where: { id } });
   if (!page) throw new AppError('Sayfa bulunamadı', 404);
@@ -289,7 +291,9 @@ export async function updatePage(id: string, data: {
   // Sistem sayfasının slug'ı değiştirilemez
   const updateData: Record<string, unknown> = {
     ...(data.title !== undefined && { title: data.title.trim() }),
+    ...(data.titleEn !== undefined && { titleEn: data.titleEn.trim() || null }),
     ...(data.content !== undefined && { content: data.content }),
+    ...(data.contentEn !== undefined && { contentEn: data.contentEn.trim() || null }),
     ...(data.showInMenu !== undefined && { showInMenu: data.showInMenu }),
     ...(data.showInHeader !== undefined && { showInHeader: data.showInHeader }),
     ...(data.showInFooter !== undefined && { showInFooter: data.showInFooter }),

@@ -3,9 +3,13 @@ import { prisma } from '../config/database';
 export interface ChatbotRuleDto {
   id:           string;
   title:        string;
+  titleEn?:     string | null;
   keywords:     string[];
+  keywordsEn?:  string[];
   response:     string;
+  responseEn?:  string | null;
   quickReplies: string[];
+  quickRepliesEn?: string[];
   sortOrder:    number;
   isActive:     boolean;
 }
@@ -115,11 +119,18 @@ export async function listRules(): Promise<ChatbotRuleDto[]> {
   return prisma.chatbotRule.findMany({ orderBy: { sortOrder: 'asc' } });
 }
 
-export async function listActiveRules(): Promise<ChatbotRuleDto[]> {
-  return prisma.chatbotRule.findMany({
+export async function listActiveRules(language: 'tr' | 'en' = 'tr'): Promise<ChatbotRuleDto[]> {
+  const rules = await prisma.chatbotRule.findMany({
     where: { isActive: true },
     orderBy: { sortOrder: 'asc' },
   });
+  return rules.map((rule) => language === 'en' ? {
+    ...rule,
+    title: rule.titleEn || rule.title,
+    keywords: rule.keywordsEn?.length ? rule.keywordsEn : rule.keywords,
+    response: rule.responseEn || rule.response,
+    quickReplies: rule.quickRepliesEn?.length ? rule.quickRepliesEn : rule.quickReplies,
+  } : rule);
 }
 
 export async function createRule(data: Omit<ChatbotRuleDto, 'id'>): Promise<ChatbotRuleDto> {

@@ -79,25 +79,25 @@ function parseDescriptionToAccordion(html: string): DescriptionParts {
 }
 
 // ─── AccordionSection Component ──────────────────────────────────────────────
-function AccordionSection({ title, content }: AccordionItem) {
-  const [open, setOpen] = useState(false);
+function AccordionSection({ title, content, open, onToggle }: AccordionItem & { open: boolean; onToggle: () => void }) {
 
   return (
-    <div className="border-b border-border">
+    <div className="border-b border-border/70 first:border-t first:border-border/70">
       <button
-        onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between py-4 px-0 text-left transition-colors hover:text-foreground/80"
+        type="button"
+        onClick={onToggle}
+        className="group w-full flex items-center justify-between gap-4 py-5 px-1 text-left transition-colors hover:text-primary"
       >
-        <h4 className="font-display text-base sm:text-lg font-medium text-foreground">
+        <h4 className="font-display text-base sm:text-lg font-medium text-foreground transition-colors group-hover:text-primary">
           {title}
         </h4>
-        <span className={`text-2xl text-foreground/60 transition-transform ${open ? 'rotate-45' : ''}`}>
+        <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-border text-lg leading-none text-foreground/60 transition-all ${open ? 'rotate-45 bg-primary text-primary-foreground border-primary' : 'group-hover:border-primary group-hover:text-primary'}`}>
           +
         </span>
       </button>
       
       {open && (
-        <div className="pb-4 text-sm text-muted-foreground leading-relaxed space-y-3 product-description">
+        <div className="mb-3 rounded-sm bg-muted/35 px-4 py-4 text-sm leading-relaxed text-muted-foreground sm:px-5 product-description">
           <div dangerouslySetInnerHTML={{ __html: content }} />
         </div>
       )}
@@ -231,9 +231,11 @@ export function ProductDetail() {
   const { taxRate } = useTaxConfig();
   const [qty, setQty] = useState(1);
   const [activeTab, setActiveTab] = useState<'reviews' | 'qa'>('reviews');
+  const [openDescriptionSection, setOpenDescriptionSection] = useState<number | null>(null);
   const [activeImageIdx, setActiveImageIdx] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const lightboxRef = useRef<HTMLDivElement>(null);
+  const touchStartXRef = useRef<number | null>(null);
   const { setCart, openCart } = useCartStore();
   const qc = useQueryClient();
   const { isFavorite, toggleFavorite } = useWishlistStore();
@@ -271,10 +273,28 @@ export function ProductDetail() {
 
   useEffect(() => {
     if (product?.images?.length) {
-      const idx = product.images.findIndex((img) => img.isPrimary);
-      setActiveImageIdx(idx >= 0 ? idx : 0);
+      setActiveImageIdx(0);
     }
   }, [product?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleGalleryTouchStart = (e: React.TouchEvent) => {
+    touchStartXRef.current = e.touches[0]?.clientX ?? null;
+  };
+
+  const handleGalleryTouchEnd = (e: React.TouchEvent) => {
+    const startX = touchStartXRef.current;
+    const endX = e.changedTouches[0]?.clientX;
+    touchStartXRef.current = null;
+    if (startX === null || endX === undefined || !product?.images?.length) return;
+
+    const distance = endX - startX;
+    if (Math.abs(distance) < 45) return;
+    setActiveImageIdx((current) =>
+      distance < 0
+        ? Math.min(current + 1, product.images.length - 1)
+        : Math.max(current - 1, 0),
+    );
+  };
 
   useEffect(() => {
     if (!lightboxOpen) return;
@@ -332,7 +352,7 @@ export function ProductDetail() {
     product.images?.find((img) => img.isPrimary) ?? product.images?.[0];
 
   return (
-    <main className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
+    <main className="container mx-auto px-3 pb-24 sm:px-4 sm:py-8 md:pb-8">
       <SeoHead
         title={product.name}
         description={
@@ -375,7 +395,45 @@ export function ProductDetail() {
       <div className="grid md:grid-cols-2 gap-4 sm:gap-8 lg:gap-12">
         {/* Görsel Galerisi — Resimler Alt Alta (Vertical) */}
         <div className="space-y-4">
-          <div className="flex flex-col gap-4">
+          {/* Mobil: tek ana görsel, dokununca lightbox; altında yatay küçük galeri. */}
+          <div className="md:hidden">
+            <button
+              type="button"
+              className="group relative block aspect-square w-full overflow-hidden rounded-sm bg-transparent"
+              onClick={() => setLightboxOpen(true)}
+              aria-label={`${product.name} görsellerini aç`}
+            >
+              <img
+                src={product.images[activeImageIdx]?.url ?? product.images[0]?.url}
+                alt={product.images[activeImageIdx]?.altText ?? product.name}
+                className="h-full w-full object-contain transition-transform duration-500 group-active:scale-[0.98]"
+              />
+              <span className="absolute bottom-3 right-3 rounded-full bg-black/45 px-3 py-1.5 text-[10px] uppercase tracking-[0.18em] text-white backdrop-blur-sm">
+                {activeImageIdx + 1} / {product.images.length}
+              </span>
+              <span className="absolute bottom-3 left-3 rounded-full bg-white/85 px-3 py-1.5 text-[10px] uppercase tracking-[0.18em] text-foreground backdrop-blur-sm">
+                Görselleri aç
+              </span>
+            </button>
+            {product.images.length > 1 && (
+              <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
+                {product.images.map((img, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => setActiveImageIdx(i)}
+                    className={`h-16 w-16 shrink-0 overflow-hidden rounded-sm border-2 bg-card transition-colors ${i === activeImageIdx ? 'border-primary' : 'border-transparent'}`}
+                    aria-label={`${product.name} görsel ${i + 1}`}
+                  >
+                    <img src={img.url} alt="" className="h-full w-full object-cover" />
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Masaüstü: mevcut dikey editorial galeri korunur. */}
+          <div className="hidden flex-col gap-4 md:flex">
             {product.images.map((img, i) => (
               <div
                 key={i}
@@ -426,13 +484,13 @@ export function ProductDetail() {
 
         {/* Bilgi — Sticky Sağ Taraf */}
         <div className="sticky top-4 h-fit space-y-4">
-          <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">
+          <p className="text-[10px] font-medium uppercase tracking-[0.28em] text-muted-foreground">
             {product.category.name}{product.brand ? ` · ${product.brand.name}` : ''}
           </p>
-          <h1 className="font-display text-3xl sm:text-4xl md:text-5xl leading-tight text-foreground">{product.name}</h1>
+          <h1 className="max-w-xl font-display text-4xl leading-[0.98] text-foreground sm:text-5xl md:text-6xl">{product.name}</h1>
 
           {avgRating !== null && (
-            <div className="flex items-center gap-2 text-sm">
+            <div className="flex items-center gap-3 text-sm">
               <div className="flex">
                 {[1, 2, 3, 4, 5].map((s) => (
                   <Star key={s} className={`h-4 w-4 ${s <= Math.round(avgRating) ? 'fill-amber-400 text-amber-400' : 'text-border'}`} />
@@ -443,7 +501,7 @@ export function ProductDetail() {
           )}
 
           {/* Fiyat - Miktar - Sepet (Grid Layout) */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-end py-6 border-y border-border">
+          <div className="grid grid-cols-1 items-end gap-6 border-y border-border py-7 md:grid-cols-2">
             {/* Fiyat */}
             <div className="text-center md:text-left">
               {variant && (
@@ -455,7 +513,7 @@ export function ProductDetail() {
                         : formatPrice(Number(variant.compareAt!) * (1 + taxRate / 100))}
                     </p>
                   )}
-                  <p className={`font-display text-3xl ${hasDiscount ? 'text-amber-800 dark:text-amber-400' : 'text-foreground'}`}>
+                  <p className={`font-display text-4xl sm:text-5xl ${hasDiscount ? 'text-amber-800 dark:text-amber-400' : 'text-foreground'}`}>
                     {product.vatIncluded
                       ? formatPrice(variant.price)
                       : formatPrice(Number(variant.price) * (1 + taxRate / 100))}
@@ -466,7 +524,7 @@ export function ProductDetail() {
 
             {/* Miktar + Sepete Ekle */}
             <div className="flex flex-col gap-2">
-              <div className="flex items-center gap-2 justify-end">
+                <div className="flex items-center justify-end gap-2">
                 <div className="flex items-center rounded-full border border-border">
                   <button
                     type="button"
@@ -488,7 +546,7 @@ export function ProductDetail() {
                 </div>
               </div>
               <Button
-                className="w-full h-11 rounded-full bg-primary text-primary-foreground hover:bg-primary/90"
+                className="h-14 w-full rounded-full bg-primary text-base font-semibold text-primary-foreground shadow-lg shadow-primary/15 transition-all hover:-translate-y-0.5 hover:bg-primary/90 hover:shadow-xl"
                 disabled={!variant || variant.stockQty === 0 || addToCartMut.isPending}
                 onClick={() => variant && addToCartMut.mutate({ variantId: variant.id, quantity: qty })}
               >
@@ -505,7 +563,7 @@ export function ProductDetail() {
           />
 
           {product.description && (
-            <div className="border-t border-border pt-5 space-y-0">
+            <div className="border-t border-border pt-6 space-y-0">
               {(() => {
                 const { intro, sections } = parseDescriptionToAccordion(product.description);
                 return (
@@ -519,7 +577,13 @@ export function ProductDetail() {
 
                     {/* Accordion sections */}
                     {sections.map((section, idx) => (
-                      <AccordionSection key={idx} title={section.title} content={section.content} />
+                      <AccordionSection
+                        key={idx}
+                        title={section.title}
+                        content={section.content}
+                        open={openDescriptionSection === idx}
+                        onToggle={() => setOpenDescriptionSection((current) => (current === idx ? null : idx))}
+                      />
                     ))}
                   </>
                 );
@@ -575,12 +639,39 @@ export function ProductDetail() {
         <RecentlyViewed excludeId={product.id} />
       </div>
 
+      {/* Mobilde satın alma aksiyonu ekranda erişilebilir kalır. */}
+      <div className="fixed inset-x-0 bottom-0 z-40 flex items-center gap-3 border-t border-border bg-background/95 px-3 py-3 shadow-[0_-8px_24px_rgba(43,33,27,0.10)] backdrop-blur-md md:hidden">
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-[10px] uppercase tracking-[0.16em] text-muted-foreground">{product.name}</p>
+          {variant && (
+            <p className="font-display text-lg text-foreground">
+              {product.vatIncluded ? formatPrice(variant.price) : formatPrice(Number(variant.price) * (1 + taxRate / 100))}
+            </p>
+          )}
+        </div>
+        <div className="flex items-center rounded-full border border-border bg-card">
+          <button type="button" aria-label={t('product.decrease')} className="flex h-10 w-8 items-center justify-center text-muted-foreground" onClick={() => setQty((q) => Math.max(1, q - 1))}>
+            <Minus className="h-3.5 w-3.5" />
+          </button>
+          <span className="w-6 text-center text-sm tabular-nums">{qty}</span>
+          <button type="button" aria-label={t('product.increase')} className="flex h-10 w-8 items-center justify-center text-muted-foreground" onClick={() => setQty((q) => Math.min(variant?.stockQty ?? 1, q + 1))}>
+            <Plus className="h-3.5 w-3.5" />
+          </button>
+        </div>
+        <Button className="h-11 shrink-0 rounded-full px-5" disabled={!variant || variant.stockQty === 0 || addToCartMut.isPending} onClick={() => variant && addToCartMut.mutate({ variantId: variant.id, quantity: qty })}>
+          <ShoppingCart className="mr-2 h-4 w-4" />
+          {addToCartMut.isPending ? t('product.addingToCart') : t('product.addToCart')}
+        </Button>
+      </div>
+
       {/* Lightbox */}
       {lightboxOpen && product.images.length > 0 && (
         <div
           ref={lightboxRef}
           className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90"
           onClick={(e) => { if (e.target === lightboxRef.current) setLightboxOpen(false); }}
+          onTouchStart={handleGalleryTouchStart}
+          onTouchEnd={handleGalleryTouchEnd}
         >
           {/* Kapat */}
           <button

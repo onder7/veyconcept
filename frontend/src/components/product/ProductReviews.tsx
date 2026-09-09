@@ -180,24 +180,25 @@ export function ProductReviews({ productId }: Props) {
     <div className="space-y-6">
       {/* Özet */}
       {reviewsData && reviewsData.total > 0 && (
-        <div className="flex flex-col sm:flex-row gap-6 p-6 rounded-xl bg-muted/40 border">
+        <div className="flex flex-col gap-7 rounded-sm border border-border bg-card p-5 shadow-sm sm:flex-row sm:items-center sm:gap-8 sm:p-7">
           {/* Ortalama */}
-          <div className="flex flex-col items-center justify-center sm:border-r sm:pr-6 gap-1">
-            <span className="text-5xl font-bold">{reviewsData.avgRating.toFixed(1)}</span>
+          <div className="flex flex-col items-center justify-center gap-1 sm:min-w-40 sm:border-r sm:border-border sm:pr-8">
+            <span className="mb-1 text-[10px] uppercase tracking-[0.22em] text-muted-foreground">Genel değerlendirme</span>
+            <span className="font-display text-6xl leading-none text-foreground">{reviewsData.avgRating.toFixed(1)}</span>
             <StarRating value={Math.round(reviewsData.avgRating)} readOnly size="md" />
             <span className="text-sm text-muted-foreground">{reviewsData.total} değerlendirme</span>
           </div>
           {/* Dağılım */}
-          <div className="flex-1 space-y-1.5">
+          <div className="flex-1 space-y-2">
             {reviewsData.distribution.map(({ star, count }) => {
               const pct = reviewsData.total > 0 ? (count / reviewsData.total) * 100 : 0;
               return (
                 <div key={star} className="flex items-center gap-2 text-xs">
-                  <span className="w-3 text-right text-muted-foreground">{star}</span>
+                  <span className="w-3 text-right font-medium text-muted-foreground">{star}</span>
                   <Star className="h-3 w-3 fill-yellow-400 text-yellow-400 shrink-0" />
-                  <div className="flex-1 h-2 rounded-full bg-muted overflow-hidden">
+                  <div className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
                     <div
-                      className="h-full bg-yellow-400 rounded-full transition-all"
+                      className="h-full rounded-full bg-amber-400 transition-all"
                       style={{ width: `${pct}%` }}
                     />
                   </div>

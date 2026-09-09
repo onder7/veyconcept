@@ -128,7 +128,7 @@ export function HeroSlider({ slides, storeName }: Props) {
       {hasSlides && (slides[index]?.title || slides[index]?.subtitle || slides[index]?.buttonText) && (
         <div
           key={index}
-          className="pointer-events-none relative z-10 mx-auto flex h-full max-w-[1600px] flex-col justify-start px-4 pt-20 text-left animate-fade-up sm:px-6 sm:pt-28 md:px-12 md:pt-40"
+          className="pointer-events-none relative z-10 mx-0 flex h-full max-w-none flex-col justify-start px-4 pt-6 text-left animate-fade-up sm:px-6 sm:pt-8 md:px-0 md:pt-10"
         >
           <div className="max-w-3xl">
             {slides[index]?.title && (
@@ -209,7 +209,7 @@ export function HeroSlider({ slides, storeName }: Props) {
       <button
         type="button"
         onClick={scrollDown}
-        className="absolute right-6 bottom-12 z-20 hidden flex-col items-center gap-2 text-white/60 transition-colors hover:text-white md:flex"
+        className="absolute left-1/2 top-6 z-20 hidden -translate-x-1/2 flex-col items-center gap-2 text-white/70 transition-colors hover:text-white md:flex"
       >
         <span className="text-[10px] uppercase tracking-[0.3em]">{t('hero.scroll')}</span>
         <span className="h-12 w-px bg-white/40" />

@@ -8,6 +8,7 @@ interface Props {
   loading?: boolean;
   cols?: 2 | 3 | 4;
   hideDetails?: boolean;
+  variant?: 'default' | 'search';
 }
 
 const colClass = {
@@ -16,7 +17,7 @@ const colClass = {
   4: 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4'
 };
 
-export function ProductGrid({ products, loading = false, cols = 4, hideDetails = false }: Props) {
+export function ProductGrid({ products, loading = false, cols = 4, hideDetails = false, variant = 'default' }: Props) {
   const { t } = useTranslation();
 
   if (loading) {
@@ -47,7 +48,9 @@ export function ProductGrid({ products, loading = false, cols = 4, hideDetails =
 
   return (
     <div className={`grid ${colClass[cols]} gap-2 sm:gap-3 md:gap-4`}>
-      {products.map((p) => <ProductCard key={p.id} product={p} hideDetails={hideDetails} cols={cols} />)}
+      {products.map((p) => (
+        <ProductCard key={p.id} product={p} hideDetails={hideDetails} cols={cols} variant={variant} />
+      ))}
     </div>
   );
 }

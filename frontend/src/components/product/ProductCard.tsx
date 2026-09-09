@@ -14,13 +14,14 @@ interface Props {
   product: Product;
   hideDetails?: boolean;
   cols?: 2 | 3 | 4;
+  variant?: 'default' | 'search';
 }
 
 function formatPrice(price: number | string): string {
   return Number(price).toLocaleString('tr-TR', { minimumFractionDigits: 0, maximumFractionDigits: 2 }) + ' TL';
 }
 
-export function ProductCard({ product, hideDetails = false, cols = 4 }: Props) {
+export function ProductCard({ product, hideDetails = false, cols = 4, variant = 'default' }: Props) {
   const { t } = useTranslation();
   
   // Görseller: birincil önce, ardından diğerleri — hover'da sırayla döner
@@ -110,7 +111,7 @@ export function ProductCard({ product, hideDetails = false, cols = 4 }: Props) {
         hideDetails ? `border-none bg-transparent ${scale} origin-top-left` : ''
       }`}
     >
-      {/* Görsel Kutusu - Sadece resim, border ile ayrı */}
+      {/* Görsel Kutusu — ürün adı ve fiyat görselin üzerine taşınmaz. */}
       <div
         className={`relative ${aspectRatio} bg-transparent flex items-center justify-center overflow-hidden border border-border rounded-t-sm`}
         onMouseEnter={startCycle}
@@ -145,9 +146,9 @@ export function ProductCard({ product, hideDetails = false, cols = 4 }: Props) {
         )}
       </div>
 
-      {/* Ürün Bilgisi - Altında ayrı alan */}
+      {/* Ürün bilgisi her zaman görselin altında ayrı bir alanda gösterilir. */}
       {!hideDetails && (
-        <div className="flex flex-col gap-2 p-3 border border-t-0 border-border rounded-b-sm bg-transparent">
+        <div className={`flex flex-col gap-2 border border-t-0 border-border rounded-b-sm bg-transparent ${variant === 'search' ? 'p-4 sm:p-5' : 'p-3'}`}>
           {/* Ürün Adı */}
           <h3 className="font-sans text-sm sm:text-base font-semibold text-foreground line-clamp-2 leading-snug">
             {product.brand?.name && <span className="font-semibold">{product.brand.name} </span>}

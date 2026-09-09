@@ -19,23 +19,26 @@ const SYSTEM_ICONS: Record<string, typeof Mail> = {
 interface MenuPage { slug: string; title: string; isSystem: boolean }
 
 export function SupportPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
   const params = useParams();
   const { isAuthenticated, user } = useAuthStore();
 
   const getSlugFromPath = (path: string) => {
-    if (path.startsWith('/sayfa/')) return params.slug || '';
-    if (path.startsWith('/iade')) return 'iade';
-    if (path.startsWith('/sss')) return 'sss';
-    if (path.startsWith('/sozlesmeler')) return 'sozlesmeler';
-    if (path.startsWith('/hakkimizda')) return 'hakkimizda';
-    if (path.startsWith('/kvkk')) return 'kvkk';
-    if (path.startsWith('/uyelik')) return 'uyelik';
+    // İngilizce rotalar /en/... şeklinde geldiğinde slug çözümünü locale'den bağımsız yap.
+    const normalizedPath = path.replace(/^\/en(?=\/|$)/, '') || '/';
+    if (normalizedPath.startsWith('/sayfa/')) return params.slug || '';
+    if (normalizedPath.startsWith('/iade')) return 'iade';
+    if (normalizedPath.startsWith('/sss')) return 'sss';
+    if (normalizedPath.startsWith('/sozlesmeler')) return 'sozlesmeler';
+    if (normalizedPath.startsWith('/hakkimizda')) return 'hakkimizda';
+    if (normalizedPath.startsWith('/kvkk')) return 'kvkk';
+    if (normalizedPath.startsWith('/uyelik')) return 'uyelik';
     return 'iletisim';
   };
   const currentSlug = getSlugFromPath(location.pathname);
+  const pageLanguage = i18n.language === 'en' ? 'en' : 'tr';
 
   const [menuPages, setMenuPages] = useState<MenuPage[]>([]);
   const [pageTitle, setPageTitle] = useState<string>('');
@@ -69,17 +72,17 @@ export function SupportPage() {
 
   // Menüde gösterilecek sayfalar (kenar çubuğu)
   useEffect(() => {
-    api.get<{ success: boolean; data: MenuPage[] }>('/pages')
+    api.get<{ success: boolean; data: MenuPage[] }>(`/pages?language=${pageLanguage}`)
       .then((res) => { if (res.data?.success) setMenuPages(res.data.data); })
       .catch((err) => console.error('Failed to load menu pages:', err));
-  }, []);
+  }, [pageLanguage]);
 
   useEffect(() => {
     setLoading(true);
     setError('');
     setSubmitSuccess(false);
     setSubmitError('');
-    api.get<{ success: boolean; data: { slug: string; title: string; content: string } }>(`/pages/${currentSlug}`)
+    api.get<{ success: boolean; data: { slug: string; title: string; content: string } }>(`/pages/${currentSlug}?language=${pageLanguage}`)
       .then((res) => {
         if (res.data?.success) {
           setContent(res.data.data.content);
@@ -95,7 +98,7 @@ export function SupportPage() {
       .finally(() => {
         setLoading(false);
       });
-  }, [currentSlug]);
+  }, [currentSlug, pageLanguage]);
 
   // Fetch company info for contact page
   useEffect(() => {
@@ -347,4 +350,3 @@ export function SupportPage() {
     </main>
   );
 }
-

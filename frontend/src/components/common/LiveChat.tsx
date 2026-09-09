@@ -155,22 +155,21 @@ function renderText(text: string) {
 
 // ─── Bileşen ─────────────────────────────────────────────────────────────────
 
-const GREETING: Message = {
-  id: 'greeting',
-  role: 'assistant',
-  text: 'Merhaba! 👋 Canlı Asistanımıza hoş geldiniz.\n\nSize nasıl yardımcı olabilirim?',
-  ts: Date.now(),
-  quickReplies: ['Kargo & Teslimat', 'İade & İptal', 'Ürün & Stok', 'Ödeme Seçenekleri'],
-};
+function createGreeting(language: 'tr' | 'en'): Message {
+  return language === 'en'
+    ? { id: 'greeting', role: 'assistant', text: 'Hello! 👋 Welcome to our Live Assistant.\n\nHow can we help you?', ts: Date.now(), quickReplies: ['Shipping & Delivery', 'Returns & Cancellations', 'Products & Stock', 'Payment Options'] }
+    : { id: 'greeting', role: 'assistant', text: 'Merhaba! 👋 Canlı Asistanımıza hoş geldiniz.\n\nSize nasıl yardımcı olabilirim?', ts: Date.now(), quickReplies: ['Kargo & Teslimat', 'İade & İptal', 'Ürün & Stok', 'Ödeme Seçenekleri'] };
+}
 
 export function LiveChat() {
-  const { t } = useTranslation();
+  const { i18n } = useTranslation();
+  const language: 'tr' | 'en' = i18n.language === 'en' ? 'en' : 'tr';
   const { name: storeName } = useStoreInfo();
   // WhatsApp numarası sistem ayarlarından (Sosyal Medya); yoksa env fallback
   const { data: socialLinks } = useSocialLinks();
   const waNumber = socialLinks?.whatsapp ? socialLinks.whatsapp.replace(/\D/g, '') : WA_NUMBER;
   const [open, setOpen] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([GREETING]);
+  const [messages, setMessages] = useState<Message[]>([createGreeting(language)]);
   const [input, setInput] = useState('');
   const [typing, setTyping] = useState(false);
   const [unread, setUnread] = useState(0);
@@ -181,7 +180,7 @@ export function LiveChat() {
 
   // Chat açıkken kuralları çek; açılışta ve her 30s'de yenile
   const fetchRules = useCallback(() => {
-    fetch(`${API_BASE}/chatbot/rules`)
+    fetch(`${API_BASE}/chatbot/rules?language=${language}`)
       .then((r) => r.json())
       .then((json) => {
         if (json.success && Array.isArray(json.data) && json.data.length > 0) {
@@ -189,7 +188,11 @@ export function LiveChat() {
         }
       })
       .catch(() => { /* fallback kalır */ });
-  }, []);
+  }, [language]);
+
+  useEffect(() => {
+    setMessages([createGreeting(language)]);
+  }, [language]);
 
   useEffect(() => {
     if (!open) return;
@@ -326,24 +329,24 @@ export function LiveChat() {
               <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-green-400 border-2 border-primary" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="font-semibold text-sm leading-none">{storeName} {t('common.language')}</p>
+              <p className="font-semibold text-sm leading-none">{storeName} {language === 'en' ? 'Live Assistant' : 'Canlı Asistan'}</p>
               <p className="text-xs text-primary-foreground/70 mt-0.5 flex items-center gap-1">
                 <span className="h-1.5 w-1.5 rounded-full bg-green-400 inline-block" />
-                Çevrimiçi · Genellikle anında yanıt verir
+                {language === 'en' ? 'Online · Usually replies instantly' : 'Çevrimiçi · Genellikle anında yanıt verir'}
               </p>
             </div>
             <div className="flex items-center gap-1">
               <button
                 onClick={() => setMinimized((m) => !m)}
                 className="h-7 w-7 rounded-lg flex items-center justify-center hover:bg-white/20 transition-colors"
-                title={minimized ? 'Büyüt' : 'Küçült'}
+                    title={minimized ? (language === 'en' ? 'Expand' : 'Büyüt') : (language === 'en' ? 'Minimize' : 'Küçült')}
               >
                 <ChevronDown className={`h-4 w-4 transition-transform ${minimized ? 'rotate-180' : ''}`} />
               </button>
               <button
                 onClick={() => setOpen(false)}
                 className="h-7 w-7 rounded-lg flex items-center justify-center hover:bg-white/20 transition-colors"
-                title="Kapat"
+                title={language === 'en' ? 'Close' : 'Kapat'}
               >
                 <X className="h-4 w-4" />
               </button>
@@ -421,7 +424,7 @@ export function LiveChat() {
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    placeholder="Mesajınızı yazın..."
+                    placeholder={language === 'en' ? 'Type your message...' : 'Mesajınızı yazın...'}
                     className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground min-w-0"
                     maxLength={300}
                   />
@@ -434,7 +437,7 @@ export function LiveChat() {
                   </button>
                 </div>
                 <p className="text-center text-[10px] text-muted-foreground mt-1.5">
-                  {storeName} Canlı Destek · Gizliliğiniz güvendedir 🔒
+                  {storeName} {language === 'en' ? 'Live Support · Your privacy is protected' : 'Canlı Destek · Gizliliğiniz güvendedir'} 🔒
                 </p>
               </div>
             </>
@@ -446,8 +449,8 @@ export function LiveChat() {
       <button
         onClick={open ? () => setOpen(false) : handleOpen}
         className="fixed bottom-20 lg:bottom-6 right-4 sm:right-6 z-[70] h-14 w-14 rounded-full shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 group bg-primary text-primary-foreground"
-        title="Canlı Destek"
-        aria-label="Canlı Destek Chatbotunu Aç"
+        title={language === 'en' ? 'Live Support' : 'Canlı Destek'}
+        aria-label={language === 'en' ? 'Open Live Support Chatbot' : 'Canlı Destek Chatbotunu Aç'}
       >
         {open ? (
           <X className="h-6 w-6" />

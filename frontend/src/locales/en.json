@@ -44,7 +44,7 @@
     "logoutBtn": "Logout",
     "signIn": "Sign In",
     "cart": "My Cart",
-    "cartItems": "My Cart ({count})"
+    "cartItems": "My Cart ({{count}})"
   },
   "hero": {
     "scroll": "Scroll"
@@ -168,6 +168,7 @@
   },
   "product": {
     "details": "Product Details",
+    "goToDetails": "Go to product details",
     "price": "Price",
     "stock": "Stock",
     "inStock": "In Stock",

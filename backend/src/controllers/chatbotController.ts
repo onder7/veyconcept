@@ -3,9 +3,10 @@ import { AuthRequest } from '../types';
 import * as svc from '../services/chatbotService';
 
 // Public: frontend'in kuralları çektiği endpoint
-export async function getActiveRules(_req: Request, res: Response, next: NextFunction) {
+export async function getActiveRules(req: Request, res: Response, next: NextFunction) {
   try {
-    const data = await svc.listActiveRules();
+    const language = req.query.language === 'en' ? 'en' : 'tr';
+    const data = await svc.listActiveRules(language);
     res.json({ success: true, data });
   } catch (err) { next(err); }
 }

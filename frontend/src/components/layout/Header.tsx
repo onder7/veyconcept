@@ -38,6 +38,9 @@ export function Header() {
     const lang = (i18n.language || 'tr').split('-')[0];
     return lang === 'en' ? 'en' : 'tr';
   });
+  useEffect(() => {
+    setLanguage(i18n.language?.split('-')[0] === 'en' ? 'en' : 'tr');
+  }, [i18n.language]);
   const { fetchWishlist } = useWishlistStore();
 
   const [predictions, setPredictions] = useState<Product[]>([]);
@@ -96,8 +99,8 @@ export function Header() {
 
   // Üst şerit menüsü — admin tarafından yönetilen Müşteri Hizmetleri sayfaları
   const { data: menuPagesData } = useQuery({
-    queryKey: ['menu-pages'],
-    queryFn: () => api.get<{ success: boolean; data: Array<{ slug: string; title: string; isSystem: boolean; showInHeader: boolean; showInFooter: boolean }> }>('/pages'),
+    queryKey: ['menu-pages', language],
+    queryFn: () => api.get<{ success: boolean; data: Array<{ slug: string; title: string; isSystem: boolean; showInHeader: boolean; showInFooter: boolean }> }>(`/pages?language=${language}`),
     staleTime: 5 * 60 * 1000,
   });
   const menuPages = (menuPagesData?.data?.data ?? []).filter((p) => p.showInHeader);
@@ -257,7 +260,7 @@ export function Header() {
           <Link to="/ara" className="py-2.5 font-display text-2xl text-foreground">{t('header.shop')}</Link>
           {categories.slice(0, 6).map((cat: any) => (
             <Link key={cat.id} to={`/kategori/${cat.slug}`} className="py-1.5 text-sm text-muted-foreground">
-              {cat.name}
+              {language === 'en' && cat.nameEn ? cat.nameEn : cat.name}
             </Link>
           ))}
           <div className="my-2 h-px bg-border/60" />

@@ -1824,7 +1824,9 @@ interface AdminPage {
   id: string;
   slug: string;
   title: string;
+  titleEn?: string | null;
   content: string;
+  contentEn?: string | null;
   showInMenu: boolean;
   showInHeader: boolean;
   showInFooter: boolean;
@@ -1837,7 +1839,9 @@ interface PageDraft {
   id: string;        // boş = yeni sayfa
   slug: string;
   title: string;
+  titleEn: string;
   content: string;
+  contentEn: string;
   showInHeader: boolean;
   showInFooter: boolean;
   isSystem: boolean;
@@ -1961,7 +1965,9 @@ function PagesTab() {
       if (draft.id) {
         await api.put(`/admin/pages/${draft.id}`, {
           title: draft.title,
+          titleEn: draft.titleEn,
           content: draft.content,
+          contentEn: draft.contentEn,
           showInHeader: draft.showInHeader,
           showInFooter: draft.showInFooter,
           ...(draft.isSystem ? {} : { slug: draft.slug }),
@@ -1969,7 +1975,9 @@ function PagesTab() {
       } else {
         await api.post('/admin/pages', {
           title: draft.title,
+          titleEn: draft.titleEn,
           content: draft.content,
+          contentEn: draft.contentEn,
           showInHeader: draft.showInHeader,
           showInFooter: draft.showInFooter,
           slug: draft.slug || undefined,
@@ -2019,7 +2027,7 @@ function PagesTab() {
                       key={p.id}
                       page={p}
                       onToggle={toggle}
-                      onEdit={() => setDraft({ id: p.id, slug: p.slug, title: p.title, content: p.content, showInHeader: p.showInHeader, showInFooter: p.showInFooter, isSystem: p.isSystem })}
+                      onEdit={() => setDraft({ id: p.id, slug: p.slug, title: p.title, titleEn: p.titleEn ?? '', content: p.content, contentEn: p.contentEn ?? '', showInHeader: p.showInHeader, showInFooter: p.showInFooter, isSystem: p.isSystem })}
                       onRemove={() => remove(p)}
                     />
                   ))}
@@ -2032,7 +2040,7 @@ function PagesTab() {
         <div className="mt-4">
           <button
             type="button"
-            onClick={() => setDraft({ id: '', slug: '', title: '', content: '', showInHeader: true, showInFooter: true, isSystem: false })}
+            onClick={() => setDraft({ id: '', slug: '', title: '', titleEn: '', content: '', contentEn: '', showInHeader: true, showInFooter: true, isSystem: false })}
             className="rounded bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-opacity-90"
           >
             + Yeni Sayfa Ekle
@@ -2054,6 +2062,15 @@ function PagesTab() {
             />
           </Field>
 
+          <Field label="Başlık (İngilizce)" hint="Site dili İngilizce olduğunda gösterilecek başlık.">
+            <input
+              className={inputCls}
+              value={draft.titleEn}
+              onChange={(e) => setDraft({ ...draft, titleEn: e.target.value })}
+              placeholder="Örn. Shipping & Returns"
+            />
+          </Field>
+
           {!draft.isSystem && (
             <Field label="Bağlantı (slug)" hint="Boş bırakırsanız başlıktan otomatik üretilir. Sayfa /sayfa/<slug> adresinde açılır.">
               <input
@@ -2072,6 +2089,16 @@ function PagesTab() {
               value={draft.content}
               onChange={(html) => setDraft({ ...draft, content: html })}
               placeholder="Sayfa içeriğini yazın... Zengin HTML (<style>, <div class=…>) otomatik HTML kaynak modunda açılır ve olduğu gibi korunur."
+              minHeight={360}
+            />
+          </div>
+
+          <div className="mb-4.5">
+            <label className={labelCls}>İçerik (İngilizce)</label>
+            <QuillEditor
+              value={draft.contentEn}
+              onChange={(html) => setDraft({ ...draft, contentEn: html })}
+              placeholder="Write the English page content here..."
               minHeight={360}
             />
           </div>
@@ -2597,15 +2624,19 @@ function MessagesTab() {
 interface ChatbotRule {
   id: string;
   title: string;
+  titleEn?: string | null;
   keywords: string[];
+  keywordsEn?: string[];
   response: string;
+  responseEn?: string | null;
   quickReplies: string[];
+  quickRepliesEn?: string[];
   sortOrder: number;
   isActive: boolean;
 }
 
 const EMPTY_RULE: Omit<ChatbotRule, 'id'> = {
-  title: '', keywords: [], response: '', quickReplies: [], sortOrder: 0, isActive: true,
+  title: '', titleEn: '', keywords: [], keywordsEn: [], response: '', responseEn: '', quickReplies: [], quickRepliesEn: [], sortOrder: 0, isActive: true,
 };
 
 function KeywordInput({ value, onChange }: { value: string[]; onChange: (v: string[]) => void }) {
@@ -2655,11 +2686,12 @@ function RuleModal({
   const isNew = !rule?.id;
   const [form, setForm] = useState<Omit<ChatbotRule, 'id'>>({
     ...EMPTY_RULE,
-    ...(rule ? { title: rule.title ?? '', keywords: rule.keywords ?? [], response: rule.response ?? '', quickReplies: rule.quickReplies ?? [], sortOrder: rule.sortOrder ?? 0, isActive: rule.isActive ?? true } : {}),
+    ...(rule ? { title: rule.title ?? '', titleEn: rule.titleEn ?? '', keywords: rule.keywords ?? [], keywordsEn: rule.keywordsEn ?? [], response: rule.response ?? '', responseEn: rule.responseEn ?? '', quickReplies: rule.quickReplies ?? [], quickRepliesEn: rule.quickRepliesEn ?? [], sortOrder: rule.sortOrder ?? 0, isActive: rule.isActive ?? true } : {}),
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [qrDraft, setQrDraft] = useState('');
+  const [qrDraftEn, setQrDraftEn] = useState('');
 
   const set = (k: keyof typeof form, v: unknown) => setForm((p) => ({ ...p, [k]: v }));
 
@@ -2667,6 +2699,12 @@ function RuleModal({
     const qr = qrDraft.trim();
     if (qr && !form.quickReplies.includes(qr)) set('quickReplies', [...form.quickReplies, qr]);
     setQrDraft('');
+  };
+
+  const addQrEn = () => {
+    const qr = qrDraftEn.trim();
+    if (qr && !form.quickRepliesEn?.includes(qr)) set('quickRepliesEn', [...(form.quickRepliesEn ?? []), qr]);
+    setQrDraftEn('');
   };
 
   const handleSave = async () => {
@@ -2696,6 +2734,9 @@ function RuleModal({
             <Field label="Başlık (yönetim için)">
               <input value={form.title} onChange={(e) => set('title', e.target.value)} className={inputCls} placeholder="ör. Kargo & Teslimat" />
             </Field>
+            <Field label="Başlık (İngilizce)">
+              <input value={form.titleEn ?? ''} onChange={(e) => set('titleEn', e.target.value)} className={inputCls} placeholder="e.g. Shipping & Delivery" />
+            </Field>
             <Field label="Sıra">
               <input type="number" value={form.sortOrder} onChange={(e) => set('sortOrder', Number(e.target.value))} className={inputCls} />
             </Field>
@@ -2705,6 +2746,10 @@ function RuleModal({
             <KeywordInput value={form.keywords} onChange={(v) => set('keywords', v)} />
           </Field>
 
+          <Field label="Trigger Keywords (English)" hint="Add English keywords and press Enter.">
+            <KeywordInput value={form.keywordsEn ?? []} onChange={(v) => set('keywordsEn', v)} />
+          </Field>
+
           <Field label="Asistan Yanıtı" hint="**kalın** için çift yıldız kullanın">
             <textarea
               value={form.response}
@@ -2712,6 +2757,16 @@ function RuleModal({
               rows={6}
               className={inputCls + ' resize-y font-mono text-xs'}
               placeholder="🚚 **Başlık**&#10;&#10;• Madde 1&#10;• Madde 2"
+            />
+          </Field>
+
+          <Field label="Assistant Response (English)" hint="Use **double asterisks** for bold text.">
+            <textarea
+              value={form.responseEn ?? ''}
+              onChange={(e) => set('responseEn', e.target.value)}
+              rows={6}
+              className={inputCls + ' resize-y font-mono text-xs'}
+              placeholder="🚚 **Shipping Information**\n\n• Item 1\n• Item 2"
             />
           </Field>
 
@@ -2731,6 +2786,27 @@ function RuleModal({
                 <span key={i} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs border border-stroke dark:border-strokedark text-black dark:text-white">
                   {qr}
                   <button onClick={() => set('quickReplies', form.quickReplies.filter((_, j) => j !== i))} className="ml-0.5 text-gray-400 hover:text-meta-1">×</button>
+                </span>
+              ))}
+            </div>
+          </Field>
+
+          <Field label="Quick Replies (English)" hint="Ready-made options shown to English-speaking visitors.">
+            <div className="flex gap-2 mb-2">
+              <input
+                value={qrDraftEn}
+                onChange={(e) => setQrDraftEn(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addQrEn(); } }}
+                placeholder="Button text, press Enter"
+                className={inputCls + ' flex-1'}
+              />
+              <button type="button" onClick={addQrEn} className="px-3 py-2 rounded bg-primary text-white text-sm">+</button>
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {(form.quickRepliesEn ?? []).map((qr, i) => (
+                <span key={i} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs border border-stroke dark:border-strokedark text-black dark:text-white">
+                  {qr}
+                  <button onClick={() => set('quickRepliesEn', (form.quickRepliesEn ?? []).filter((_, j) => j !== i))} className="ml-0.5 text-gray-400 hover:text-meta-1">×</button>
                 </span>
               ))}
             </div>

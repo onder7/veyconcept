@@ -44,7 +44,7 @@
     "logoutBtn": "Çıkış Yap",
     "signIn": "Giriş Yap",
     "cart": "Sepetim",
-    "cartItems": "Sepetim ({count})"
+    "cartItems": "Sepetim ({{count}})"
   },
   "hero": {
     "scroll": "Kaydır"
@@ -168,6 +168,7 @@
   },
   "product": {
     "details": "Ürün Detayları",
+    "goToDetails": "Ürün detayına git",
     "price": "Fiyat",
     "stock": "Stok",
     "inStock": "Stokta Var",
