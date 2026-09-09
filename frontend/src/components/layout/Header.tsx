@@ -253,7 +253,7 @@ export function Header() {
       <div
         className={cn(
           'overflow-hidden border-t transition-all duration-500 md:hidden',
-          mobileOpen ? 'max-h-[560px] border-border bg-background' : 'max-h-0 border-transparent',
+          mobileOpen ? 'max-h-[680px] border-border bg-background' : 'max-h-0 border-transparent',
         )}
       >
           <nav className="flex flex-col gap-1 px-6 py-4">
@@ -279,6 +279,25 @@ export function Header() {
             <Link to="/giris" className="py-2 text-sm text-muted-foreground">{t('header.signIn')}</Link>
           )}
           <Link to="/sepet" className="py-2 text-sm text-muted-foreground">{t('header.cartItems', { count: itemCount })}</Link>
+          <div className="mt-2 flex items-center gap-2 border-t border-border/60 pt-3 text-sm text-muted-foreground">
+            <Globe className="h-4 w-4" />
+            <span className="mr-2">{t('common.language')}:</span>
+            <button
+              type="button"
+              onClick={() => { handleLanguageChange('tr'); setMobileOpen(false); }}
+              className={language === 'tr' ? 'font-semibold text-[#6b1017]' : 'hover:text-foreground'}
+            >
+              {t('common.turkish')}
+            </button>
+            <span aria-hidden="true">/</span>
+            <button
+              type="button"
+              onClick={() => { handleLanguageChange('en'); setMobileOpen(false); }}
+              className={language === 'en' ? 'font-semibold text-[#6b1017]' : 'hover:text-foreground'}
+            >
+              {t('common.english')}
+            </button>
+          </div>
         </nav>
       </div>
     </header>

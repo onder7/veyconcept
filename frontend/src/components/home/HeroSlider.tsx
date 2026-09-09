@@ -76,7 +76,7 @@ export function HeroSlider({ slides, storeName }: Props) {
   return (
     <section
       id="hero"
-      className="relative h-[75svh] min-h-[500px] max-h-[900px] w-full overflow-hidden bg-foreground md:h-[80svh]"
+      className="relative aspect-[1672/941] min-h-0 w-full overflow-hidden bg-foreground"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
@@ -92,9 +92,7 @@ export function HeroSlider({ slides, storeName }: Props) {
               <img
                 src={slide.img}
                 alt=""
-                className={`h-full w-full object-cover transition-transform duration-[6000ms] ease-out ${
-                  active ? 'scale-105' : 'scale-100'
-                }`}
+                className="h-full w-full object-contain"
               />
             );
             // Buton metni varsa CTA yönlendirir → görsel düz; yoksa tüm slayt tıklanabilir bağlantı

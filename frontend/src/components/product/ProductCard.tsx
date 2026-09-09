@@ -22,7 +22,7 @@ function formatPrice(price: number | string): string {
 }
 
 export function ProductCard({ product, hideDetails = false, cols = 4, variant = 'default' }: Props) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   
   // Görseller: birincil önce, ardından diğerleri — hover'da sırayla döner
   const images = (product.images ?? [])
@@ -69,6 +69,9 @@ export function ProductCard({ product, hideDetails = false, cols = 4, variant = 
   const toGross = (v: number) => (product.vatIncluded ? v : v * (1 + taxRate / 100));
   const grossPrice = cheapestVariant ? toGross(Number(cheapestVariant.price)) : 0;
   const grossCompareAt = discount > 0 && cheapestVariant?.compareAt ? toGross(Number(cheapestVariant.compareAt)) : 0;
+  const displayPrice = variant === 'search'
+    ? `${grossPrice.toLocaleString(i18n.language === 'en' ? 'en-US' : 'tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}TL`
+    : formatPrice(grossPrice);
 
   const { isFavorite, toggleFavorite } = useWishlistStore();
   const { setCart, openCart } = useCartStore();
@@ -113,7 +116,7 @@ export function ProductCard({ product, hideDetails = false, cols = 4, variant = 
     >
       {/* Görsel Kutusu — ürün adı ve fiyat görselin üzerine taşınmaz. */}
       <div
-        className={`relative ${aspectRatio} bg-transparent flex items-center justify-center overflow-hidden border border-border rounded-t-sm`}
+        className={`relative ${variant === 'search' ? 'aspect-square border-none rounded-none' : aspectRatio + ' border border-border rounded-t-sm'} bg-transparent flex items-center justify-center overflow-hidden`}
         onMouseEnter={startCycle}
         onMouseLeave={stopCycle}
       >
@@ -129,13 +132,15 @@ export function ProductCard({ product, hideDetails = false, cols = 4, variant = 
         )}
 
         {/* Favori */}
-        <button
-          onClick={handleFavoriteClick}
-          className="absolute top-3 right-3 z-20 p-2 rounded-full bg-background/90 backdrop-blur-xs text-foreground/60 hover:text-red-500 hover:scale-105 active:scale-95 transition-all cursor-pointer border border-border"
-          aria-label={t('components.productCard.addFavorites')}
-        >
-          <Heart className={`h-4.5 w-4.5 transition-colors ${fav ? 'fill-red-500 text-red-500' : 'text-neutral-600'}`} />
-        </button>
+        {variant !== 'search' && (
+          <button
+            onClick={handleFavoriteClick}
+            className="absolute top-3 right-3 z-20 p-2 rounded-full bg-background/90 backdrop-blur-xs text-foreground/60 hover:text-red-500 hover:scale-105 active:scale-95 transition-all cursor-pointer border border-border"
+            aria-label={t('components.productCard.addFavorites')}
+          >
+            <Heart className={`h-4.5 w-4.5 transition-colors ${fav ? 'fill-red-500 text-red-500' : 'text-neutral-600'}`} />
+          </button>
+        )}
 
         {!inStock && (
           <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
@@ -148,9 +153,9 @@ export function ProductCard({ product, hideDetails = false, cols = 4, variant = 
 
       {/* Ürün bilgisi her zaman görselin altında ayrı bir alanda gösterilir. */}
       {!hideDetails && (
-        <div className={`flex flex-col gap-2 border border-t-0 border-border rounded-b-sm bg-transparent ${variant === 'search' ? 'p-4 sm:p-5' : 'p-3'}`}>
+        <div className={`flex flex-col bg-transparent ${variant === 'search' ? 'items-center gap-1 border-none p-3 text-center sm:p-4' : 'gap-2 border border-t-0 border-border rounded-b-sm p-3'}`}>
           {/* Ürün Adı */}
-          <h3 className="font-sans text-sm sm:text-base font-semibold text-foreground line-clamp-2 leading-snug">
+          <h3 className={`text-sm sm:text-base text-foreground line-clamp-2 leading-snug ${variant === 'search' ? 'font-display font-normal' : 'font-sans font-semibold'}`}>
             {product.brand?.name && <span className="font-semibold">{product.brand.name} </span>}
             {product.name}
           </h3>
@@ -158,12 +163,12 @@ export function ProductCard({ product, hideDetails = false, cols = 4, variant = 
           {/* Fiyat */}
           {cheapestVariant && (
             <span className="text-base sm:text-lg font-display font-semibold text-foreground">
-              {formatPrice(grossPrice)}
+              {displayPrice}
             </span>
           )}
 
           {/* Puan */}
-          {avgRating !== null && (
+          {avgRating !== null && variant !== 'search' && (
             <div className="flex items-center gap-1 text-xs">
               <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
               <span className="font-semibold text-foreground/80">
@@ -174,7 +179,7 @@ export function ProductCard({ product, hideDetails = false, cols = 4, variant = 
           )}
 
           {/* Discount + Sepete Ekle */}
-          <div className="flex items-end justify-between gap-2 pt-1">
+          {variant !== 'search' && <div className="flex items-end justify-between gap-2 pt-1">
             <div className="min-w-0">
               {discount > 0 && (
                 <div className="flex items-center gap-2 mb-1">
@@ -192,7 +197,7 @@ export function ProductCard({ product, hideDetails = false, cols = 4, variant = 
                 <ShoppingCart className="h-4.5 w-4.5" />
               </button>
             )}
-          </div>
+          </div>}
         </div>
       )}
     </Link>
