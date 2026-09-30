@@ -49,6 +49,10 @@
   "hero": {
     "scroll": "Scroll"
   },
+  "lamp": {
+    "on": "Turn On Light",
+    "off": "Turn Off Light"
+  },
   "footer": {
     "newsletter": "Newsletter",
     "newsletterDesc": "Get Special Offers",

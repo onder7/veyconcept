@@ -49,6 +49,10 @@
   "hero": {
     "scroll": "Kaydır"
   },
+  "lamp": {
+    "on": "Işığı Aç",
+    "off": "Işığı Kapat"
+  },
   "footer": {
     "newsletter": "Bülten",
     "newsletterDesc": "Özel Fırsatlardan Haberdar Olun",

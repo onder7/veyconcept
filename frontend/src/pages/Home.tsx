@@ -5,6 +5,7 @@ import { api } from '@/services/api';
 import { HeroSlider, type HeroSlide } from '@/components/home/HeroSlider';
 import { HomeJournal } from '@/components/home/HomeJournal';
 import { HomeShop } from '@/components/home/HomeShop';
+import { LampInteractive } from '@/components/home/LampInteractive';
 import { useState, useEffect } from 'react';
 import { SeoHead } from '@/components/seo/SeoHead';
 import { organizationSchema, websiteSchema } from '@/lib/schemas';
@@ -92,6 +93,9 @@ export function Home() {
 
       {/* Öne Çıkan Ürünler — referans "shop" bölümü: tıklayınca modal (one-page) */}
       <HomeShop products={featured} loading={isFeaturedLoading} />
+
+      {/* İnteraktif Lamba Alanı */}
+      <LampInteractive />
 
       {/* "Günce" tarzı koyu editorial bülten bandı */}
       <HomeJournal />
