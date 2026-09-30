@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Power } from 'lucide-react';
 
 export function LampsDisplay() {
   const [isLightOn, setIsLightOn] = useState(false);
