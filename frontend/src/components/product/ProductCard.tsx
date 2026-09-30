@@ -153,21 +153,35 @@ export function ProductCard({ product, hideDetails = false, cols = 4, variant = 
 
       {/* Ürün bilgisi her zaman görselin altında ayrı bir alanda gösterilir. */}
       {!hideDetails && (
-        <div className={`flex flex-col bg-transparent ${variant === 'search' ? 'items-center gap-1 border-none p-3 text-center sm:p-4' : 'gap-2 border border-t-0 border-border rounded-b-sm p-3'}`}>
+        <div className={`flex flex-col bg-transparent ${variant === 'search' ? 'items-center gap-3 border-none p-4 text-center sm:p-5' : 'gap-2 border border-t-0 border-border rounded-b-sm p-3'}`}>
           {/* Ürün Adı */}
-          <h3 className={`text-sm sm:text-base text-foreground line-clamp-2 leading-snug ${variant === 'search' ? 'font-display font-normal' : 'font-sans font-semibold'}`}>
+          <h3 className={`text-sm sm:text-base text-foreground line-clamp-2 leading-snug ${variant === 'search' ? 'font-display font-semibold' : 'font-sans font-semibold'}`}>
             {product.brand?.name && <span className="font-semibold">{product.brand.name} </span>}
             {product.name}
           </h3>
 
-          {/* Fiyat Etiketi */}
-          <p className="mb-1 text-[10px] uppercase tracking-[0.22em] text-muted-foreground">Price</p>
+          {/* Search Variant: Fiyat büyük ve border box'ta */}
+          {variant === 'search' && cheapestVariant && (
+            <div className="border border-foreground px-6 py-3 min-w-fit">
+              <span className="text-2xl sm:text-3xl font-display font-bold text-foreground whitespace-nowrap">
+                {displayPrice}
+              </span>
+            </div>
+          )}
 
-          {/* Fiyat */}
-          {cheapestVariant && (
-            <span className="text-base sm:text-lg font-display font-semibold text-foreground">
-              {displayPrice}
-            </span>
+          {/* Default Variant: Fiyat etiketi + normal fiyat */}
+          {variant !== 'search' && (
+            <>
+              {/* Fiyat Etiketi */}
+              <p className="mb-1 text-[10px] uppercase tracking-[0.22em] text-muted-foreground">Price</p>
+
+              {/* Fiyat */}
+              {cheapestVariant && (
+                <span className="text-base sm:text-lg font-display font-semibold text-foreground">
+                  {displayPrice}
+                </span>
+              )}
+            </>
           )}
 
           {/* Puan */}
