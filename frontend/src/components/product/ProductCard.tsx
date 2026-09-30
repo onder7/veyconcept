@@ -160,13 +160,11 @@ export function ProductCard({ product, hideDetails = false, cols = 4, variant = 
             {product.name}
           </h3>
 
-          {/* Search Variant: Fiyat çok büyük, çerçeve yok */}
+          {/* Search Variant: Fiyat, VEY Concept etiketi gibi */}
           {variant === 'search' && cheapestVariant && (
-            <div className="px-6 py-2 min-w-fit">
-              <span className="text-5xl sm:text-6xl font-display font-bold text-foreground whitespace-nowrap">
-                {displayPrice}
-              </span>
-            </div>
+            <p className="mb-2 text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+              {displayPrice}
+            </p>
           )}
 
           {/* Default Variant: Fiyat etiketi + normal fiyat */}
