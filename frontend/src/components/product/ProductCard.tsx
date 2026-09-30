@@ -160,6 +160,9 @@ export function ProductCard({ product, hideDetails = false, cols = 4, variant = 
             {product.name}
           </h3>
 
+          {/* Fiyat Etiketi */}
+          <p className="mb-1 text-[10px] uppercase tracking-[0.22em] text-muted-foreground">Price</p>
+
           {/* Fiyat */}
           {cheapestVariant && (
             <span className="text-base sm:text-lg font-display font-semibold text-foreground">
