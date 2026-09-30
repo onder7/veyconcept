@@ -160,10 +160,10 @@ export function ProductCard({ product, hideDetails = false, cols = 4, variant = 
             {product.name}
           </h3>
 
-          {/* Search Variant: Fiyat büyük ve border box'ta */}
+          {/* Search Variant: Fiyat çok büyük, çerçeve yok */}
           {variant === 'search' && cheapestVariant && (
-            <div className="border border-foreground px-6 py-3 min-w-fit">
-              <span className="text-2xl sm:text-3xl font-display font-bold text-foreground whitespace-nowrap">
+            <div className="px-6 py-2 min-w-fit">
+              <span className="text-5xl sm:text-6xl font-display font-bold text-foreground whitespace-nowrap">
                 {displayPrice}
               </span>
             </div>
