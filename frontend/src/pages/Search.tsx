@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { productApi } from '@/services/productApi';
 import { ProductGrid } from '@/components/product/ProductGrid';
+import { LampsDisplay } from '@/components/search/LampsDisplay';
 import { Button } from '@/components/ui/button';
 import { SeoHead } from '@/components/seo/SeoHead';
 
@@ -77,6 +78,9 @@ export function Search() {
             </Button>
           </div>
         )}
+
+        {/* Lamps Display */}
+        <LampsDisplay />
       </div>
     </main>
   );
