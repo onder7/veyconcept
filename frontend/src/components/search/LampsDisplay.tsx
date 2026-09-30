@@ -15,7 +15,8 @@ export function LampsDisplay() {
           {/* Toggle Switch */}
           <button
             onClick={() => setIsLightOn(!isLightOn)}
-            className="flex items-center gap-2 px-4 py-2 rounded-full bg-muted hover:bg-muted/80 transition-colors"
+            className="flex items-center gap-3 px-4 py-2 rounded-full bg-muted hover:bg-muted/80 transition-colors cursor-pointer"
+            type="button"
           >
             <span className="text-sm font-medium text-foreground">
               Light: {isLightOn ? 'On' : 'Off'}
@@ -34,18 +35,8 @@ export function LampsDisplay() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {[1, 2, 3].map((index) => (
             <div key={index} className="flex flex-col items-center">
-              {/* Arka plan glow efekti */}
-              {isLightOn && (
-                <div className="absolute inset-0 rounded-full bg-gradient-to-br from-amber-200/40 to-transparent blur-3xl animate-pulse" />
-              )}
-
               {/* Lamba Container */}
               <div className="relative w-full max-w-xs aspect-square flex items-center justify-center">
-                {/* Glow Effect */}
-                {isLightOn && (
-                  <div className="absolute inset-0 rounded-full bg-gradient-to-br from-amber-200/40 to-transparent blur-3xl animate-pulse" />
-                )}
-
                 {/* Lamba Görseli */}
                 <img
                   src={isLightOn ? '/lamp-on.png' : '/lamp-off.png'}
