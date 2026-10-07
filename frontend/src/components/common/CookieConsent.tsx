@@ -96,8 +96,11 @@ export function CookieConsent() {
               <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
                 {t('components.cookieConsent.title')}
               </h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
                 {t('components.cookieConsent.description')}
+              </p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                {t('components.cookieConsent.descriptionPart2')}
               </p>
               <div className="mt-3 flex flex-wrap gap-2">
                 <a href="/sozlesmeler" className="text-sm text-primary hover:underline">
