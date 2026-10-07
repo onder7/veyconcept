@@ -556,12 +556,6 @@ export function ProductDetail() {
             </div>
           </div>
 
-          {/* Sosyal Medya Paylaşım */}
-          <ProductShareBar
-            name={product.name}
-            url={typeof window !== 'undefined' ? window.location.href : `${SITE_URL}/urun/${product.slug}`}
-          />
-
           {product.description && (
             <div className="border-t border-border pt-6 space-y-0">
               {(() => {
@@ -590,6 +584,12 @@ export function ProductDetail() {
               })()}
             </div>
           )}
+
+          {/* Sosyal Medya Paylaşım */}
+          <ProductShareBar
+            name={product.name}
+            url={typeof window !== 'undefined' ? window.location.href : `${SITE_URL}/urun/${product.slug}`}
+          />
         </div>
       </div>
 
