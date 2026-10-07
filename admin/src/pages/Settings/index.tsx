@@ -1513,12 +1513,12 @@ function FindUsTab() {
     api
       .get<{ success: boolean; data: Record<string, any> }>('/admin/settings/find_us')
       .then((r) => {
-        setTitleTr(r.data.find_us_title_tr ?? 'Bize Ulaşın');
-        setTitleEn(r.data.find_us_title_en ?? 'Find Us');
+        setTitleTr(r.data.title_tr ?? 'Bize Ulaşın');
+        setTitleEn(r.data.title_en ?? 'Find Us');
         let parsed: FindUsLink[] = [];
         try {
-          if (r.data.find_us_links) {
-            parsed = JSON.parse(r.data.find_us_links);
+          if (r.data.links) {
+            parsed = JSON.parse(r.data.links);
           }
         } catch {}
         // Seed with sample data if empty
@@ -1544,9 +1544,9 @@ function FindUsTab() {
     setSaved(false);
     try {
       await api.put('/admin/settings/find_us', {
-        find_us_title_tr: titleTr,
-        find_us_title_en: titleEn,
-        find_us_links: JSON.stringify(links),
+        title_tr: titleTr,
+        title_en: titleEn,
+        links: JSON.stringify(links),
       });
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
