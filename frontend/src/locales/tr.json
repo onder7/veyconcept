@@ -549,7 +549,7 @@
     },
     "cookieConsent": {
       "title": "İzin Tercihlerinizi Özelleştirelim",
-      "description": "İnternet sitemizde deneyimlerinizi kişiselleştirmek amacıyla çerezler kullanılmaktadır. Zorunlu çerezler haricindeki çerezleri kabul ederseniz, verileriniz yurt dışında yerleşik altyapı tedarikçilerimize aktarılacaktır.",
+      "description": "Web sitemizi ziyaretiniz sırasında deneyiminizi geliştirmek, site performansını analiz etmek ve size özel içerikler sunabilmek amacıyla çerezler (cookies) kullanıyoruz.\n\nÇerezler aracılığıyla işlenen kişisel verilerinize ilişkin detaylı bilgiye [Çerez Politikası] metnimizden ulaşabilirsiniz. \"Tümünü Kabul Et\" butonuna tıklayarak isteğe bağlı çerezlerin kullanımına ve bu çerezler vasıtasıyla toplanan verilerinizin yurt dışındaki iş ortaklarımıza aktarılmasına onay verebilirsiniz. Tercihlerinizi \"Ayarları Yönet\" kısmından özelleştirebilir veya \"Tümünü Reddet\" seçeneği ile zorunlu olmayan çerezleri kapatabilirsiniz.",
       "cookiePolicy": "Çerez Politikası",
       "cookieSettings": "Çerez Ayarları",
       "reject": "Reddet",
