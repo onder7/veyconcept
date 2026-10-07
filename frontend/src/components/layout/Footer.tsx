@@ -261,24 +261,6 @@ export function Footer() {
       <div className="border-t border-border bg-secondary/40 py-6 text-center text-xs text-muted-foreground">
         <div className="container mx-auto px-4 text-center space-y-1.5">
           <p>{t('footer.copyright').replace('{year}', new Date().getFullYear().toString()).replace('{storeName}', storeName)}</p>
-          <p className="text-muted-foreground/70">
-            Yazılım &amp; Geliştirme:{' '}
-            <a
-              href="https://nefesol.net/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-amber-800 dark:hover:text-amber-500 transition-colors"
-            >
-              nefesol.net
-            </a>
-            <span className="mx-1.5 text-border">·</span>
-            <a
-              href="mailto:onder7@gmail.com"
-              className="hover:text-amber-800 dark:hover:text-amber-500 transition-colors"
-            >
-              onder7@gmail.com
-            </a>
-          </p>
         </div>
       </div>
     </footer>
