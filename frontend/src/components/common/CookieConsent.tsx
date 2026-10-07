@@ -103,7 +103,7 @@ export function CookieConsent() {
                 {t('components.cookieConsent.descriptionPart2')}
               </p>
               <div className="mt-3 flex flex-wrap gap-2">
-                <a href="/sozlesmeler" className="text-sm text-primary hover:underline">
+                <a href="/sayfa/cookie" className="text-sm text-primary hover:underline">
                   {t('components.cookieConsent.cookiePolicy')}
                 </a>
                 <span className="text-gray-300">•</span>
