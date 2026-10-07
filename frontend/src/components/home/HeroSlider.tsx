@@ -92,7 +92,7 @@ export function HeroSlider({ slides, storeName }: Props) {
               <img
                 src={slide.img}
                 alt=""
-                className="h-full w-full object-cover"
+                className="h-full w-full object-contain"
               />
             );
             // Buton metni varsa CTA yönlendirir → görsel düz; yoksa tüm slayt tıklanabilir bağlantı
