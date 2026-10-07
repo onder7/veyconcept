@@ -11,8 +11,6 @@ import { useAuthStore } from '@/store/authStore';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
-import { ProductReviews } from '@/components/product/ProductReviews';
-import { ProductQA } from '@/components/product/ProductQA';
 import { RecentlyViewed } from '@/components/product/RecentlyViewed';
 import { useRecentlyViewedStore } from '@/store/recentlyViewedStore';
 import { SeoHead, SITE_URL } from '@/components/seo/SeoHead';
@@ -230,7 +228,6 @@ export function ProductDetail() {
   const { name: storeName } = useStoreInfo();
   const { taxRate } = useTaxConfig();
   const [qty, setQty] = useState(1);
-  const [activeTab, setActiveTab] = useState<'reviews' | 'qa'>('reviews');
   const [openDescriptionSection, setOpenDescriptionSection] = useState<number | null>(null);
   const [activeImageIdx, setActiveImageIdx] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -593,46 +590,6 @@ export function ProductDetail() {
         </div>
       </div>
 
-      {/* ── Değerlendirmeler & Sorular Sekmesi ── */}
-      <div className="mt-12">
-        {/* Sekme Başlıkları */}
-        <div className="flex border-b">
-          <button
-            onClick={() => setActiveTab('reviews')}
-            className={`px-6 py-3 text-xs uppercase tracking-[0.14em] font-medium transition-colors border-b-2 -mb-px ${
-              activeTab === 'reviews'
-                ? 'border-amber-600 text-foreground'
-                : 'border-transparent text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            {t('product.reviews')}
-            {product._count?.reviews ? (
-              <span className="ml-2 text-xs bg-muted px-1.5 py-0.5 rounded-full">
-                {product._count.reviews}
-              </span>
-            ) : null}
-          </button>
-          <button
-            onClick={() => setActiveTab('qa')}
-            className={`px-6 py-3 text-xs uppercase tracking-[0.14em] font-medium transition-colors border-b-2 -mb-px ${
-              activeTab === 'qa'
-                ? 'border-amber-600 text-foreground'
-                : 'border-transparent text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            {t('product.questionsAnswers')}
-          </button>
-        </div>
-
-        {/* Sekme İçeriği */}
-        <div className="py-8">
-          {activeTab === 'reviews' ? (
-            <ProductReviews productId={product.id} />
-          ) : (
-            <ProductQA productId={product.id} />
-          )}
-        </div>
-      </div>
 
       {/* Son görüntülenen ürünler */}
       <div className="mt-12">
