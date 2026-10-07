@@ -67,9 +67,6 @@ router.use('/locations', locationsRouter);
 router.use('/checkout', checkoutRouter);
 router.use('/wishlist', wishlistRouter);
 router.use('/reviews', reviewsRouter);
-router.use('/', pagesRouter);
-router.use('/', navLinksRouter);
-router.use('/', featureCardsRouter);
 
 // GET /api/questions/my-questions — kullanıcının sorduğu sorular (hesabım sayfası)
 import { authenticate as authMw } from '../middlewares/auth';
@@ -228,5 +225,10 @@ router.post('/contact', optionalAuthenticate, async (req: AuthRequest, res, next
     res.json({ success: true, data: msg });
   } catch (err) { next(err); }
 });
+
+// Root routes — MUST be last to avoid catchall precedence over specific routes like /find-us
+router.use('/', pagesRouter);
+router.use('/', navLinksRouter);
+router.use('/', featureCardsRouter);
 
 export default router;
