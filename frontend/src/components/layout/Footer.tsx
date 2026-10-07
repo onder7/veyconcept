@@ -240,7 +240,7 @@ export function Footer() {
             <h3 className="mb-4 text-xs uppercase tracking-[0.3em] text-muted-foreground">
               {pageLanguage === 'en' 
                 ? (findUsData.title_en || 'Find Us') 
-                : (findUsData.title_tr || 'Bizi Nereden Ulaşırsınız')}
+                : (findUsData.title_tr || 'Bize Nereden Ulaşırsınız')}
             </h3>
             <ul className="space-y-2.5 text-muted-foreground">
               {findUsData.links.map((link) => (
