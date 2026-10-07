@@ -1489,6 +1489,190 @@ function SocialMediaTab() {
   );
 }
 
+// ─── Tab: Bize Ulaşın ──────────────────────────────────────────────────────
+
+interface FindUsLink {
+  id: string;
+  label_tr: string;
+  label_en: string;
+  url: string;
+  icon: string;
+}
+
+function FindUsTab() {
+  const [loading, setLoading] = useState(true);
+  const [titleTr, setTitleTr] = useState('');
+  const [titleEn, setTitleEn] = useState('');
+  const [links, setLinks] = useState<FindUsLink[]>([]);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [error, setError] = useState('');
+
+  const load = useCallback(() => {
+    setLoading(true);
+    api
+      .get<{ success: boolean; data: Record<string, any> }>('/admin/settings/find_us')
+      .then((r) => {
+        setTitleTr(r.data.find_us_title_tr ?? 'Bize Ulaşın');
+        setTitleEn(r.data.find_us_title_en ?? 'Find Us');
+        let parsed: FindUsLink[] = [];
+        try {
+          if (r.data.find_us_links) {
+            parsed = JSON.parse(r.data.find_us_links);
+          }
+        } catch {}
+        // Seed with sample data if empty
+        if (parsed.length === 0) {
+          parsed = [
+            { id: '1', label_tr: 'LinkedIn', label_en: 'LinkedIn', url: 'https://linkedin.com', icon: 'linkedin' },
+            { id: '2', label_tr: 'Twitter / X', label_en: 'Twitter / X', url: 'https://twitter.com', icon: 'twitter' },
+            { id: '3', label_tr: 'Instagram', label_en: 'Instagram', url: 'https://instagram.com', icon: 'instagram' },
+            { id: '4', label_tr: 'WhatsApp', label_en: 'WhatsApp', url: 'https://wa.me/', icon: 'whatsapp' },
+          ];
+        }
+        setLinks(parsed);
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, []);
+
+  useEffect(() => { load(); }, [load]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleSave = async () => {
+    setSaving(true);
+    setError('');
+    setSaved(false);
+    try {
+      await api.put('/admin/settings/find_us', {
+        find_us_title_tr: titleTr,
+        find_us_title_en: titleEn,
+        find_us_links: JSON.stringify(links),
+      });
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+    } catch (err: any) {
+      setError(err.message || 'Kaydedilemedi');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleReset = () => { load(); };
+
+  const addLink = () => {
+    setLinks((prev) => [
+      ...prev,
+      {
+        id: Date.now().toString(),
+        label_tr: '',
+        label_en: '',
+        url: '',
+        icon: '',
+      },
+    ]);
+  };
+
+  const removeLink = (id: string) => {
+    setLinks((prev) => prev.filter((l) => l.id !== id));
+  };
+
+  const updateLink = (id: string, key: keyof FindUsLink, value: string) => {
+    setLinks((prev) => prev.map((l) => (l.id === id ? { ...l, [key]: value } : l)));
+  };
+
+  if (loading) return <Loader />;
+
+  return (
+    <div>
+      <SectionCard title="Bölüm Başlıkları" subtitle="Footer'da gösterilecek başlık (TR ve EN)">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <Field label="Başlık (Türkçe)">
+            <input
+              className={inputCls}
+              value={titleTr}
+              onChange={(e) => setTitleTr(e.target.value)}
+              placeholder="Bize Ulaşın"
+            />
+          </Field>
+          <Field label="Başlık (İngilizce)">
+            <input
+              className={inputCls}
+              value={titleEn}
+              onChange={(e) => setTitleEn(e.target.value)}
+              placeholder="Find Us"
+            />
+          </Field>
+        </div>
+      </SectionCard>
+
+      <SectionCard title="Linkler" subtitle="Footer'da gösterilecek ulaşım ve sosyal medya linkleri">
+        {error && <p className="mb-3 text-sm text-red-500">{error}</p>}
+        <div className="space-y-4">
+          {links.map((link, idx) => (
+            <div key={link.id} className="border border-stroke dark:border-strokedark rounded-lg p-4 space-y-3">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-sm font-medium text-black dark:text-white">Link #{idx + 1}</p>
+                <button
+                  type="button"
+                  onClick={() => removeLink(link.id)}
+                  className="px-2 py-1 text-xs rounded border border-red-300 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition"
+                >
+                  Sil
+                </button>
+              </div>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <Field label="Başlık (Türkçe)">
+                  <input
+                    className={inputCls}
+                    value={link.label_tr}
+                    onChange={(e) => updateLink(link.id, 'label_tr', e.target.value)}
+                    placeholder="Örn: Ofis, Sosyal Medya"
+                  />
+                </Field>
+                <Field label="Başlık (İngilizce)">
+                  <input
+                    className={inputCls}
+                    value={link.label_en}
+                    onChange={(e) => updateLink(link.id, 'label_en', e.target.value)}
+                    placeholder="Örn: Office, Social"
+                  />
+                </Field>
+              </div>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <Field label="URL">
+                  <input
+                    className={inputCls}
+                    value={link.url}
+                    onChange={(e) => updateLink(link.id, 'url', e.target.value)}
+                    placeholder="https://example.com"
+                  />
+                </Field>
+                <Field label="İkon Adı (opsiyonel)">
+                  <input
+                    className={inputCls}
+                    value={link.icon}
+                    onChange={(e) => updateLink(link.id, 'icon', e.target.value)}
+                    placeholder="linkedin, twitter, instagram, whatsapp"
+                  />
+                </Field>
+              </div>
+            </div>
+          ))}
+        </div>
+        <button
+          type="button"
+          onClick={addLink}
+          className="mt-4 flex items-center gap-2 px-4 py-2 rounded border border-stroke dark:border-strokedark hover:border-primary hover:text-primary text-sm transition-colors"
+        >
+          <span className="text-lg leading-none">+</span> Yeni Link Ekle
+        </button>
+      </SectionCard>
+
+      <SaveBar saving={saving} saved={saved} error={error} onSave={handleSave} onReset={handleReset} />
+    </div>
+  );
+}
+
 function MaintenanceTab() {
   const [loading, setLoading] = useState(true);
   const [isActive, setIsActive] = useState(false);
@@ -4015,7 +4199,7 @@ function PopupTab() {
 
 // ─── Tab Config ───────────────────────────────────────────────────────────────
 
-type TabKey = 'general' | 'payment' | 'shipping' | 'team' | 'notifications' | 'social' | 'maintenance' | 'watermark' | 'pages' | 'navlinks' | 'features' | 'slider' | 'messages' | 'tools' | 'chatbot' | 'popup' | 'campaign' | 'oauth' | 'mfa' | 'analytics';
+type TabKey = 'general' | 'payment' | 'shipping' | 'team' | 'notifications' | 'social' | 'findus' | 'maintenance' | 'watermark' | 'pages' | 'navlinks' | 'features' | 'slider' | 'messages' | 'tools' | 'chatbot' | 'popup' | 'campaign' | 'oauth' | 'mfa' | 'analytics';
 
 // ─── Tab: Menü Linkleri ───────────────────────────────────────────────────────
 
@@ -4758,6 +4942,16 @@ const TABS: { key: TabKey; label: string; icon: React.ReactNode }[] = [
     ),
   },
   {
+    key: 'findus',
+    label: 'Bize Ulaşın',
+    icon: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+        <circle cx="12" cy="10" r="3" />
+      </svg>
+    ),
+  },
+  {
     key: 'maintenance',
     label: 'Bakım Modu',
     icon: (
@@ -4926,6 +5120,7 @@ export default function Settings() {
     team:          <TeamTab />,
     notifications: <NotificationsTab />,
     social:        <SocialMediaTab />,
+    findus:        <FindUsTab />,
     maintenance:   <MaintenanceTab />,
     watermark:     <WatermarkTab />,
     pages:         <PagesTab />,

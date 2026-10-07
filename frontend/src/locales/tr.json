@@ -67,7 +67,8 @@
     "favorites": "Favori Ürünlerim",
     "addresses": "Adreslerim",
     "copyright": "© {year} {storeName}. Tüm hakları saklıdır.",
-    "followUs": "Bizi Takip Edin"
+    "followUs": "Bizi Takip Edin",
+    "findUs": "Bize Ulaşın"
   },
   "home": {
     "description": "Hızlı kargo, kolay iade ve uygun fiyat garantisiyle {storeName} ürünlerini keşfedin.",

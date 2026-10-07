@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { useState } from 'react';
 import { useSocialLinks } from '@/hooks/useSocialLinks';
+import { useFindUsLinks } from '@/hooks/useFindUsLinks';
 import { useStoreInfo, useFooterSlogan } from '@/hooks/useStoreInfo';
 
 const FacebookIcon = () => (
@@ -91,6 +92,7 @@ export function Footer() {
   const menuPages = (menuPagesData?.data?.data ?? []).filter((p) => p.showInFooter);
 
   const { data: socialLinks } = useSocialLinks();
+  const { data: findUsData } = useFindUsLinks();
 
   const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -151,7 +153,7 @@ export function Footer() {
       )}
 
       {/* Main Links Section */}
-      <div className="container mx-auto px-4 py-16 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-10 text-sm">
+      <div className="container mx-auto px-4 py-16 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-10 text-sm">
         <div>
           <h3 className="font-display text-3xl text-foreground mb-4">{storeName}</h3>
           <div
@@ -229,6 +231,29 @@ export function Footer() {
                 </SocialBtn>
               )}
             </div>
+          </div>
+        )}
+
+        {/* Find Us Section */}
+        {findUsData && findUsData.links && findUsData.links.length > 0 && (
+          <div>
+            <h3 className="mb-4 text-xs uppercase tracking-[0.3em] text-muted-foreground">
+              {pageLanguage === 'en' ? findUsData.title_en : findUsData.title_tr}
+            </h3>
+            <ul className="space-y-2.5 text-muted-foreground">
+              {findUsData.links.map((link) => (
+                <li key={link.id}>
+                  <a
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-amber-800 dark:hover:text-amber-500 transition-colors"
+                  >
+                    {pageLanguage === 'en' ? link.label_en || link.label_tr : link.label_tr}
+                  </a>
+                </li>
+              ))}
+            </ul>
           </div>
         )}
       </div>

@@ -67,7 +67,8 @@
     "favorites": "My Favorites",
     "addresses": "Addresses",
     "copyright": "© {year} {storeName}. All rights reserved.",
-    "followUs": "Follow Us"
+    "followUs": "Follow Us",
+    "findUs": "Find Us"
   },
   "home": {
     "description": "Discover {storeName} products with fast shipping, easy returns, and guaranteed fair prices.",

@@ -140,6 +140,28 @@ router.get('/social-links', async (_req, res, next) => {
   } catch (err) { next(err); }
 });
 
+// Find Us links — public (footer için)
+router.get('/find-us', async (_req, res, next) => {
+  try {
+    const { prisma } = await import('../config/database');
+    const [titleTrRow, titleEnRow, linksRow] = await Promise.all([
+      prisma.siteSettings.findUnique({ where: { key: 'find_us_title_tr' } }),
+      prisma.siteSettings.findUnique({ where: { key: 'find_us_title_en' } }),
+      prisma.siteSettings.findUnique({ where: { key: 'find_us_links' } }),
+    ]);
+    let links = [];
+    try { if (linksRow?.value) links = JSON.parse(linksRow.value); } catch {}
+    res.json({
+      success: true,
+      data: {
+        title_tr: titleTrRow?.value || 'Bize Ulaşın',
+        title_en: titleEnRow?.value || 'Find Us',
+        links,
+      },
+    });
+  } catch (err) { next(err); }
+});
+
 // Kargo konfigürasyonu — public (frontend sepet/checkout için)
 router.get('/shipping-config', async (_req, res, next) => {
   try {
