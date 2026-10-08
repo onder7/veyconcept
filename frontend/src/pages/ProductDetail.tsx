@@ -95,7 +95,7 @@ function AccordionSection({ title, content, open, onToggle }: AccordionItem & { 
       </button>
       
       {open && (
-        <div className="mb-3 rounded-sm bg-muted/35 px-4 py-4 text-sm leading-relaxed text-muted-foreground sm:px-5 product-description">
+        <div className="mb-3 rounded-sm px-4 py-4 text-sm leading-relaxed text-muted-foreground sm:px-5 product-description">
           <div dangerouslySetInnerHTML={{ __html: content }} />
         </div>
       )}
