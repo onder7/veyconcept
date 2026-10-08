@@ -163,18 +163,20 @@ export function HeroSlider({ slides, storeName }: Props) {
                   type="button"
                   onClick={() => go(i)}
                   aria-label={`Slayt ${i + 1}`}
-                  className="group relative min-h-0 flex-1 overflow-visible"
+                  className="group relative flex-1 overflow-visible"
                   style={{ 
                     height: '1px',
                     background: 'rgba(255, 255, 255, 0.25)',
-                    boxShadow: '0 0 0 1px rgba(255, 255, 255, 0.25)'
+                    minHeight: '1px',
+                    maxHeight: '1px'
                   }}
                 >
                   <span
                     className="absolute left-0 top-0 bg-amber-400"
                     style={{ 
                       width: i === index ? `${progress * 100}%` : i < index ? '100%' : '0%',
-                      height: '100%'
+                      height: '1px',
+                      maxHeight: '1px'
                     }}
                   />
                 </button>
