@@ -84,7 +84,7 @@ function AccordionSection({ title, content, open, onToggle }: AccordionItem & { 
       <button
         type="button"
         onClick={onToggle}
-        className="group w-full flex items-center justify-between gap-4 py-5 px-1 text-left transition-colors hover:text-primary"
+        className="group w-full flex items-center justify-between gap-4 py-3 px-1 text-left transition-colors hover:text-primary"
       >
         <h4 className="font-display text-base sm:text-lg font-medium text-foreground transition-colors group-hover:text-primary">
           {title}
@@ -95,7 +95,7 @@ function AccordionSection({ title, content, open, onToggle }: AccordionItem & { 
       </button>
       
       {open && (
-        <div className="mb-3 rounded-sm px-4 py-4 text-sm leading-relaxed text-muted-foreground sm:px-5 product-description">
+        <div className="mb-2 rounded-sm px-4 py-2 text-sm leading-relaxed text-muted-foreground sm:px-5 product-description">
           <div dangerouslySetInnerHTML={{ __html: content }} />
         </div>
       )}
@@ -498,7 +498,7 @@ export function ProductDetail() {
           )}
 
           {/* Fiyat - Miktar - Sepet (Grid Layout) */}
-          <div className="grid grid-cols-1 items-end gap-6 py-7 md:grid-cols-2">
+          <div className="grid grid-cols-1 items-end gap-6 py-4 md:grid-cols-2">
             {/* Fiyat */}
             <div className="text-center md:text-left">
               {variant && (
@@ -554,14 +554,14 @@ export function ProductDetail() {
           </div>
 
           {product.description && (
-            <div className="pt-6 space-y-0">
+            <div className="pt-3 space-y-0">
               {(() => {
                 const { intro, sections } = parseDescriptionToAccordion(product.description);
                 return (
                   <>
                     {/* Intro metni */}
                     {intro && (
-                      <div className="mb-6 text-sm text-muted-foreground leading-relaxed space-y-3 product-description pb-6">
+                      <div className="mb-3 text-sm text-muted-foreground leading-relaxed space-y-3 product-description pb-3">
                         <div dangerouslySetInnerHTML={{ __html: intro }} />
                       </div>
                     )}
