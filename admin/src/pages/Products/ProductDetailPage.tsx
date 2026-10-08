@@ -380,6 +380,16 @@ export default function ProductDetailPage() {
     setForm((f) => ({ ...f, images: f.images.filter((_, idx) => idx !== i) }));
   }
 
+  function moveImage(i: number, direction: 'up' | 'down') {
+    setForm((f) => {
+      const images = [...f.images];
+      const newI = direction === 'up' ? i - 1 : i + 1;
+      if (newI < 0 || newI >= images.length) return f;
+      [images[i], images[newI]] = [images[newI], images[i]];
+      return { ...f, images };
+    });
+  }
+
   async function uploadFiles(files: File[]) {
     const imageFiles = files.filter((f) => f.type.startsWith('image/'));
     if (!imageFiles.length) return;
@@ -912,6 +922,22 @@ export default function ProductDetailPage() {
                         <button type="button" onClick={() => setImage(i, { isPrimary: true })} title="Ana görsel yap"
                           className="bg-white text-xs text-gray-700 px-2 py-1 rounded-lg font-medium hover:bg-primary hover:text-white transition">
                           Ana
+                        </button>
+                      )}
+                      {i > 0 && (
+                        <button type="button" onClick={() => moveImage(i, 'up')} title="Yukarı taşı"
+                          className="bg-white text-gray-700 w-7 h-7 rounded-lg flex items-center justify-center hover:bg-primary hover:text-white transition">
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+                            <path d="M12 19V5m0 0l-6 6m6-6l6 6" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        </button>
+                      )}
+                      {i < form.images.length - 1 && (
+                        <button type="button" onClick={() => moveImage(i, 'down')} title="Aşağı taşı"
+                          className="bg-white text-gray-700 w-7 h-7 rounded-lg flex items-center justify-center hover:bg-primary hover:text-white transition">
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+                            <path d="M12 5v14m0 0l-6-6m6 6l6-6" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
                         </button>
                       )}
                       <button type="button" onClick={() => removeImage(i)} title="Kaldır"
