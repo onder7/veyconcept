@@ -12,7 +12,6 @@ import { toast } from 'sonner';
 import {
   ShoppingBag,
   Heart,
-  Star,
   Gift,
   User,
   Lock,
@@ -23,12 +22,10 @@ import {
   Phone,
   ArrowLeft,
   MapPin,
-  MessageCircle,
   AlertTriangle,
 } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { useProfileCompleteness } from '@/hooks/useProfileCompleteness';
-import { useStoreInfo } from '@/hooks/useStoreInfo';
 import { useTaxConfig } from '@/hooks/useTaxConfig';
 
 function formatPrice(price: number) {
@@ -57,7 +54,6 @@ export function AccountDashboard() {
   const logout = useAuthStore((s) => s.logout);
   const setUser = useAuthStore((s) => s.setUser);
   const accessToken = useAuthStore((s) => s.accessToken);
-  const { name: storeName } = useStoreInfo();
   const { taxRate } = useTaxConfig();
   const { hasWarning: profileHasWarning, missingAddress, missingPhone, message: profileWarningMessage } = useProfileCompleteness();
   const navigate = useNavigate();
@@ -258,41 +254,7 @@ export function AccountDashboard() {
     refetchOnWindowFocus: true,
   });
 
-  // Fetch reviews
-  const { data: reviewsData = [], isLoading: reviewsLoading, refetch: refetchReviews } = useQuery({
-    queryKey: ['my-reviews'],
-    queryFn: async () => {
-      try {
-        const res = await fetch('/api/reviews/my-reviews', { credentials: 'include' });
-        if (!res.ok) return [];
-        const data = await res.json();
-        return data.data || [];
-      } catch {
-        return [];
-      }
-    },
-    staleTime: 0,
-    refetchOnMount: true,
-    refetchOnWindowFocus: true,
-  });
 
-  // Fetch questions
-  const { data: questionsData = [], isLoading: questionsLoading, refetch: refetchQuestions } = useQuery({
-    queryKey: ['my-questions'],
-    queryFn: async () => {
-      try {
-        const res = await fetch('/api/questions/my-questions', { credentials: 'include' });
-        if (!res.ok) return [];
-        const data = await res.json();
-        return data.data || [];
-      } catch {
-        return [];
-      }
-    },
-    staleTime: 0,
-    refetchOnMount: true,
-    refetchOnWindowFocus: true,
-  });
 
   // Fetch addresses
   const { data: addressesData = [], isLoading: addressesLoading, refetch: refetchAddresses } = useQuery({
@@ -351,24 +313,19 @@ export function AccountDashboard() {
     if (activeSection === 'overview') {
       refetchOrders();
       refetchFavorites();
-      refetchReviews();
       refetchCart();
     } else if (activeSection === 'orders') {
       refetchOrders();
     } else if (activeSection === 'favorites') {
       refetchFavorites();
-    } else if (activeSection === 'reviews') {
-      refetchReviews();
     } else if (activeSection === 'cart') {
       refetchCart();
     } else if (activeSection === 'profile') {
       refetchAddresses();
-    } else if (activeSection === 'questions') {
-      refetchQuestions();
     } else if (activeSection === 'coupons') {
       fetchAppliedCoupons();
     }
-  }, [activeSection, refetchOrders, refetchFavorites, refetchReviews, refetchQuestions, refetchCart, refetchAddresses]);
+  }, [activeSection, refetchOrders, refetchFavorites, refetchCart, refetchAddresses]);
 
   // Kullanıcının kazandığı kuponları tek endpoint'ten çek
   async function fetchAppliedCoupons() {
@@ -407,18 +364,6 @@ export function AccountDashboard() {
       icon: Heart,
       label: t('account.myFavorites'),
       badge: favoritesData.length > 0 ? String(favoritesData.length) : null,
-    },
-    {
-      id: 'reviews',
-      icon: Star,
-      label: t('account.myReviews'),
-      badge: reviewsData.length > 0 ? String(reviewsData.length) : null,
-    },
-    {
-      id: 'questions',
-      icon: MessageCircle,
-      label: t('account.questionsAnswers'),
-      badge: questionsData.length > 0 ? String(questionsData.length) : null,
     },
     {
       id: 'coupons',
@@ -582,12 +527,15 @@ export function AccountDashboard() {
                 <div className="bg-white rounded-lg border border-gray-200 p-6 dark:bg-gray-900 dark:border-gray-700">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">{t('account.myReviews')}</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Toplam Değer</p>
                       <p className="font-display text-4xl text-foreground">
-                        {reviewsData.length}
+                        {ordersData.length > 0 
+                          ? formatPrice(ordersData.reduce((sum: number, order: any) => sum + (Number(order.total) || 0), 0))
+                          : formatPrice(0)
+                        }
                       </p>
                     </div>
-                    <Star size={32} className="text-yellow-500 opacity-20" />
+                    <ShoppingBag size={32} className="text-blue-500 opacity-20" />
                   </div>
                 </div>
               </div>
@@ -1390,190 +1338,7 @@ export function AccountDashboard() {
             </div>
           )}
 
-          {/* Reviews */}
-          {activeSection === 'reviews' && (
-            <div className="bg-white rounded-lg border border-gray-200 dark:bg-gray-900 dark:border-gray-700">
-              <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-                <h2 className="font-display text-3xl text-foreground">Değerlendirmelerim</h2>
-              </div>
 
-              {reviewsLoading ? (
-                <div className="p-6 text-center">
-                  <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full mx-auto" />
-                </div>
-              ) : reviewsData.length === 0 ? (
-                <div className="p-12 text-center text-gray-500 dark:text-gray-400">
-                  Henüz değerlendirme yapılmamıştır.
-                </div>
-              ) : (
-                <div className="divide-y divide-gray-200 dark:divide-gray-700">
-                  {reviewsData.map((review: any) => (
-                    <Link
-                      key={review.id}
-                      to={`/urun/${review.product?.slug}`}
-                      className="p-6 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors block group"
-                    >
-                      <div className="flex gap-4">
-                        {review.product?.images?.[0] && (
-                          <div className="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100 dark:bg-gray-800">
-                            <img
-                              src={review.product.images[0].url}
-                              alt={review.product.name}
-                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                            />
-                          </div>
-                        )}
-                        <div className="flex-1">
-                          <div className="flex items-start justify-between mb-2">
-                            <div className="flex-1">
-                              <p className="font-semibold text-gray-900 dark:text-white group-hover:text-primary transition-colors">
-                                {review.product?.name || 'Ürün'}
-                              </p>
-                              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                                {review.product?.category?.name || 'Kategori'}
-                              </p>
-                              <div className="flex items-center gap-3 mt-2">
-                                <div className="flex gap-0.5">
-                                  {[1, 2, 3, 4, 5].map((star) => (
-                                    <span key={star} className={`text-sm ${star <= review.rating ? 'text-yellow-400' : 'text-gray-300'}`}>
-                                      ★
-                                    </span>
-                                  ))}
-                                </div>
-                                <span className="text-sm font-medium text-gray-900 dark:text-white">
-                                  {review.rating}/5
-                                </span>
-                              </div>
-                            </div>
-                            <div className="text-right flex-shrink-0">
-                              <p className="text-xs text-gray-500 whitespace-nowrap">
-                                {new Date(review.createdAt).toLocaleDateString('tr-TR')}
-                              </p>
-                              {!review.isApproved && (
-                                <p className="text-xs text-orange-600 dark:text-orange-400 mt-1">
-                                  ⏳ Onay Beklemede
-                                </p>
-                              )}
-                              {review.isApproved && (
-                                <p className="text-xs text-green-600 dark:text-green-400 mt-1">
-                                  ✓ Onaylandı
-                                </p>
-                              )}
-                            </div>
-                          </div>
-                          {review.title && (
-                            <p className="font-medium text-gray-900 dark:text-white mt-2">
-                              {review.title}
-                            </p>
-                          )}
-                          {review.body && (
-                            <p className="text-sm text-gray-700 dark:text-gray-300 mt-2 line-clamp-2">
-                              {review.body}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Questions */}
-          {activeSection === 'questions' && (
-            <div className="bg-white rounded-lg border border-gray-200 dark:bg-gray-900 dark:border-gray-700">
-              <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-                <h2 className="font-display text-3xl text-foreground">Soru & Cevaplarım</h2>
-              </div>
-
-              {questionsLoading ? (
-                <div className="p-6 text-center">
-                  <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full mx-auto" />
-                </div>
-              ) : questionsData.length === 0 ? (
-                <div className="p-12 text-center text-gray-500 dark:text-gray-400">
-                  <MessageCircle size={48} className="mx-auto text-gray-300 mb-4" />
-                  <p>Henüz soru sormadınız.</p>
-                  <p className="text-sm mt-2">Ürün sayfalarından sorularınızı iletebilirsiniz.</p>
-                </div>
-              ) : (
-                <div className="divide-y divide-gray-200 dark:divide-gray-700">
-                  {questionsData.map((q: any) => (
-                    <Link
-                      key={q.id}
-                      to={`/urun/${q.product?.slug}`}
-                      className="p-6 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors block group"
-                    >
-                      <div className="flex gap-4">
-                        {q.product?.images?.[0] && (
-                          <div className="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100 dark:bg-gray-800">
-                            <img
-                              src={q.product.images[0].url}
-                              alt={q.product.name}
-                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                            />
-                          </div>
-                        )}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-start justify-between mb-2">
-                            <div className="flex-1">
-                              <p className="font-semibold text-gray-900 dark:text-white group-hover:text-primary transition-colors">
-                                {q.product?.name || 'Ürün'}
-                              </p>
-                              <p className="text-sm text-gray-700 dark:text-gray-300 mt-2">
-                                {q.body}
-                              </p>
-                            </div>
-                            <div className="text-right flex-shrink-0 ml-4">
-                              <p className="text-xs text-gray-500 whitespace-nowrap">
-                                {new Date(q.createdAt).toLocaleDateString('tr-TR')}
-                              </p>
-                              {!q.isApproved && (
-                                <p className="text-xs text-orange-600 dark:text-orange-400 mt-1">
-                                  ⏳ Onay Beklemede
-                                </p>
-                              )}
-                              {q.isApproved && (
-                                <p className="text-xs text-green-600 dark:text-green-400 mt-1">
-                                  ✓ Onaylandı
-                                </p>
-                              )}
-                            </div>
-                          </div>
-
-                          {q.answers && q.answers.length > 0 && (
-                            <div className="mt-3 space-y-2 border-l-2 border-primary/30 pl-3">
-                              {q.answers.map((ans: any) => {
-                                const aName = ans.user?.profile?.firstName
-                                  ? `${ans.user.profile.firstName} ${ans.user.profile.lastName || ''}`.trim()
-                                  : 'Ekip';
-                                return (
-                                  <div key={ans.id}>
-                                    <p className="text-xs font-semibold text-primary">
-                                      {ans.user?.role === 'ADMIN' ? `✓ ${storeName || 'Satıcı'}` : aName}
-                                    </p>
-                                    <p className="text-sm text-gray-600 dark:text-gray-400">{ans.body}</p>
-                                    <p className="text-xs text-gray-400 mt-0.5">
-                                      {new Date(ans.createdAt).toLocaleDateString('tr-TR')}
-                                    </p>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          )}
-
-                          {q.answers?.length === 0 && q.isApproved && (
-                            <p className="text-xs text-gray-400 mt-2 italic">Henüz cevaplanmadı</p>
-                          )}
-                        </div>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
 
           {/* Coupons — kullanılabilir kişiye özel kuponlar */}
           {activeSection === 'coupons' && (
