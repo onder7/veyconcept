@@ -80,7 +80,7 @@ function parseDescriptionToAccordion(html: string): DescriptionParts {
 function AccordionSection({ title, content, open, onToggle }: AccordionItem & { open: boolean; onToggle: () => void }) {
 
   return (
-    <div className="border-b border-border/70 first:border-t first:border-border/70">
+    <div>
       <button
         type="button"
         onClick={onToggle}
@@ -498,7 +498,7 @@ export function ProductDetail() {
           )}
 
           {/* Fiyat - Miktar - Sepet (Grid Layout) */}
-          <div className="grid grid-cols-1 items-end gap-6 border-y border-border py-7 md:grid-cols-2">
+          <div className="grid grid-cols-1 items-end gap-6 py-7 md:grid-cols-2">
             {/* Fiyat */}
             <div className="text-center md:text-left">
               {variant && (
@@ -554,14 +554,14 @@ export function ProductDetail() {
           </div>
 
           {product.description && (
-            <div className="border-t border-border pt-6 space-y-0">
+            <div className="pt-6 space-y-0">
               {(() => {
                 const { intro, sections } = parseDescriptionToAccordion(product.description);
                 return (
                   <>
                     {/* Intro metni */}
                     {intro && (
-                      <div className="mb-6 text-sm text-muted-foreground leading-relaxed space-y-3 product-description pb-6 border-b border-border">
+                      <div className="mb-6 text-sm text-muted-foreground leading-relaxed space-y-3 product-description pb-6">
                         <div dangerouslySetInnerHTML={{ __html: intro }} />
                       </div>
                     )}
