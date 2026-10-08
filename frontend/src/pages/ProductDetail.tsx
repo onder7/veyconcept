@@ -11,7 +11,6 @@ import { useAuthStore } from '@/store/authStore';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
-import { RecentlyViewed } from '@/components/product/RecentlyViewed';
 import { useRecentlyViewedStore } from '@/store/recentlyViewedStore';
 import { SeoHead, SITE_URL } from '@/components/seo/SeoHead';
 import { productSchema, breadcrumbSchema } from '@/lib/schemas';
@@ -588,12 +587,6 @@ export function ProductDetail() {
             url={typeof window !== 'undefined' ? window.location.href : `${SITE_URL}/urun/${product.slug}`}
           />
         </div>
-      </div>
-
-
-      {/* Son görüntülenen ürünler */}
-      <div className="mt-12">
-        <RecentlyViewed excludeId={product.id} />
       </div>
 
       {/* Mobilde satın alma aksiyonu ekranda erişilebilir kalır. */}
