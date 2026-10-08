@@ -167,8 +167,11 @@ export function HeroSlider({ slides, storeName }: Props) {
                   style={{ height: '1px' }}
                 >
                   <span
-                    className="absolute inset-y-0 left-0 bg-amber-400"
-                    style={{ width: i === index ? `${progress * 100}%` : i < index ? '100%' : '0%' }}
+                    className="absolute left-0 top-0 bg-amber-400"
+                    style={{ 
+                      width: i === index ? `${progress * 100}%` : i < index ? '100%' : '0%',
+                      height: '1px'
+                    }}
                   />
                 </button>
               ))}
