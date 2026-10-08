@@ -25,15 +25,15 @@ export function HomeShop({ products, loading = false }: Props) {
 
   return (
     <section id="shop" className="scroll-mt-[148px] bg-background md:scroll-mt-[166px]">
-      <div className="mx-auto max-w-[1600px] px-4 py-20 sm:px-6 md:px-12 md:py-28">
+      <div className="mx-auto max-w-[1600px] px-4 py-12 sm:px-6 md:px-8 md:py-16 lg:px-12 lg:py-20">
         {/* Bölüm başlığı */}
-        <div className="mb-12 md:mb-16 text-center">
+        <div className="mb-8 md:mb-10 text-center">
           <p className="mb-5 flex items-center justify-center gap-4 text-[10px] uppercase tracking-[0.32em] text-muted-foreground">
             <span className="h-px w-10 bg-amber-500" />
             {t('components.homeShop.title')}
             <span className="h-px w-10 bg-amber-500" />
           </p>
-          <h2 className="font-display text-5xl leading-[0.95] text-foreground md:text-7xl">
+          <h2 className="font-display text-[2.78rem] sm:text-[3.36rem] font-semibold leading-[0.95] text-[#6b1017] uppercase tracking-[0.14em]">
             {t('components.homeShop.heading')}
           </h2>
           {t('components.homeShop.description') && (
@@ -46,11 +46,11 @@ export function HomeShop({ products, loading = false }: Props) {
         </div>
 
         {/* Ürün ızgarası */}
-        <div className="mx-auto grid max-w-[900px] grid-cols-2 gap-x-3 gap-y-8 sm:gap-x-4 xl:gap-x-6">
+        <div className="mx-auto grid w-full grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-2 gap-y-6 sm:gap-x-3 lg:gap-x-4">
           {loading
             ? Array.from({ length: 6 }).map((_, i) => (
                 <div key={i} className="animate-pulse">
-                  <div className="aspect-[4/5] rounded-sm bg-muted" />
+                  <div className="aspect-[3/4] rounded-sm bg-muted" />
                   <div className="mt-4 h-4 w-2/3 rounded bg-muted" />
                   <div className="mt-2 h-3 w-1/3 rounded bg-muted" />
                 </div>
@@ -60,7 +60,7 @@ export function HomeShop({ products, loading = false }: Props) {
                   product.images?.find((im) => im.isPrimary)?.url || product.images?.[0]?.url || '';
                 return (
                   <article key={product.id} className="group cursor-pointer" onClick={() => openProduct(product)}>
-                    <div className="relative aspect-[4/5] overflow-hidden rounded-none bg-transparent">
+                    <div className="relative aspect-[3/4] overflow-hidden rounded-none bg-transparent">
                       {img ? (
                         <img
                           src={img}
