@@ -288,8 +288,8 @@ export function ProductDetail() {
     if (Math.abs(distance) < 45) return;
     setActiveImageIdx((current) =>
       distance < 0
-        ? Math.min(current + 1, product.images.length - 1)
-        : Math.max(current - 1, 0),
+        ? (current + 1) % product.images.length
+        : (current - 1 + product.images.length) % product.images.length,
     );
   };
 
@@ -297,8 +297,8 @@ export function ProductDetail() {
     if (!lightboxOpen) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setLightboxOpen(false);
-      if (e.key === 'ArrowRight') setActiveImageIdx((i) => Math.min(i + 1, (product?.images?.length ?? 1) - 1));
-      if (e.key === 'ArrowLeft') setActiveImageIdx((i) => Math.max(i - 1, 0));
+      if (e.key === 'ArrowRight') setActiveImageIdx((i) => (i + 1) % (product?.images?.length ?? 1));
+      if (e.key === 'ArrowLeft') setActiveImageIdx((i) => (i - 1 + (product?.images?.length ?? 1)) % (product?.images?.length ?? 1));
     };
     document.addEventListener('keydown', onKey);
     document.body.style.overflow = 'hidden';
@@ -644,9 +644,8 @@ export function ProductDetail() {
           {product.images.length > 1 && (
             <button
               type="button"
-              onClick={() => setActiveImageIdx((i) => Math.max(i - 1, 0))}
-              disabled={activeImageIdx === 0}
-              className="absolute left-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors disabled:opacity-30"
+              onClick={() => setActiveImageIdx((i) => (i - 1 + product.images.length) % product.images.length)}
+              className="absolute left-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
               aria-label="Önceki"
             >
               <ChevronLeft className="h-5 w-5" />
@@ -665,9 +664,8 @@ export function ProductDetail() {
           {product.images.length > 1 && (
             <button
               type="button"
-              onClick={() => setActiveImageIdx((i) => Math.min(i + 1, product.images.length - 1))}
-              disabled={activeImageIdx === product.images.length - 1}
-              className="absolute right-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors disabled:opacity-30"
+              onClick={() => setActiveImageIdx((i) => (i + 1) % product.images.length)}
+              className="absolute right-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
               aria-label="Sonraki"
             >
               <ChevronRight className="h-5 w-5" />
