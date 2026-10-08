@@ -2438,6 +2438,16 @@ function SliderTab() {
     setSlides((prev) => prev.filter((_, idx) => idx !== index));
   };
 
+  const moveSlide = (index: number, direction: 'up' | 'down') => {
+    setSlides((prev) => {
+      const newSlides = [...prev];
+      const newIndex = direction === 'up' ? index - 1 : index + 1;
+      if (newIndex < 0 || newIndex >= newSlides.length) return prev;
+      [newSlides[index], newSlides[newIndex]] = [newSlides[newIndex], newSlides[index]];
+      return newSlides;
+    });
+  };
+
   const addSlide = () => {
     setSlides((prev) => [...prev, { img: '', link: '', title: '', subtitle: '', buttonText: '' }]);
   };
@@ -2547,20 +2557,46 @@ function SliderTab() {
                 </Field>
               </div>
 
-              {/* Delete Button */}
-              <button
-                type="button"
-                onClick={() => removeSlide(index)}
-                className="absolute top-3 right-3 md:relative md:top-auto md:right-auto md:self-center p-2 rounded-lg text-meta-1 hover:bg-red-50 dark:hover:bg-red-500/10 transition"
-                title="Slide Sil"
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <polyline points="3 6 5 6 21 6" />
-                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                  <line x1="10" y1="11" x2="10" y2="17" />
-                  <line x1="14" y1="11" x2="14" y2="17" />
-                </svg>
-              </button>
+              {/* Delete/Move Buttons */}
+              <div className="absolute top-3 right-3 md:relative md:top-auto md:right-auto md:self-center flex gap-1">
+                {index > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => moveSlide(index, 'up')}
+                    className="p-2 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition"
+                    title="Yukarı Taşı"
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M12 19V5m0 0l-6 6m6-6l6 6" />
+                    </svg>
+                  </button>
+                )}
+                {index < slides.length - 1 && (
+                  <button
+                    type="button"
+                    onClick={() => moveSlide(index, 'down')}
+                    className="p-2 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition"
+                    title="Aşağı Taşı"
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M12 5v14m0 0l-6-6m6 6l6-6" />
+                    </svg>
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => removeSlide(index)}
+                  className="p-2 rounded-lg text-meta-1 hover:bg-red-50 dark:hover:bg-red-500/10 transition"
+                  title="Slide Sil"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <polyline points="3 6 5 6 21 6" />
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                    <line x1="10" y1="11" x2="10" y2="17" />
+                    <line x1="14" y1="11" x2="14" y2="17" />
+                  </svg>
+                </button>
+              </div>
             </div>
           ))}
 
