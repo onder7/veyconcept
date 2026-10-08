@@ -122,27 +122,27 @@ export function HeroSlider({ slides, storeName }: Props) {
       {hasSlides && (slides[index]?.title || slides[index]?.subtitle || slides[index]?.buttonText) && (
         <div
           key={index}
-          className="pointer-events-none relative z-10 mx-0 flex h-full max-w-none flex-col justify-start px-4 pt-6 text-left animate-fade-up sm:px-6 sm:pt-8 md:px-0 md:pt-10"
+          className="pointer-events-none relative z-10 mx-0 flex h-full max-w-none flex-col justify-start px-4 pt-6 text-left animate-fade-up sm:px-6 sm:pt-8 md:px-8 md:pt-12 lg:px-12 lg:pt-16"
         >
-          <div className="max-w-3xl">
+          <div className="max-w-4xl">
             {slides[index]?.title && (
-              <h1 className="font-display text-4xl font-bold leading-[1.02] text-white sm:text-7xl md:text-8xl tracking-tight" style={{ fontFamily: 'serif' }}>
+              <h1 className="font-display font-bold leading-tight text-white tracking-tight text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl" style={{ fontFamily: 'serif' }}>
                 {slides[index].title}
               </h1>
             )}
             {slides[index]?.subtitle && (
-              <p className="mt-5 max-w-xl text-base leading-relaxed text-white/80 md:text-lg">
+              <p className="mt-3 sm:mt-4 md:mt-5 max-w-xl text-xs sm:text-sm md:text-base lg:text-lg leading-relaxed text-white/80">
                 {slides[index].subtitle}
               </p>
             )}
             {slides[index]?.buttonText && (
-              <div className="pointer-events-auto mt-9 flex justify-start">
+              <div className="pointer-events-auto mt-6 sm:mt-7 md:mt-8 lg:mt-9 flex justify-start">
                 <Link
                   to={slides[index].link || '#'}
-                  className="group inline-flex items-center justify-center gap-2 rounded-full bg-white px-6 py-3.5 text-sm font-medium text-foreground transition-all hover:bg-amber-50 sm:px-7"
+                  className="group inline-flex items-center justify-center gap-2 rounded-full bg-white px-5 sm:px-6 md:px-7 py-2.5 sm:py-3 md:py-3.5 text-xs sm:text-sm font-medium text-foreground transition-all hover:bg-amber-50"
                 >
                   {slides[index].buttonText}
-                  <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                  <ArrowUpRight className="h-3 w-3 sm:h-4 sm:w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                 </Link>
               </div>
             )}
@@ -163,7 +163,7 @@ export function HeroSlider({ slides, storeName }: Props) {
                   type="button"
                   onClick={() => go(i)}
                   aria-label={`Slayt ${i + 1}`}
-                  className="group relative h-0.5 min-h-0 flex-1 overflow-hidden bg-white/25"
+                  className="group relative h-px md:h-0.5 min-h-0 flex-1 overflow-hidden bg-white/25"
                 >
                   <span
                     className="absolute inset-y-0 left-0 bg-amber-400"
